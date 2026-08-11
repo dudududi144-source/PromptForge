@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #e4e4e4; line-height: 1.6; min-height: 100vh; }
-        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         h1 { font-size: 2.5rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
         .subtitle { color: #a1a1aa; margin-bottom: 30px; font-size: 1.1rem; }
         .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
@@ -20,6 +20,7 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-connect { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-analyze { background: linear-gradient(135deg, #f59e0b, #d97706); }
         .chat-box { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-top: 16px; max-height: 500px; overflow-y: auto; }
         .chat-message { margin-bottom: 16px; padding: 12px; border-radius: 8px; }
         .chat-message.user { background: #1a1a2e; border: 1px solid #3f3f46; }
@@ -31,22 +32,24 @@
         .status-dot.error { background: #ef4444; }
         .status-dot.loading { background: #f59e0b; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .error-msg { color: #ef4444; margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; }
-        .hidden { display: none; }
         .api-key-section { background: #1a1a2e; border: 1px solid #3f3f46; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
         .api-key-section h3 { font-size: 1rem; margin-bottom: 8px; color: #a1a1aa; }
         .api-key-status { font-size: 0.85rem; margin-top: 8px; }
         .api-key-status.connected { color: #10b981; }
         .api-key-status.disconnected { color: #ef4444; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-        .tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #27272a; padding-bottom: 8px; }
+        .tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; font-size: 0.9rem; }
         .tab.active { background: #6366f1; color: white; border-color: #6366f1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .analysis-result { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-top: 16px; max-height: 400px; overflow-y: auto; }
+        .analysis-result pre { white-space: pre-wrap; word-break: break-word; font-family: monospace; font-size: 0.85rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>PromptForge</h1>
-        <p class="subtitle">AI Development Platform - Chat, Code, Deploy</p>
+        <p class="subtitle">AI Development Platform - Chat, Analyze, Improve</p>
         
         <div class="status-bar">
             <span class="status-dot" id="statusDot"></span>
@@ -54,27 +57,51 @@
         </div>
         
         <div class="card">
-            <h2>🔑 Connect NVIDIA Build API</h2>
+            <h2>🔑 Connect API</h2>
             <div class="api-key-section">
-                <h3>NVIDIA API Key</h3>
-                <label for="nvidiaApiKey">Enter your NVIDIA Build API key:</label>
+                <label for="nvidiaApiKey">NVIDIA Build API key:</label>
                 <input type="password" id="nvidiaApiKey" placeholder="nvapi-..." />
-                <button class="btn btn-connect" id="connectBtn" onclick="connectApiKey()">Connect API Key</button>
+                <button class="btn btn-connect" id="connectBtn" onclick="connectApiKey()">Connect</button>
                 <div class="api-key-status disconnected" id="apiKeyStatus">Not connected</div>
             </div>
         </div>
         
         <div class="card">
-            <h2>💬 Chat with PromptForge</h2>
-            <div class="chat-box" id="chatBox"></div>
-            <textarea id="chatInput" placeholder="Type your message here... (e.g., Hi, Write a Python function, What is machine learning?)"></textarea>
-            <button class="btn" id="sendBtn" onclick="sendMessage()">Send Message</button>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('chat')">💬 Chat</div>
+                <div class="tab" onclick="switchTab('developer')">🤖 AI Developer</div>
+            </div>
+            
+            <div class="tab-content active" id="chat-tab">
+                <h2>💬 Chat with PromptForge</h2>
+                <div class="chat-box" id="chatBox"></div>
+                <textarea id="chatInput" placeholder="Type your message..."></textarea>
+                <button class="btn" id="sendBtn" onclick="sendMessage()">Send Message</button>
+            </div>
+            
+            <div class="tab-content" id="developer-tab">
+                <h2>🤖 AI Developer - Analyze & Improve GitHub Repos</h2>
+                <label for="repoOwner">Repo Owner:</label>
+                <input type="text" id="repoOwner" placeholder="e.g., dudududi144-source" value="dudududi144-source" />
+                <label for="repoName" style="margin-top: 12px;">Repo Name:</label>
+                <input type="text" id="repoName" placeholder="e.g., PromptForge" value="PromptForge" />
+                <button class="btn btn-analyze" onclick="analyzeRepo()">Analyze Repository</button>
+                <div class="analysis-result" id="analysisResult" style="display: none;"></div>
+            </div>
         </div>
     </div>
     
     <script>
         const API_URL = 'https://promptforge-gateway.rabotatony.workers.dev';
+        const DEVELOPER_URL = 'https://promptforge-developer.rabotatony.workers.dev';
         let chatHistory = [];
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.tab').forEach(function(t) { if (t.textContent.includes(tab === 'chat' ? 'Chat' : 'Developer')) t.classList.add('active'); });
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
         
         async function checkHealth() {
             try {
@@ -82,14 +109,11 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     document.getElementById('statusDot').className = 'status-dot';
-                    document.getElementById('statusText').textContent = 'Ready | NVIDIA: ' + (data.nvidia_configured ? 'Connected' : 'Not configured') + ' | GitHub: ' + (data.github_configured ? 'Connected' : 'Not configured');
-                } else {
-                    document.getElementById('statusDot').className = 'status-dot error';
-                    document.getElementById('statusText').textContent = 'API unavailable';
+                    document.getElementById('statusText').textContent = 'Ready | NVIDIA: ' + (data.nvidia_configured ? 'Connected' : 'Not configured');
                 }
             } catch (e) {
                 document.getElementById('statusDot').className = 'status-dot error';
-                document.getElementById('statusText').textContent = 'Cannot connect to API';
+                document.getElementById('statusText').textContent = 'Cannot connect';
             }
         }
         
@@ -118,8 +142,6 @@
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
             sendBtn.textContent = 'Thinking...';
-            document.getElementById('statusDot').className = 'status-dot loading';
-            document.getElementById('statusText').textContent = 'Thinking...';
             try {
                 const resp = await fetch(API_URL + '/api/chat', {
                     method: 'POST',
@@ -130,12 +152,8 @@
                 if (data.error) throw new Error(data.error);
                 addChatMessage('ai', data.reply);
                 chatHistory.push({ role: 'assistant', content: data.reply });
-                document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = 'Ready';
             } catch (e) {
                 addChatMessage('ai', 'Error: ' + e.message);
-                document.getElementById('statusDot').className = 'status-dot error';
-                document.getElementById('statusText').textContent = 'Error';
             } finally {
                 sendBtn.disabled = false;
                 sendBtn.textContent = 'Send Message';
@@ -153,8 +171,6 @@
             }
             connectBtn.disabled = true;
             connectBtn.textContent = 'Connecting...';
-            statusEl.textContent = 'Connecting...';
-            statusEl.className = 'api-key-status';
             try {
                 const resp = await fetch(API_URL + '/api/connect-key', {
                     method: 'POST',
@@ -163,36 +179,45 @@
                 });
                 const data = await resp.json();
                 if (data.success) {
-                    statusEl.textContent = 'Connected! ' + data.models_available + ' models available';
+                    statusEl.textContent = 'Connected! ' + data.models_available + ' models';
                     statusEl.className = 'api-key-status connected';
-                    localStorage.setItem('nvidia_api_key', apiKey);
                     checkHealth();
                 } else {
-                    statusEl.textContent = 'Connection failed: ' + (data.message || 'Invalid key');
+                    statusEl.textContent = 'Failed: ' + (data.message || 'Invalid key');
                     statusEl.className = 'api-key-status disconnected';
                 }
             } catch (e) {
-                statusEl.textContent = 'Connection error: ' + e.message;
+                statusEl.textContent = 'Error: ' + e.message;
                 statusEl.className = 'api-key-status disconnected';
             } finally {
                 connectBtn.disabled = false;
-                connectBtn.textContent = 'Connect API Key';
+                connectBtn.textContent = 'Connect';
             }
         }
         
-        window.addEventListener('load', function() {
-            const storedKey = localStorage.getItem('nvidia_api_key');
-            if (storedKey) {
-                document.getElementById('nvidiaApiKey').value = storedKey;
-                connectApiKey();
+        async function analyzeRepo() {
+            const owner = document.getElementById('repoOwner').value.trim();
+            const repo = document.getElementById('repoName').value.trim();
+            const resultEl = document.getElementById('analysisResult');
+            if (!owner || !repo) { alert("Please enter owner and repo"); return; }
+            resultEl.style.display = 'block';
+            resultEl.innerHTML = '<pre>Analyzing ' + owner + '/' + repo + '... This may take a minute.</pre>';
+            try {
+                const resp = await fetch(DEVELOPER_URL + '/api/developer/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ owner: owner, repo: repo })
+                });
+                const data = await resp.json();
+                if (data.error) throw new Error(data.error);
+                resultEl.innerHTML = '<pre>Job ID: ' + data.job_id + '\nStatus: ' + data.status + '\nFiles analyzed: ' + data.files_analyzed + '\n\nAnalysis:\n' + (data.analysis || 'No analysis available') + '</pre>';
+            } catch (e) {
+                resultEl.innerHTML = '<pre>Error: ' + e.message + '</pre>';
             }
-        });
+        }
         
         document.getElementById('chatInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
         });
         
         checkHealth();
