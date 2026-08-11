@@ -47,12 +47,23 @@ textarea{min-height:70px}
 .api-status{margin-top:8px;font-size:.85rem;padding:8px 12px;border-radius:6px}
 .api-status.on{background:#064e3b;color:#6ee7b7;border:1px solid #065f46}
 .api-status.off{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600;margin-left:6px}
+.badge.simple{background:#064e3b;color:#6ee7b7}
+.badge.medium{background:#1e3a5f;color:#93c5fd}
+.badge.complex{background:#7f1d1d;color:#fca5a5}
+.badge.vague{background:#78350f;color:#fcd34d}
+.suggestion{background:#1e1b4b;border:1px solid #312e81;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:.85rem;cursor:pointer;transition:all .15s}
+.suggestion:hover{background:#312e81}
+.suggestion .type{color:#818cf8;font-weight:600;font-size:.75rem}
+.analysis-bar{background:#0f172a;border:1px solid #1e3a5f;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.85rem;display:none}
+.analysis-bar.show{display:block}
+.analysis-bar .complexity{font-weight:600}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>PromptForge</h1>
-<p class="subtitle">AI Development Platform — Chat · Analyze · Improve · Deploy</p>
+<p class="subtitle">AI Development Platform — Powered by Nova Intelligence</p>
 <div class="status-bar">
   <span class="dot load" id="mainDot"></span>
   <span id="mainStatus">Checking services...</span>
@@ -70,11 +81,16 @@ textarea{min-height:70px}
   <div class="tab" onclick="switchTab('loops')">🔄 Loops</div>
   <div class="tab" onclick="switchTab('github')">🐙 GitHub</div>
 </div>
+
+<!-- TAB: CHAT -->
 <div class="tab-content active" id="tab-chat">
   <div class="card">
-    <h2>💬 Chat with AI</h2>
+    <h2>💬 Chat with AI <span class="badge medium">Nova Intelligence</span></h2>
+    <div class="analysis-bar" id="analysisBar">
+      <span id="analysisText"></span>
+    </div>
     <div class="chat-box" id="chatBox">
-      <div class="msg ai"><div class="role">PromptForge</div><div class="content">Hello! I'm PromptForge. Ask me anything about code, architecture, or development.</div></div>
+      <div class="msg ai"><div class="role">PromptForge</div><div class="content">Hello! I'm PromptForge, powered by Nova Intelligence. I can analyze missions, generate code, validate output, and suggest improvements. Ask me anything!</div></div>
     </div>
     <textarea id="chatInput" placeholder="Type your message... (Enter to send, Shift+Enter for new line)"></textarea>
     <div style="display:flex;gap:8px;align-items:center">
@@ -87,8 +103,14 @@ textarea{min-height:70px}
       </select>
       <button class="btn" id="sendBtn" onclick="sendChat()" style="margin-top:0">Send</button>
     </div>
+    <div id="suggestionsBox" style="display:none;margin-top:12px">
+      <label>💡 Suggestions:</label>
+      <div id="suggestionsList"></div>
+    </div>
   </div>
 </div>
+
+<!-- TAB: AI DEVELOPER -->
 <div class="tab-content" id="tab-dev">
   <div class="card">
     <h2>🤖 AI Developer — Analyze GitHub Repos</h2>
@@ -100,6 +122,8 @@ textarea{min-height:70px}
     <div class="result-box" id="devResult" style="display:none"><pre id="devResultText"></pre></div>
   </div>
 </div>
+
+<!-- TAB: LOOPS -->
 <div class="tab-content" id="tab-loops">
   <div class="card">
     <h2>🔄 Autonomous Loops</h2>
@@ -116,6 +140,8 @@ textarea{min-height:70px}
     <div class="result-box" id="loopResult" style="display:none"><pre id="loopResultText"></pre></div>
   </div>
 </div>
+
+<!-- TAB: GITHUB -->
 <div class="tab-content" id="tab-github">
   <div class="card">
     <h2>🐙 GitHub Integration</h2>
@@ -135,18 +161,23 @@ textarea{min-height:70px}
   </div>
 </div>
 </div>
+
 <script>
 const GW='https://promptforge-gateway.rabotatony.workers.dev';
 const DEV='https://promptforge-developer.rabotatony.workers.dev';
 const LOOP='https://promptforge-loops.rabotatony.workers.dev';
 const GH='https://promptforge-github.rabotatony.workers.dev';
 let chatHistory=[];
+let lastSuggestions=[];
+
 function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
 function switchTab(name){
   document.querySelectorAll('.tab').forEach((t,i)=>{const names=['chat','dev','loops','github'];t.classList.toggle('active',names[i]===name)});
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
 }
+
 async function connectKey(){
   const key=document.getElementById('apiKey').value.trim();
   const st=document.getElementById('apiStatus');
@@ -156,28 +187,66 @@ async function connectKey(){
     const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'hi',model:'meta/llama-3.1-8b-instruct',apiKey:key})});
     const d=await r.json();
     if(d.error&&d.error.includes('NVIDIA')){st.textContent='❌ Invalid API key';st.className='api-status off'}
-    else{st.textContent='✅ Connected! Ready to use.';st.className='api-status on';localStorage.setItem('pf_api_key',key)}
+    else{st.textContent='✅ Connected! Nova Intelligence active.';st.className='api-status on';localStorage.setItem('pf_api_key',key)}
   }catch(e){st.textContent='⚠️ Gateway unreachable — key saved locally';st.className='api-status off';localStorage.setItem('pf_api_key',key)}
 }
+
 function addMsg(role,text){
   const box=document.getElementById('chatBox');
   const m=document.createElement('div');m.className='msg '+role;
   m.innerHTML='<div class="role">'+(role==='user'?'You':'PromptForge')+'</div><div class="content">'+esc(text)+'</div>';
   box.appendChild(m);box.scrollTop=box.scrollHeight;
 }
+
+function showAnalysis(analysis){
+  const bar=document.getElementById('analysisBar');
+  const txt=document.getElementById('analysisText');
+  if(!analysis)return;
+  const c=analysis.complexity||'medium';
+  const badge='<span class="badge '+c+'">'+c+'</span>';
+  const vague=analysis.vague?' <span class="badge vague">vague</span>':'';
+  const over=analysis.overScope?' <span class="badge vague">over-scope</span>':'';
+  txt.innerHTML='Complexity: '+badge+vague+over+' | Est: '+(analysis.estimatedBuildTime||'?')+' | Model: '+(analysis.modelRecommendation||'?');
+  bar.classList.add('show');
+}
+
+function showSuggestions(suggestions){
+  const box=document.getElementById('suggestionsBox');
+  const list=document.getElementById('suggestionsList');
+  lastSuggestions=suggestions||[];
+  if(!suggestions||suggestions.length===0){box.style.display='none';return}
+  box.style.display='block';
+  list.innerHTML=suggestions.map(s=>'<div class="suggestion" onclick="applySuggestion(this)"><span class="type">['+esc(s.type)+']</span> '+esc(s.message)+'</div>').join('');
+}
+
+function applySuggestion(el){
+  const msg=el.textContent;
+  document.getElementById('chatInput').value='Please apply this improvement: '+msg;
+  el.style.opacity='0.5';
+}
+
 async function sendChat(){
   const inp=document.getElementById('chatInput');const msg=inp.value.trim();if(!msg)return;
   const model=document.getElementById('chatModel').value;const btn=document.getElementById('sendBtn');
   addMsg('user',msg);chatHistory.push({role:'user',content:msg});inp.value='';btn.disabled=true;btn.textContent='Thinking...';
+  document.getElementById('suggestionsBox').style.display='none';
   try{
     const apiKey=localStorage.getItem('pf_api_key')||document.getElementById('apiKey').value.trim();
     const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,model:model,history:chatHistory,apiKey:apiKey})});
     const d=await r.json();
-    if(d.error){addMsg('ai','❌ Error: '+d.error)}else{addMsg('ai',d.reply||'No response');chatHistory.push({role:'assistant',content:d.reply})}
+    if(d.error){addMsg('ai','❌ Error: '+d.error+(d.shouldRetry?' (will retry)':''))}
+    else{
+      addMsg('ai',d.reply||'No response');
+      chatHistory.push({role:'assistant',content:d.reply});
+      if(d.mission_analysis)showAnalysis(d.mission_analysis);
+      if(d.suggestions&&d.suggestions.length>0)showSuggestions(d.suggestions);
+    }
   }catch(e){addMsg('ai','❌ Network error: '+e.message)}
   btn.disabled=false;btn.textContent='Send';
 }
+
 document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
+
 async function analyzeRepo(){
   const owner=document.getElementById('devOwner').value.trim();const repo=document.getElementById('devRepo').value.trim();
   const box=document.getElementById('devResult');const txt=document.getElementById('devResultText');const btn=document.getElementById('analyzeBtn');
@@ -190,6 +259,7 @@ async function analyzeRepo(){
   }catch(e){txt.textContent='❌ Network error: '+e.message}
   btn.disabled=false;
 }
+
 async function runLoops(){
   const btn=document.getElementById('loopBtn');const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
   btn.disabled=true;btn.textContent='Running...';box.style.display='block';txt.textContent='⏳ Running all loops...';
@@ -197,6 +267,7 @@ async function runLoops(){
   catch(e){txt.textContent='❌ '+e.message}
   btn.disabled=false;btn.textContent='▶ Run All Loops Now';
 }
+
 async function updateLoopStatus(){
   try{
     const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();const states=d.state||[];
@@ -205,27 +276,32 @@ async function updateLoopStatus(){
     if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString()});
   }catch(e){}
 }
+
 async function getLoopLogs(){
   const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
   box.style.display='block';txt.textContent='Loading...';
   try{const r=await fetch(LOOP+'/api/loops/logs');const d=await r.json();txt.textContent=JSON.stringify(d.logs||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
 }
+
 async function getMemories(){
   const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
   box.style.display='block';txt.textContent='Loading...';
   try{const r=await fetch(LOOP+'/api/loops/memories');const d=await r.json();txt.textContent=JSON.stringify(d.memories||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
 }
+
 async function ghHealth(){
   const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
   box.style.display='block';txt.textContent='Checking...';
   try{const r=await fetch(GH+'/api/github/health');const d=await r.json();txt.textContent=JSON.stringify(d,null,2)}catch(e){txt.textContent='❌ '+e.message}
 }
+
 async function ghRepos(){
   const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
   box.style.display='block';txt.textContent='Loading...';
   try{const r=await fetch(GH+'/api/github/repos');const d=await r.json();
   if(d.repos){txt.textContent=d.repos.map(r=>r.full_name+' ('+(r.language||'N/A')+')').join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
 }
+
 async function ghBranches(){
   const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
   const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();
@@ -233,6 +309,7 @@ async function ghBranches(){
   try{const r=await fetch(GH+'/api/github/branches?owner='+owner+'&repo='+repo);const d=await r.json();
   if(d.branches){txt.textContent=d.branches.map(b=>b.name).join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
 }
+
 async function ghReadFile(){
   const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
   const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();const path=document.getElementById('ghFilePath').value.trim();
@@ -240,12 +317,14 @@ async function ghReadFile(){
   try{const r=await fetch(GH+'/api/github/file?owner='+owner+'&repo='+repo+'&path='+path);const d=await r.json();
   if(d.content){txt.textContent=d.content}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
 }
+
 (async function(){
   const saved=localStorage.getItem('pf_api_key');if(saved)document.getElementById('apiKey').value=saved;
   const dot=document.getElementById('mainDot');const st=document.getElementById('mainStatus');
   try{
     const r=await fetch(GW+'/api/health',{signal:AbortSignal.timeout(8000)});const d=await r.json();
-    dot.className='dot ok';st.textContent='Gateway: ✅ | NVIDIA: '+(d.nvidia_configured?'✅':'❌')+' | GitHub: '+(d.github_configured?'✅':'❌');
+    dot.className='dot ok';
+    st.textContent='Gateway: ✅ | NVIDIA: '+(d.nvidia_configured?'✅':'❌')+' | Nova Intelligence: '+(d.intelligence?'✅':'❌');
   }catch(e){dot.className='dot err';st.textContent='⚠️ Gateway unreachable'}
   updateLoopStatus();
 })();
