@@ -9,6 +9,7 @@ quality assurance, and automated deployment into a unified CLI.
 
     pip install -e ".[dev]"
     cp .env.example .env
+    # Edit .env with your NVIDIA API key
     promptforge run "Build a REST API"
 
 ## Architecture
@@ -24,6 +25,16 @@ quality assurance, and automated deployment into a unified CLI.
 | PromptForge | Code enhancement | Active |
 | Forge Engine | Deployment | Active |
 | Turso DB | Persistent storage | Active |
+| Chat UI | Frontend | Active |
+
+## Deployment
+
+### Cloudflare Workers
+- Gateway: https://rabotatony.workers.dev/promptforge-gateway
+- API: https://rabotatony.workers.dev/promptforge-api
+
+### Cloudflare Pages
+- Chat UI: https://promptforge-ui.pages.dev
 
 ## License
 
