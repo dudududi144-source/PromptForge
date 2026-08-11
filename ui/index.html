@@ -32,7 +32,7 @@
         }
         .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: #fafafa; }
         label { display: block; margin-bottom: 8px; color: #a1a1aa; font-size: 0.9rem; }
-        textarea, select {
+        textarea, select, input[type="password"] {
             width: 100%;
             background: #09090b;
             border: 1px solid #27272a;
@@ -44,7 +44,7 @@
             resize: vertical;
         }
         textarea { min-height: 100px; }
-        textarea:focus, select:focus { outline: none; border-color: #6366f1; }
+        textarea:focus, select:focus, input:focus { outline: none; border-color: #6366f1; }
         .btn {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
@@ -124,6 +124,28 @@
         .stat-value { font-size: 1.3rem; font-weight: 700; color: #6366f1; }
         .stat-label { font-size: 0.75rem; color: #a1a1aa; margin-top: 4px; }
         .hidden { display: none; }
+        .api-key-section {
+            background: #1a1a2e;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .api-key-section h3 { font-size: 1rem; margin-bottom: 8px; color: #a1a1aa; }
+        .api-key-status { font-size: 0.85rem; margin-top: 8px; }
+        .api-key-status.connected { color: #10b981; }
+        .api-key-status.disconnected { color: #ef4444; }
+        .actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-sm {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #e4e4e4;
+        }
+        .btn-sm:hover { background: #3f3f46; }
     </style>
 </head>
 <body>
@@ -150,8 +172,11 @@
             
             <label for="model" style="margin-top: 16px;">Model:</label>
             <select id="model">
-                <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B (Quality)</option>
                 <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
+                <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B (Quality)</option>
+                <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B (Best)</option>
+                <option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B (Code)</option>
+                <option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder 6.7B</option>
             </select>
             
             <button class="btn" id="generateBtn" onclick="generate()">Generate Code</button>
@@ -161,6 +186,10 @@
             <h2>Generated Code</h2>
             <div id="resultStats"></div>
             <div class="result-box" id="codeOutput"></div>
+            <div class="actions">
+                <button class="btn-sm" onclick="downloadCode()">Download</button>
+                <button class="btn-sm" onclick="copyCode()">Copy</button>
+            </div>
         </div>
         
         <div class="card hidden" id="errorCard">
@@ -175,8 +204,9 @@
             try {
                 const resp = await fetch(API_URL + '/api/health');
                 if (resp.ok) {
+                    const data = await resp.json();
                     document.getElementById('statusDot').className = 'status-dot';
-                    document.getElementById('statusText').textContent = 'Ready';
+                    document.getElementById('statusText').textContent = 'Ready' + (data.nvidia_configured ? ' | NVIDIA connected' : ' | NVIDIA not configured');
                 } else {
                     document.getElementById('statusDot').className = 'status-dot error';
                     document.getElementById('statusText').textContent = 'API unavailable';
@@ -222,8 +252,8 @@
                 document.getElementById('resultCard').classList.remove('hidden');
                 document.getElementById('errorCard').classList.add('hidden');
                 
-                document.getElementById('resultStats').innerHTML = '<div class="stats"><div class="stat"><div class="stat-value">' + (data.total_tokens || 0) + '</div><div class="stat-label">Tokens</div></div></div>';
-                document.getElementById('codeOutput').textContent = JSON.stringify(data.outputs, null, 2);
+                document.getElementById('resultStats').innerHTML = '<div class="stats"><div class="stat"><div class="stat-value">' + (data.total_tokens || 0) + '</div><div class="stat-label">Tokens</div></div><div class="stat"><div class="stat-value">' + (data.code ? data.code.length : 0) + '</div><div class="stat-label">Characters</div></div><div class="stat"><div class="stat-value">' + (data.code ? data.code.split(String.fromCharCode(10)).length : 0) + '</div><div class="stat-label">Lines</div></div></div>';
+                document.getElementById('codeOutput').textContent = data.code || '';
                 
                 document.getElementById('statusDot').className = 'status-dot';
                 document.getElementById('statusText').textContent = 'Generated successfully';
@@ -236,6 +266,25 @@
                 btn.disabled = false;
                 btn.textContent = 'Generate Code';
             }
+        }
+        
+        function downloadCode() {
+            const code = document.getElementById('codeOutput').textContent;
+            if (!code) return;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'generated_code.py';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function copyCode() {
+            const code = document.getElementById('codeOutput').textContent;
+            if (!code) return;
+            navigator.clipboard.writeText(code);
+            alert('Copied!');
         }
         
         checkHealth();
