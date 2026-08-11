@@ -32,7 +32,7 @@
         }
         .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: #fafafa; }
         label { display: block; margin-bottom: 8px; color: #a1a1aa; font-size: 0.9rem; }
-        textarea, select, input[type="password"] {
+        textarea, select, input[type="password"], input[type="text"] {
             width: 100%;
             background: #09090b;
             border: 1px solid #27272a;
@@ -60,6 +60,9 @@
         }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-connect {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
         .result-box {
             background: #09090b;
             border: 1px solid #27272a;
@@ -107,6 +110,13 @@
             margin-top: 12px;
             padding: 12px;
             background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+        }
+        .success-msg {
+            color: #10b981;
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
             border-radius: 8px;
         }
         .stats {
