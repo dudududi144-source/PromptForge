@@ -3,3 +3,19 @@ __pycache__/
 *.py[cod]
 .venv/
 .promptforge/
+
+# ═══════════════════════════════════════════
+# Secrets & sensitive files (added for safety)
+# ═══════════════════════════════════════════
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_ed25519
+credentials.json
+secrets.json
+.npmrc
+.pypirc
+.netrc
