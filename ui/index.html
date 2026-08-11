@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptForge - AI Code Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #e4e4e4;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .subtitle { color: #a1a1aa; margin-bottom: 30px; font-size: 1.1rem; }
+        .card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: #fafafa; }
+        label { display: block; margin-bottom: 8px; color: #a1a1aa; font-size: 0.9rem; }
+        textarea, select {
+            width: 100%;
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 12px;
+            color: #fafafa;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        textarea { min-height: 100px; }
+        textarea:focus, select:focus { outline: none; border-color: #6366f1; }
+        .btn {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 16px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .result-box {
+            background: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        .status-dot.error { background: #ef4444; }
+        .status-dot.loading { background: #f59e0b; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .example-btn {
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .example-btn:hover { background: #3f3f46; border-color: #6366f1; }
+        .error-msg {
+            color: #ef4444;
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .stat {
+            background: #09090b;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.3rem; font-weight: 700; color: #6366f1; }
+        .stat-label { font-size: 0.75rem; color: #a1a1aa; margin-top: 4px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PromptForge</h1>
+        <p class="subtitle">AI Code Generator - Describe what you want, get working code</p>
+        
+        <div class="status-bar">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Connecting...</span>
+        </div>
+        
+        <div class="card">
+            <h2>What do you want to build?</h2>
+            <label for="goal">Describe your task:</label>
+            <textarea id="goal" placeholder="e.g., Write a Python function that calculates fibonacci with memoization"></textarea>
+            
+            <div class="examples">
+                <button class="example-btn" onclick="setGoal('Write a Python function that calculates fibonacci with memoization')">Fibonacci</button>
+                <button class="example-btn" onclick="setGoal('Write a REST API endpoint with FastAPI for user registration')">REST API</button>
+                <button class="example-btn" onclick="setGoal('Write a Python class for a thread-safe LRU cache')">LRU Cache</button>
+                <button class="example-btn" onclick="setGoal('Write a web scraper that extracts article titles and links')">Web Scraper</button>
+            </div>
+            
+            <label for="model" style="margin-top: 16px;">Model:</label>
+            <select id="model">
+                <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B (Quality)</option>
+                <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
+            </select>
+            
+            <button class="btn" id="generateBtn" onclick="generate()">Generate Code</button>
+        </div>
+        
+        <div class="card hidden" id="resultCard">
+            <h2>Generated Code</h2>
+            <div id="resultStats"></div>
+            <div class="result-box" id="codeOutput"></div>
+        </div>
+        
+        <div class="card hidden" id="errorCard">
+            <div class="error-msg" id="errorMsg"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'https://rabotatony.workers.dev/promptforge-gateway';
+        
+        async function checkHealth() {
+            try {
+                const resp = await fetch(API_URL + '/api/health');
+                if (resp.ok) {
+                    document.getElementById('statusDot').className = 'status-dot';
+                    document.getElementById('statusText').textContent = 'Ready';
+                } else {
+                    document.getElementById('statusDot').className = 'status-dot error';
+                    document.getElementById('statusText').textContent = 'API unavailable';
+                }
+            } catch (e) {
+                document.getElementById('statusDot').className = 'status-dot error';
+                document.getElementById('statusText').textContent = 'Cannot connect to API';
+            }
+        }
+        
+        function setGoal(text) {
+            document.getElementById('goal').value = text;
+        }
+        
+        async function generate() {
+            const goal = document.getElementById('goal').value.trim();
+            const model = document.getElementById('model').value;
+            
+            if (!goal) {
+                alert('Please enter a description');
+                return;
+            }
+            
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            document.getElementById('statusDot').className = 'status-dot loading';
+            document.getElementById('statusText').textContent = 'Generating...';
+            
+            try {
+                const resp = await fetch(API_URL + '/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ goal, model })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('errorCard').classList.add('hidden');
+                
+                document.getElementById('resultStats').innerHTML = '<div class="stats"><div class="stat"><div class="stat-value">' + (data.total_tokens || 0) + '</div><div class="stat-label">Tokens</div></div></div>';
+                document.getElementById('codeOutput').textContent = JSON.stringify(data.outputs, null, 2);
+                
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = 'Generated successfully';
+            } catch (e) {
+                document.getElementById('errorCard').classList.remove('hidden');
+                document.getElementById('errorMsg').textContent = 'Error: ' + e.message;
+                document.getElementById('statusDot').className = 'status-dot error';
+                document.getElementById('statusText').textContent = 'Error';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Code';
+            }
+        }
+        
+        checkHealth();
+        setInterval(checkHealth, 30000);
+    </script>
+</body>
+</html>
