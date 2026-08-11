@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptForge - AI Code Generator</title>
+    <title>PromptForge - AI Assistant</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -43,7 +43,7 @@
             font-size: 1rem;
             resize: vertical;
         }
-        textarea { min-height: 100px; }
+        textarea { min-height: 80px; }
         textarea:focus, select:focus, input:focus { outline: none; border-color: #6366f1; }
         .btn {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -63,20 +63,36 @@
         .btn-connect {
             background: linear-gradient(135deg, #10b981, #059669);
         }
-        .result-box {
+        .chat-box {
             background: #09090b;
             border: 1px solid #27272a;
             border-radius: 8px;
             padding: 16px;
             margin-top: 16px;
-            font-family: 'Cascadia Code', 'Fira Code', monospace;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            word-break: break-word;
             max-height: 500px;
             overflow-y: auto;
-            direction: ltr;
-            text-align: left;
+        }
+        .chat-message {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .chat-message.user {
+            background: #1a1a2e;
+            border: 1px solid #3f3f46;
+        }
+        .chat-message.ai {
+            background: #0f172a;
+            border: 1px solid #312e81;
+        }
+        .chat-message .role {
+            font-size: 0.8rem;
+            color: #a1a1aa;
+            margin-bottom: 4px;
+        }
+        .chat-message .content {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
         .status-bar {
             display: flex;
@@ -94,17 +110,6 @@
         .status-dot.error { background: #ef4444; }
         .status-dot.loading { background: #f59e0b; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .example-btn {
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .example-btn:hover { background: #3f3f46; border-color: #6366f1; }
         .error-msg {
             color: #ef4444;
             margin-top: 12px;
@@ -112,27 +117,6 @@
             background: rgba(239, 68, 68, 0.1);
             border-radius: 8px;
         }
-        .success-msg {
-            color: #10b981;
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border-radius: 8px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 12px;
-            margin-top: 16px;
-        }
-        .stat {
-            background: #09090b;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-value { font-size: 1.3rem; font-weight: 700; color: #6366f1; }
-        .stat-label { font-size: 0.75rem; color: #a1a1aa; margin-top: 4px; }
         .hidden { display: none; }
         .api-key-section {
             background: #1a1a2e;
@@ -145,23 +129,12 @@
         .api-key-status { font-size: 0.85rem; margin-top: 8px; }
         .api-key-status.connected { color: #10b981; }
         .api-key-status.disconnected { color: #ef4444; }
-        .actions { display: flex; gap: 8px; margin-top: 12px; }
-        .btn-sm {
-            background: #27272a;
-            border: 1px solid #3f3f46;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            color: #e4e4e4;
-        }
-        .btn-sm:hover { background: #3f3f46; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>PromptForge</h1>
-        <p class="subtitle">AI Code Generator - Describe what you want, get working code</p>
+        <p class="subtitle">AI Assistant - Chat normally or generate code</p>
         
         <div class="status-bar">
             <span class="status-dot" id="statusDot"></span>
@@ -180,46 +153,16 @@
         </div>
         
         <div class="card">
-            <h2>What do you want to build?</h2>
-            <label for="goal">Describe your task:</label>
-            <textarea id="goal" placeholder="e.g., Write a Python function that calculates fibonacci with memoization"></textarea>
-            
-            <div class="examples">
-                <button class="example-btn" onclick="setGoal('Write a Python function that calculates fibonacci with memoization')">Fibonacci</button>
-                <button class="example-btn" onclick="setGoal('Write a REST API endpoint with FastAPI for user registration')">REST API</button>
-                <button class="example-btn" onclick="setGoal('Write a Python class for a thread-safe LRU cache')">LRU Cache</button>
-                <button class="example-btn" onclick="setGoal('Write a web scraper that extracts article titles and links')">Web Scraper</button>
-            </div>
-            
-            <label for="model" style="margin-top: 16px;">Model:</label>
-            <select id="model">
-                <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
-                <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B (Quality)</option>
-                <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B (Best)</option>
-                <option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B (Code)</option>
-                <option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder 6.7B</option>
-            </select>
-            
-            <button class="btn" id="generateBtn" onclick="generate()">Generate Code</button>
-        </div>
-        
-        <div class="card hidden" id="resultCard">
-            <h2>Generated Code</h2>
-            <div id="resultStats"></div>
-            <div class="result-box" id="codeOutput"></div>
-            <div class="actions">
-                <button class="btn-sm" onclick="downloadCode()">Download</button>
-                <button class="btn-sm" onclick="copyCode()">Copy</button>
-            </div>
-        </div>
-        
-        <div class="card hidden" id="errorCard">
-            <div class="error-msg" id="errorMsg"></div>
+            <h2>💬 Chat with PromptForge</h2>
+            <div class="chat-box" id="chatBox"></div>
+            <textarea id="chatInput" placeholder="Type your message here... (e.g., 'Hi', 'Write a Python function', 'What is machine learning?')"></textarea>
+            <button class="btn" id="sendBtn" onclick="sendMessage()">Send Message</button>
         </div>
     </div>
     
     <script>
         const API_URL = 'https://promptforge-gateway.rabotatony.workers.dev';
+        let chatHistory = [];
         
         async function checkHealth() {
             try {
@@ -238,8 +181,63 @@
             }
         }
         
-        function setGoal(text) {
-            document.getElementById('goal').value = text;
+        function addChatMessage(role, content) {
+            const chatBox = document.getElementById('chatBox');
+            const msgEl = document.createElement('div');
+            msgEl.className = 'chat-message ' + role;
+            msgEl.innerHTML = '<div class="role">' + (role === 'user' ? 'You' : 'PromptForge') + '</div><div class="content">' + escapeHtml(content) + '</div>';
+            chatBox.appendChild(msgEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage('user', message);
+            chatHistory.push({ role: 'user', content: message });
+            input.value = '';
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Thinking...';
+            document.getElementById('statusDot').className = 'status-dot loading';
+            document.getElementById('statusText').textContent = 'Thinking...';
+            
+            try {
+                const resp = await fetch(API_URL + '/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, history: chatHistory })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                addChatMessage('ai', data.reply);
+                chatHistory.push({ role: 'assistant', content: data.reply });
+                
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = 'Ready';
+            } catch (e) {
+                addChatMessage('ai', 'Error: ' + e.message);
+                document.getElementById('statusDot').className = 'status-dot error';
+                document.getElementById('statusText').textContent = 'Error';
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Message';
+            }
         }
         
         async function connectApiKey() {
@@ -293,71 +291,12 @@
             }
         });
         
-        async function generate() {
-            const goal = document.getElementById('goal').value.trim();
-            const model = document.getElementById('model').value;
-            
-            if (!goal) {
-                alert('Please enter a description');
-                return;
+        document.getElementById('chatInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
-            
-            const btn = document.getElementById('generateBtn');
-            btn.disabled = true;
-            btn.textContent = 'Generating...';
-            document.getElementById('statusDot').className = 'status-dot loading';
-            document.getElementById('statusText').textContent = 'Generating...';
-            
-            try {
-                const resp = await fetch(API_URL + '/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ goal, model })
-                });
-                
-                const data = await resp.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                document.getElementById('resultCard').classList.remove('hidden');
-                document.getElementById('errorCard').classList.add('hidden');
-                
-                document.getElementById('resultStats').innerHTML = '<div class="stats"><div class="stat"><div class="stat-value">' + (data.total_tokens || 0) + '</div><div class="stat-label">Tokens</div></div><div class="stat"><div class="stat-value">' + (data.code ? data.code.length : 0) + '</div><div class="stat-label">Characters</div></div><div class="stat"><div class="stat-value">' + (data.code ? data.code.split(String.fromCharCode(10)).length : 0) + '</div><div class="stat-label">Lines</div></div></div>';
-                document.getElementById('codeOutput').textContent = data.code || '';
-                
-                document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = 'Generated successfully';
-            } catch (e) {
-                document.getElementById('errorCard').classList.remove('hidden');
-                document.getElementById('errorMsg').textContent = 'Error: ' + e.message;
-                document.getElementById('statusDot').className = 'status-dot error';
-                document.getElementById('statusText').textContent = 'Error';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Generate Code';
-            }
-        }
-        
-        function downloadCode() {
-            const code = document.getElementById('codeOutput').textContent;
-            if (!code) return;
-            const blob = new Blob([code], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'generated_code.py';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-        
-        function copyCode() {
-            const code = document.getElementById('codeOutput').textContent;
-            if (!code) return;
-            navigator.clipboard.writeText(code);
-            alert('Copied!');
-        }
+        });
         
         checkHealth();
         setInterval(checkHealth, 30000);
