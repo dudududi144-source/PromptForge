@@ -169,6 +169,17 @@
         </div>
         
         <div class="card">
+            <h2>🔑 Connect NVIDIA Build API</h2>
+            <div class="api-key-section">
+                <h3>NVIDIA API Key</h3>
+                <label for="nvidiaApiKey">Enter your NVIDIA Build API key:</label>
+                <input type="password" id="nvidiaApiKey" placeholder="nvapi-..." />
+                <button class="btn btn-connect" id="connectBtn" onclick="connectApiKey()">Connect API Key</button>
+                <div class="api-key-status disconnected" id="apiKeyStatus">Not connected</div>
+            </div>
+        </div>
+        
+        <div class="card">
             <h2>What do you want to build?</h2>
             <label for="goal">Describe your task:</label>
             <textarea id="goal" placeholder="e.g., Write a Python function that calculates fibonacci with memoization"></textarea>
@@ -230,6 +241,57 @@
         function setGoal(text) {
             document.getElementById('goal').value = text;
         }
+        
+        async function connectApiKey() {
+            const apiKey = document.getElementById('nvidiaApiKey').value.trim();
+            const statusEl = document.getElementById('apiKeyStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            if (!apiKey) {
+                statusEl.textContent = 'Please enter your API key';
+                statusEl.className = 'api-key-status disconnected';
+                return;
+            }
+            
+            connectBtn.disabled = true;
+            connectBtn.textContent = 'Connecting...';
+            statusEl.textContent = 'Connecting...';
+            statusEl.className = 'api-key-status';
+            
+            try {
+                const resp = await fetch(API_URL + '/api/connect-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey: apiKey })
+                });
+                
+                const data = await resp.json();
+                
+                if (data.success) {
+                    statusEl.textContent = 'Connected! ' + data.models_available + ' models available';
+                    statusEl.className = 'api-key-status connected';
+                    localStorage.setItem('nvidia_api_key', apiKey);
+                    checkHealth();
+                } else {
+                    statusEl.textContent = 'Connection failed: ' + (data.message || 'Invalid key');
+                    statusEl.className = 'api-key-status disconnected';
+                }
+            } catch (e) {
+                statusEl.textContent = 'Connection error: ' + e.message;
+                statusEl.className = 'api-key-status disconnected';
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.textContent = 'Connect API Key';
+            }
+        }
+        
+        window.addEventListener('load', function() {
+            const storedKey = localStorage.getItem('nvidia_api_key');
+            if (storedKey) {
+                document.getElementById('nvidiaApiKey').value = storedKey;
+                connectApiKey();
+            }
+        });
         
         async function generate() {
             const goal = document.getElementById('goal').value.trim();
