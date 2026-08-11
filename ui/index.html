@@ -3,138 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptForge - AI Assistant</title>
+    <title>PromptForge - AI Development Platform</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0a;
-            color: #e4e4e4;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #e4e4e4; line-height: 1.6; min-height: 100vh; }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-        h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-        }
+        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
         .subtitle { color: #a1a1aa; margin-bottom: 30px; font-size: 1.1rem; }
-        .card {
-            background: #18181b;
-            border: 1px solid #27272a;
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 20px;
-        }
+        .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
         .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: #fafafa; }
         label { display: block; margin-bottom: 8px; color: #a1a1aa; font-size: 0.9rem; }
-        textarea, select, input[type="password"], input[type="text"] {
-            width: 100%;
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            padding: 12px;
-            color: #fafafa;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-        }
+        textarea, select, input[type="password"], input[type="text"] { width: 100%; background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 12px; color: #fafafa; font-family: inherit; font-size: 1rem; resize: vertical; }
         textarea { min-height: 80px; }
         textarea:focus, select:focus, input:focus { outline: none; border-color: #6366f1; }
-        .btn {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 16px;
-        }
+        .btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 16px; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-connect {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        .chat-box {
-            background: #09090b;
-            border: 1px solid #27272a;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .chat-message {
-            margin-bottom: 16px;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        .chat-message.user {
-            background: #1a1a2e;
-            border: 1px solid #3f3f46;
-        }
-        .chat-message.ai {
-            background: #0f172a;
-            border: 1px solid #312e81;
-        }
-        .chat-message .role {
-            font-size: 0.8rem;
-            color: #a1a1aa;
-            margin-bottom: 4px;
-        }
-        .chat-message .content {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-        }
+        .btn-connect { background: linear-gradient(135deg, #10b981, #059669); }
+        .chat-box { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-top: 16px; max-height: 500px; overflow-y: auto; }
+        .chat-message { margin-bottom: 16px; padding: 12px; border-radius: 8px; }
+        .chat-message.user { background: #1a1a2e; border: 1px solid #3f3f46; }
+        .chat-message.ai { background: #0f172a; border: 1px solid #312e81; }
+        .chat-message .role { font-size: 0.8rem; color: #a1a1aa; margin-bottom: 4px; }
+        .chat-message .content { white-space: pre-wrap; word-break: break-word; }
+        .status-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
         .status-dot.error { background: #ef4444; }
         .status-dot.loading { background: #f59e0b; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .error-msg {
-            color: #ef4444;
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 8px;
-        }
+        .error-msg { color: #ef4444; margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; }
         .hidden { display: none; }
-        .api-key-section {
-            background: #1a1a2e;
-            border: 1px solid #3f3f46;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
+        .api-key-section { background: #1a1a2e; border: 1px solid #3f3f46; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
         .api-key-section h3 { font-size: 1rem; margin-bottom: 8px; color: #a1a1aa; }
         .api-key-status { font-size: 0.85rem; margin-top: 8px; }
         .api-key-status.connected { color: #10b981; }
         .api-key-status.disconnected { color: #ef4444; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; }
+        .tab.active { background: #6366f1; color: white; border-color: #6366f1; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>PromptForge</h1>
-        <p class="subtitle">AI Assistant - Chat normally or generate code</p>
+        <p class="subtitle">AI Development Platform - Chat, Code, Deploy</p>
         
         <div class="status-bar">
             <span class="status-dot" id="statusDot"></span>
@@ -155,7 +67,7 @@
         <div class="card">
             <h2>💬 Chat with PromptForge</h2>
             <div class="chat-box" id="chatBox"></div>
-            <textarea id="chatInput" placeholder="Type your message here... (e.g., 'Hi', 'Write a Python function', 'What is machine learning?')"></textarea>
+            <textarea id="chatInput" placeholder="Type your message here... (e.g., Hi, Write a Python function, What is machine learning?)"></textarea>
             <button class="btn" id="sendBtn" onclick="sendMessage()">Send Message</button>
         </div>
     </div>
@@ -170,7 +82,7 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     document.getElementById('statusDot').className = 'status-dot';
-                    document.getElementById('statusText').textContent = 'Ready' + (data.nvidia_configured ? ' | NVIDIA connected' : ' | NVIDIA not configured');
+                    document.getElementById('statusText').textContent = 'Ready | NVIDIA: ' + (data.nvidia_configured ? 'Connected' : 'Not configured') + ' | GitHub: ' + (data.github_configured ? 'Connected' : 'Not configured');
                 } else {
                     document.getElementById('statusDot').className = 'status-dot error';
                     document.getElementById('statusText').textContent = 'API unavailable';
@@ -199,35 +111,25 @@
         async function sendMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
-            
             if (!message) return;
-            
             addChatMessage('user', message);
             chatHistory.push({ role: 'user', content: message });
             input.value = '';
-            
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
             sendBtn.textContent = 'Thinking...';
             document.getElementById('statusDot').className = 'status-dot loading';
             document.getElementById('statusText').textContent = 'Thinking...';
-            
             try {
                 const resp = await fetch(API_URL + '/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message, history: chatHistory })
+                    body: JSON.stringify({ message: message, history: chatHistory })
                 });
-                
                 const data = await resp.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
+                if (data.error) throw new Error(data.error);
                 addChatMessage('ai', data.reply);
                 chatHistory.push({ role: 'assistant', content: data.reply });
-                
                 document.getElementById('statusDot').className = 'status-dot';
                 document.getElementById('statusText').textContent = 'Ready';
             } catch (e) {
@@ -244,27 +146,22 @@
             const apiKey = document.getElementById('nvidiaApiKey').value.trim();
             const statusEl = document.getElementById('apiKeyStatus');
             const connectBtn = document.getElementById('connectBtn');
-            
             if (!apiKey) {
                 statusEl.textContent = 'Please enter your API key';
                 statusEl.className = 'api-key-status disconnected';
                 return;
             }
-            
             connectBtn.disabled = true;
             connectBtn.textContent = 'Connecting...';
             statusEl.textContent = 'Connecting...';
             statusEl.className = 'api-key-status';
-            
             try {
                 const resp = await fetch(API_URL + '/api/connect-key', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ apiKey: apiKey })
                 });
-                
                 const data = await resp.json();
-                
                 if (data.success) {
                     statusEl.textContent = 'Connected! ' + data.models_available + ' models available';
                     statusEl.className = 'api-key-status connected';
