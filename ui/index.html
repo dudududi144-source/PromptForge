@@ -1,227 +1,254 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PromptForge - AI Development Platform</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0a0a0a; color: #e4e4e4; line-height: 1.6; min-height: 100vh; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        h1 { font-size: 2.5rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
-        .subtitle { color: #a1a1aa; margin-bottom: 30px; font-size: 1.1rem; }
-        .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
-        .card h2 { font-size: 1.2rem; margin-bottom: 16px; color: #fafafa; }
-        label { display: block; margin-bottom: 8px; color: #a1a1aa; font-size: 0.9rem; }
-        textarea, select, input[type="password"], input[type="text"] { width: 100%; background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 12px; color: #fafafa; font-family: inherit; font-size: 1rem; resize: vertical; }
-        textarea { min-height: 80px; }
-        textarea:focus, select:focus, input:focus { outline: none; border-color: #6366f1; }
-        .btn { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; margin-top: 16px; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-connect { background: linear-gradient(135deg, #10b981, #059669); }
-        .btn-analyze { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .chat-box { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-top: 16px; max-height: 500px; overflow-y: auto; }
-        .chat-message { margin-bottom: 16px; padding: 12px; border-radius: 8px; }
-        .chat-message.user { background: #1a1a2e; border: 1px solid #3f3f46; }
-        .chat-message.ai { background: #0f172a; border: 1px solid #312e81; }
-        .chat-message .role { font-size: 0.8rem; color: #a1a1aa; margin-bottom: 4px; }
-        .chat-message .content { white-space: pre-wrap; word-break: break-word; }
-        .status-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 0.9rem; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
-        .status-dot.error { background: #ef4444; }
-        .status-dot.loading { background: #f59e0b; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .api-key-section { background: #1a1a2e; border: 1px solid #3f3f46; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-        .api-key-section h3 { font-size: 1rem; margin-bottom: 8px; color: #a1a1aa; }
-        .api-key-status { font-size: 0.85rem; margin-top: 8px; }
-        .api-key-status.connected { color: #10b981; }
-        .api-key-status.disconnected { color: #ef4444; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #27272a; padding-bottom: 8px; }
-        .tab { padding: 8px 16px; border-radius: 6px; cursor: pointer; background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; font-size: 0.9rem; }
-        .tab.active { background: #6366f1; color: white; border-color: #6366f1; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .analysis-result { background: #09090b; border: 1px solid #27272a; border-radius: 8px; padding: 16px; margin-top: 16px; max-height: 400px; overflow-y: auto; }
-        .analysis-result pre { white-space: pre-wrap; word-break: break-word; font-family: monospace; font-size: 0.85rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptForge — AI Development Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#e4e4e4;line-height:1.6;min-height:100vh}
+.container{max-width:960px;margin:0 auto;padding:20px}
+h1{font-size:2.4rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.subtitle{color:#a1a1aa;margin-bottom:24px;font-size:1rem}
+.status-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:.85rem;color:#a1a1aa}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot.ok{background:#10b981}.dot.err{background:#ef4444}.dot.load{background:#f59e0b;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.card{background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:16px}
+.card h2{font-size:1.05rem;color:#fafafa;margin-bottom:12px}
+label{display:block;margin-bottom:6px;color:#a1a1aa;font-size:.85rem}
+input,textarea,select{width:100%;background:#09090b;border:1px solid #27272a;border-radius:8px;padding:10px 12px;color:#fafafa;font-family:inherit;font-size:.95rem;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#6366f1}
+textarea{min-height:70px}
+.btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:12px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.35)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-green{background:linear-gradient(135deg,#10b981,#059669)}
+.btn-amber{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.btn-sm{padding:8px 14px;font-size:.8rem;margin-top:8px;margin-left:6px;background:#27272a;border:1px solid #3f3f46}
+.btn-sm:hover{background:#3f3f46;box-shadow:none}
+.tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid #27272a;padding-bottom:10px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:6px;cursor:pointer;background:#27272a;border:1px solid #3f3f46;color:#a1a1aa;font-size:.85rem;transition:all .15s}
+.tab.active{background:#6366f1;color:#fff;border-color:#6366f1}
+.tab-content{display:none}.tab-content.active{display:block}
+.chat-box{background:#09090b;border:1px solid #27272a;border-radius:8px;padding:14px;margin-bottom:12px;max-height:420px;overflow-y:auto}
+.msg{margin-bottom:12px;padding:10px 12px;border-radius:8px}
+.msg.user{background:#1e1b4b;border:1px solid #312e81}
+.msg.ai{background:#0f172a;border:1px solid #1e3a5f}
+.msg .role{font-size:.75rem;color:#818cf8;margin-bottom:3px;font-weight:600}
+.msg .content{white-space:pre-wrap;word-break:break-word;font-size:.9rem}
+.result-box{background:#09090b;border:1px solid #27272a;border-radius:8px;padding:14px;margin-top:12px;max-height:400px;overflow-y:auto}
+.result-box pre{white-space:pre-wrap;word-break:break-word;font-family:'Cascadia Code','Fira Code',monospace;font-size:.82rem;direction:ltr;text-align:left}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;font-size:.85rem}
+.kv:last-child{border-bottom:none}
+.kv .k{color:#9ca3af}.kv .v{color:#e5e7eb;font-weight:500}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.api-status{margin-top:8px;font-size:.85rem;padding:8px 12px;border-radius:6px}
+.api-status.on{background:#064e3b;color:#6ee7b7;border:1px solid #065f46}
+.api-status.off{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>PromptForge</h1>
-        <p class="subtitle">AI Development Platform - Chat, Analyze, Improve</p>
-        
-        <div class="status-bar">
-            <span class="status-dot" id="statusDot"></span>
-            <span id="statusText">Connecting...</span>
-        </div>
-        
-        <div class="card">
-            <h2>🔑 Connect API</h2>
-            <div class="api-key-section">
-                <label for="nvidiaApiKey">NVIDIA Build API key:</label>
-                <input type="password" id="nvidiaApiKey" placeholder="nvapi-..." />
-                <button class="btn btn-connect" id="connectBtn" onclick="connectApiKey()">Connect</button>
-                <div class="api-key-status disconnected" id="apiKeyStatus">Not connected</div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('chat')">💬 Chat</div>
-                <div class="tab" onclick="switchTab('developer')">🤖 AI Developer</div>
-            </div>
-            
-            <div class="tab-content active" id="chat-tab">
-                <h2>💬 Chat with PromptForge</h2>
-                <div class="chat-box" id="chatBox"></div>
-                <textarea id="chatInput" placeholder="Type your message..."></textarea>
-                <button class="btn" id="sendBtn" onclick="sendMessage()">Send Message</button>
-            </div>
-            
-            <div class="tab-content" id="developer-tab">
-                <h2>🤖 AI Developer - Analyze & Improve GitHub Repos</h2>
-                <label for="repoOwner">Repo Owner:</label>
-                <input type="text" id="repoOwner" placeholder="e.g., dudududi144-source" value="dudududi144-source" />
-                <label for="repoName" style="margin-top: 12px;">Repo Name:</label>
-                <input type="text" id="repoName" placeholder="e.g., PromptForge" value="PromptForge" />
-                <button class="btn btn-analyze" onclick="analyzeRepo()">Analyze Repository</button>
-                <div class="analysis-result" id="analysisResult" style="display: none;"></div>
-            </div>
-        </div>
+<div class="container">
+<h1>PromptForge</h1>
+<p class="subtitle">AI Development Platform — Chat · Analyze · Improve · Deploy</p>
+<div class="status-bar">
+  <span class="dot load" id="mainDot"></span>
+  <span id="mainStatus">Checking services...</span>
+</div>
+<div class="card">
+  <h2>🔑 API Connection</h2>
+  <label for="apiKey">NVIDIA Build API Key</label>
+  <input type="password" id="apiKey" placeholder="nvapi-...">
+  <button class="btn btn-green" onclick="connectKey()">Connect</button>
+  <div class="api-status off" id="apiStatus">Not connected</div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('chat')">💬 Chat</div>
+  <div class="tab" onclick="switchTab('dev')">🤖 AI Developer</div>
+  <div class="tab" onclick="switchTab('loops')">🔄 Loops</div>
+  <div class="tab" onclick="switchTab('github')">🐙 GitHub</div>
+</div>
+<div class="tab-content active" id="tab-chat">
+  <div class="card">
+    <h2>💬 Chat with AI</h2>
+    <div class="chat-box" id="chatBox">
+      <div class="msg ai"><div class="role">PromptForge</div><div class="content">Hello! I'm PromptForge. Ask me anything about code, architecture, or development.</div></div>
     </div>
-    
-    <script>
-        const API_URL = 'https://promptforge-gateway.rabotatony.workers.dev';
-        const DEVELOPER_URL = 'https://promptforge-developer.rabotatony.workers.dev';
-        let chatHistory = [];
-        
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
-            document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
-            document.querySelectorAll('.tab').forEach(function(t) { if (t.textContent.includes(tab === 'chat' ? 'Chat' : 'Developer')) t.classList.add('active'); });
-            document.getElementById(tab + '-tab').classList.add('active');
-        }
-        
-        async function checkHealth() {
-            try {
-                const resp = await fetch(API_URL + '/api/health');
-                if (resp.ok) {
-                    const data = await resp.json();
-                    document.getElementById('statusDot').className = 'status-dot';
-                    document.getElementById('statusText').textContent = 'Ready | NVIDIA: ' + (data.nvidia_configured ? 'Connected' : 'Not configured');
-                }
-            } catch (e) {
-                document.getElementById('statusDot').className = 'status-dot error';
-                document.getElementById('statusText').textContent = 'Cannot connect';
-            }
-        }
-        
-        function addChatMessage(role, content) {
-            const chatBox = document.getElementById('chatBox');
-            const msgEl = document.createElement('div');
-            msgEl.className = 'chat-message ' + role;
-            msgEl.innerHTML = '<div class="role">' + (role === 'user' ? 'You' : 'PromptForge') + '</div><div class="content">' + escapeHtml(content) + '</div>';
-            chatBox.appendChild(msgEl);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        async function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (!message) return;
-            addChatMessage('user', message);
-            chatHistory.push({ role: 'user', content: message });
-            input.value = '';
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Thinking...';
-            try {
-                const resp = await fetch(API_URL + '/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, history: chatHistory })
-                });
-                const data = await resp.json();
-                if (data.error) throw new Error(data.error);
-                addChatMessage('ai', data.reply);
-                chatHistory.push({ role: 'assistant', content: data.reply });
-            } catch (e) {
-                addChatMessage('ai', 'Error: ' + e.message);
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.textContent = 'Send Message';
-            }
-        }
-        
-        async function connectApiKey() {
-            const apiKey = document.getElementById('nvidiaApiKey').value.trim();
-            const statusEl = document.getElementById('apiKeyStatus');
-            const connectBtn = document.getElementById('connectBtn');
-            if (!apiKey) {
-                statusEl.textContent = 'Please enter your API key';
-                statusEl.className = 'api-key-status disconnected';
-                return;
-            }
-            connectBtn.disabled = true;
-            connectBtn.textContent = 'Connecting...';
-            try {
-                const resp = await fetch(API_URL + '/api/connect-key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ apiKey: apiKey })
-                });
-                const data = await resp.json();
-                if (data.success) {
-                    statusEl.textContent = 'Connected! ' + data.models_available + ' models';
-                    statusEl.className = 'api-key-status connected';
-                    checkHealth();
-                } else {
-                    statusEl.textContent = 'Failed: ' + (data.message || 'Invalid key');
-                    statusEl.className = 'api-key-status disconnected';
-                }
-            } catch (e) {
-                statusEl.textContent = 'Error: ' + e.message;
-                statusEl.className = 'api-key-status disconnected';
-            } finally {
-                connectBtn.disabled = false;
-                connectBtn.textContent = 'Connect';
-            }
-        }
-        
-        async function analyzeRepo() {
-            const owner = document.getElementById('repoOwner').value.trim();
-            const repo = document.getElementById('repoName').value.trim();
-            const resultEl = document.getElementById('analysisResult');
-            if (!owner || !repo) { alert("Please enter owner and repo"); return; }
-            resultEl.style.display = 'block';
-            resultEl.innerHTML = '<pre>Analyzing ' + owner + '/' + repo + '... This may take a minute.</pre>';
-            try {
-                const resp = await fetch(DEVELOPER_URL + '/api/developer/analyze', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ owner: owner, repo: repo })
-                });
-                const data = await resp.json();
-                if (data.error) throw new Error(data.error);
-                resultEl.innerHTML = '<pre>Job ID: ' + data.job_id + '\nStatus: ' + data.status + '\nFiles analyzed: ' + data.files_analyzed + '\n\nAnalysis:\n' + (data.analysis || 'No analysis available') + '</pre>';
-            } catch (e) {
-                resultEl.innerHTML = '<pre>Error: ' + e.message + '</pre>';
-            }
-        }
-        
-        document.getElementById('chatInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-        
-        checkHealth();
-        setInterval(checkHealth, 30000);
-    </script>
+    <textarea id="chatInput" placeholder="Type your message... (Enter to send, Shift+Enter for new line)"></textarea>
+    <div style="display:flex;gap:8px;align-items:center">
+      <select id="chatModel" style="width:auto;flex-shrink:0">
+        <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B (Best)</option>
+        <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+        <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
+        <option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option>
+        <option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option>
+      </select>
+      <button class="btn" id="sendBtn" onclick="sendChat()" style="margin-top:0">Send</button>
+    </div>
+  </div>
+</div>
+<div class="tab-content" id="tab-dev">
+  <div class="card">
+    <h2>🤖 AI Developer — Analyze GitHub Repos</h2>
+    <div class="grid2">
+      <div><label for="devOwner">Repo Owner</label><input type="text" id="devOwner" value="dudududi144-source"></div>
+      <div><label for="devRepo">Repo Name</label><input type="text" id="devRepo" value="PromptForge"></div>
+    </div>
+    <button class="btn btn-amber" onclick="analyzeRepo()" id="analyzeBtn">🔍 Analyze Repository</button>
+    <div class="result-box" id="devResult" style="display:none"><pre id="devResultText"></pre></div>
+  </div>
+</div>
+<div class="tab-content" id="tab-loops">
+  <div class="card">
+    <h2>🔄 Autonomous Loops</h2>
+    <div id="loopStatus">
+      <div class="kv"><span class="k">Health Check</span><span class="v" id="loopHealth">—</span></div>
+      <div class="kv"><span class="k">Self-Healing</span><span class="v" id="loopHeal">—</span></div>
+      <div class="kv"><span class="k">Learning</span><span class="v" id="loopLearn">—</span></div>
+      <div class="kv"><span class="k">Optimization</span><span class="v" id="loopOpt">—</span></div>
+      <div class="kv"><span class="k">Last Run</span><span class="v" id="loopLast">—</span></div>
+    </div>
+    <button class="btn btn-green" onclick="runLoops()" id="loopBtn">▶ Run All Loops Now</button>
+    <button class="btn btn-sm" onclick="getLoopLogs()">📋 View Logs</button>
+    <button class="btn btn-sm" onclick="getMemories()">🧠 View Memories</button>
+    <div class="result-box" id="loopResult" style="display:none"><pre id="loopResultText"></pre></div>
+  </div>
+</div>
+<div class="tab-content" id="tab-github">
+  <div class="card">
+    <h2>🐙 GitHub Integration</h2>
+    <button class="btn btn-sm" onclick="ghHealth()">🔌 Check Connection</button>
+    <button class="btn btn-sm" onclick="ghRepos()">📦 List Repos</button>
+    <button class="btn btn-sm" onclick="ghBranches()">🌿 List Branches</button>
+    <div style="margin-top:12px">
+      <label>Read File</label>
+      <div class="grid2">
+        <input type="text" id="ghFileOwner" placeholder="owner" value="dudududi144-source">
+        <input type="text" id="ghFileRepo" placeholder="repo" value="PromptForge">
+      </div>
+      <input type="text" id="ghFilePath" placeholder="path" value="ui/index.html" style="margin-top:8px">
+      <button class="btn btn-sm" onclick="ghReadFile()">📖 Read File</button>
+    </div>
+    <div class="result-box" id="ghResult" style="display:none"><pre id="ghResultText"></pre></div>
+  </div>
+</div>
+</div>
+<script>
+const GW='https://promptforge-gateway.rabotatony.workers.dev';
+const DEV='https://promptforge-developer.rabotatony.workers.dev';
+const LOOP='https://promptforge-loops.rabotatony.workers.dev';
+const GH='https://promptforge-github.rabotatony.workers.dev';
+let chatHistory=[];
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{const names=['chat','dev','loops','github'];t.classList.toggle('active',names[i]===name)});
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+async function connectKey(){
+  const key=document.getElementById('apiKey').value.trim();
+  const st=document.getElementById('apiStatus');
+  if(!key){st.textContent='Please enter your API key';st.className='api-status off';return}
+  st.textContent='Connecting...';st.className='api-status off';
+  try{
+    const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'hi',model:'meta/llama-3.1-8b-instruct',apiKey:key})});
+    const d=await r.json();
+    if(d.error&&d.error.includes('NVIDIA')){st.textContent='❌ Invalid API key';st.className='api-status off'}
+    else{st.textContent='✅ Connected! Ready to use.';st.className='api-status on';localStorage.setItem('pf_api_key',key)}
+  }catch(e){st.textContent='⚠️ Gateway unreachable — key saved locally';st.className='api-status off';localStorage.setItem('pf_api_key',key)}
+}
+function addMsg(role,text){
+  const box=document.getElementById('chatBox');
+  const m=document.createElement('div');m.className='msg '+role;
+  m.innerHTML='<div class="role">'+(role==='user'?'You':'PromptForge')+'</div><div class="content">'+esc(text)+'</div>';
+  box.appendChild(m);box.scrollTop=box.scrollHeight;
+}
+async function sendChat(){
+  const inp=document.getElementById('chatInput');const msg=inp.value.trim();if(!msg)return;
+  const model=document.getElementById('chatModel').value;const btn=document.getElementById('sendBtn');
+  addMsg('user',msg);chatHistory.push({role:'user',content:msg});inp.value='';btn.disabled=true;btn.textContent='Thinking...';
+  try{
+    const apiKey=localStorage.getItem('pf_api_key')||document.getElementById('apiKey').value.trim();
+    const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,model:model,history:chatHistory,apiKey:apiKey})});
+    const d=await r.json();
+    if(d.error){addMsg('ai','❌ Error: '+d.error)}else{addMsg('ai',d.reply||'No response');chatHistory.push({role:'assistant',content:d.reply})}
+  }catch(e){addMsg('ai','❌ Network error: '+e.message)}
+  btn.disabled=false;btn.textContent='Send';
+}
+document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
+async function analyzeRepo(){
+  const owner=document.getElementById('devOwner').value.trim();const repo=document.getElementById('devRepo').value.trim();
+  const box=document.getElementById('devResult');const txt=document.getElementById('devResultText');const btn=document.getElementById('analyzeBtn');
+  if(!owner||!repo){alert('Enter owner and repo');return}
+  box.style.display='block';txt.textContent='⏳ Analyzing '+owner+'/'+repo+'...';btn.disabled=true;
+  try{
+    const r=await fetch(DEV+'/api/developer/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({owner:owner,repo:repo})});
+    const d=await r.json();
+    if(d.error){txt.textContent='❌ Error: '+d.error}else{txt.textContent='Job ID: '+(d.job_id||'N/A')+'\nStatus: '+(d.status||'N/A')+'\nFiles: '+(d.files_analyzed||0)+'\n\n'+(d.analysis||'No analysis')}
+  }catch(e){txt.textContent='❌ Network error: '+e.message}
+  btn.disabled=false;
+}
+async function runLoops(){
+  const btn=document.getElementById('loopBtn');const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
+  btn.disabled=true;btn.textContent='Running...';box.style.display='block';txt.textContent='⏳ Running all loops...';
+  try{const r=await fetch(LOOP+'/api/loops/run',{method:'POST'});const d=await r.json();txt.textContent=JSON.stringify(d,null,2);updateLoopStatus()}
+  catch(e){txt.textContent='❌ '+e.message}
+  btn.disabled=false;btn.textContent='▶ Run All Loops Now';
+}
+async function updateLoopStatus(){
+  try{
+    const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();const states=d.state||[];
+    states.forEach(s=>{const el={health_check:'loopHealth',self_healing:'loopHeal',learning:'loopLearn',optimization:'loopOpt'}[s.loop_name];
+    if(el){const elem=document.getElementById(el);elem.textContent=s.status;elem.style.color=s.status==='healthy'?'#6ee7b7':s.status==='degraded'?'#fca5a5':'#9ca3af'}
+    if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString()});
+  }catch(e){}
+}
+async function getLoopLogs(){
+  const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
+  box.style.display='block';txt.textContent='Loading...';
+  try{const r=await fetch(LOOP+'/api/loops/logs');const d=await r.json();txt.textContent=JSON.stringify(d.logs||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
+}
+async function getMemories(){
+  const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
+  box.style.display='block';txt.textContent='Loading...';
+  try{const r=await fetch(LOOP+'/api/loops/memories');const d=await r.json();txt.textContent=JSON.stringify(d.memories||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
+}
+async function ghHealth(){
+  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
+  box.style.display='block';txt.textContent='Checking...';
+  try{const r=await fetch(GH+'/api/github/health');const d=await r.json();txt.textContent=JSON.stringify(d,null,2)}catch(e){txt.textContent='❌ '+e.message}
+}
+async function ghRepos(){
+  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
+  box.style.display='block';txt.textContent='Loading...';
+  try{const r=await fetch(GH+'/api/github/repos');const d=await r.json();
+  if(d.repos){txt.textContent=d.repos.map(r=>r.full_name+' ('+(r.language||'N/A')+')').join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
+}
+async function ghBranches(){
+  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
+  const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();
+  box.style.display='block';txt.textContent='Loading...';
+  try{const r=await fetch(GH+'/api/github/branches?owner='+owner+'&repo='+repo);const d=await r.json();
+  if(d.branches){txt.textContent=d.branches.map(b=>b.name).join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
+}
+async function ghReadFile(){
+  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
+  const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();const path=document.getElementById('ghFilePath').value.trim();
+  box.style.display='block';txt.textContent='Loading...';
+  try{const r=await fetch(GH+'/api/github/file?owner='+owner+'&repo='+repo+'&path='+path);const d=await r.json();
+  if(d.content){txt.textContent=d.content}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
+}
+(async function(){
+  const saved=localStorage.getItem('pf_api_key');if(saved)document.getElementById('apiKey').value=saved;
+  const dot=document.getElementById('mainDot');const st=document.getElementById('mainStatus');
+  try{
+    const r=await fetch(GW+'/api/health',{signal:AbortSignal.timeout(8000)});const d=await r.json();
+    dot.className='dot ok';st.textContent='Gateway: ✅ | NVIDIA: '+(d.nvidia_configured?'✅':'❌')+' | GitHub: '+(d.github_configured?'✅':'❌');
+  }catch(e){dot.className='dot err';st.textContent='⚠️ Gateway unreachable'}
+  updateLoopStatus();
+})();
+</script>
 </body>
 </html>
