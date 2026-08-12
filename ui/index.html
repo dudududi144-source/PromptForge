@@ -5,433 +5,176 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PromptForge</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#08080a;--surface:#111114;--surface2:#1a1a1f;
-  --border:#222228;--text:#e8e6e3;--text2:#8a8890;
-  --fire:#e8722a;--fire2:#f59e0b;--ember:#ff4d00;
-  --glow:rgba(232,114,42,0.15);--success:#34d399;
-}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(232,114,42,0.06),transparent 70%);transition:all 1.5s}
-body.building .ambient{background:radial-gradient(ellipse 80% 50% at 50% 30%,rgba(232,114,42,0.12),transparent 70%)}
-.wrap{max-width:720px;margin:0 auto;padding:40px 24px;position:relative;z-index:1}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:60px}
-.logo .name{font-size:1.1rem;font-weight:700;
-  background:linear-gradient(135deg,var(--fire),var(--fire2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.logo .settings{margin-right:auto;background:none;border:none;color:var(--text2);
-  cursor:pointer;font-size:1.1rem;padding:8px;border-radius:8px;transition:all .2s}
-.logo .settings:hover{color:var(--text);background:var(--surface)}
-.hero{text-align:center;margin-bottom:48px}
-.hero h1{font-size:2.8rem;font-weight:800;letter-spacing:-0.03em;line-height:1.15;margin-bottom:14px}
-.hero h1 span{background:linear-gradient(135deg,var(--fire),var(--fire2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--text2);font-size:1.05rem;font-weight:300}
-.forge-input{position:relative;background:var(--surface);border:1px solid var(--border);
-  border-radius:16px;padding:4px;transition:all .3s;box-shadow:0 0 0 0 var(--glow)}
-.forge-input:focus-within{border-color:rgba(232,114,42,0.4);box-shadow:0 0 40px 0 var(--glow)}
-.forge-input textarea{width:100%;background:none;border:none;outline:none;color:var(--text);
-  font-family:inherit;font-size:1.05rem;padding:16px 18px;resize:none;min-height:80px;line-height:1.6}
-.forge-input textarea::placeholder{color:#55535a}
-.forge-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--border)}
-.forge-bar .hint{font-size:.8rem;color:var(--text2)}
-.forge-btn{display:flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,var(--fire),var(--ember));color:#fff;border:none;
-  padding:10px 28px;border-radius:10px;font-family:inherit;font-size:.95rem;font-weight:600;
-  cursor:pointer;transition:all .25s;box-shadow:0 2px 12px rgba(232,114,42,0.3)}
-.forge-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,114,42,0.4)}
-.forge-btn:disabled{opacity:.5;cursor:wait;transform:none}
-.process{margin-top:32px;display:none}
-.process.show{display:block;animation:fadeUp .5s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;
-  opacity:0;transform:translateY(8px);transition:all .4s ease}
+:root{--bg:#fafafa;--surface:#ffffff;--border:#e5e5e5;--text:#1a1a2e;--text2:#6b7280;--accent:#2563eb;--accent2:#1d4ed8}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.wrap{max-width:640px;margin:0 auto;padding:60px 24px}
+.logo{display:flex;align-items:center;gap:8px;margin-bottom:48px}
+.logo .name{font-size:1rem;font-weight:700;color:var(--text)}
+.logo .settings{margin-right:auto;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:6px;border-radius:6px}
+.logo .settings:hover{color:var(--text);background:#f3f4f6}
+h1{font-size:2rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px}
+.sub{color:var(--text2);font-size:.95rem;margin-bottom:40px}
+.input-area{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;transition:all .2s}
+.input-area:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+.input-area textarea{width:100%;background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:1rem;padding:14px 16px;resize:none;min-height:70px;line-height:1.6}
+.input-area textarea::placeholder{color:#9ca3af}
+.input-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-top:1px solid var(--border)}
+.input-bar .hint{font-size:.75rem;color:var(--text2)}
+.go-btn{background:var(--accent);color:#fff;border:none;padding:8px 24px;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
+.go-btn:hover{background:var(--accent2)}
+.go-btn:disabled{opacity:.5;cursor:wait}
+.steps{margin-top:28px;display:none}
+.steps.show{display:block}
+.step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;opacity:0;transform:translateY(6px);transition:all .3s}
 .step.visible{opacity:1;transform:translateY(0)}
-.step .dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;
-  align-items:center;justify-content:center;font-size:.75rem;
-  background:var(--surface2);border:1px solid var(--border);color:var(--text2);transition:all .4s}
-.step.active .dot{background:var(--glow);border-color:var(--fire);color:var(--fire);box-shadow:0 0 12px var(--glow)}
-.step.done .dot{background:rgba(52,211,153,0.1);border-color:var(--success);color:var(--success)}
-.step .title{font-size:.9rem;font-weight:600;margin-bottom:2px}
-.step .desc{font-size:.8rem;color:var(--text2);line-height:1.5}
-.step.active .title{color:var(--fire)}
-.result{margin-top:32px;display:none}
-.result.show{display:block;animation:fadeUp .5s ease}
-.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.result-header h3{font-size:1rem;font-weight:600}
-.result-actions{display:flex;gap:8px}
-.result-actions button{background:var(--surface2);border:1px solid var(--border);color:var(--text2);
-  padding:6px 14px;border-radius:8px;font-family:inherit;font-size:.8rem;cursor:pointer;transition:all .2s}
-.result-actions button:hover{color:var(--text);border-color:var(--text2)}
-.code-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;
-  padding:20px;max-height:500px;overflow:auto;direction:ltr;text-align:left}
-.code-block pre{font-family:'Cascadia Code','Fira Code',monospace;font-size:.82rem;
-  line-height:1.7;color:#c9d1d9;white-space:pre-wrap;word-break:break-word}
-.preview-frame{margin-top:16px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff}
-.preview-frame iframe{width:100%;height:400px;border:none}
-.preview-label{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;
-  background:var(--surface);border-bottom:1px solid var(--border);font-size:.8rem;color:var(--text2)}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
-  z-index:100;display:none;align-items:center;justify-content:center}
+.step .dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;background:#f3f4f6;border:1px solid var(--border);color:var(--text2)}
+.step.active .dot{background:rgba(37,99,235,0.1);border-color:var(--accent);color:var(--accent)}
+.step.done .dot{background:rgba(16,185,129,0.1);border-color:#10b981;color:#10b981}
+.step .title{font-size:.85rem;font-weight:600}
+.step .desc{font-size:.75rem;color:var(--text2)}
+.step.active .title{color:var(--accent)}
+.output{margin-top:28px;display:none}
+.output.show{display:block}
+.output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.output-header h3{font-size:.95rem;font-weight:600}
+.output-actions{display:flex;gap:6px}
+.output-actions button{background:#f3f4f6;border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:6px;font-family:inherit;font-size:.75rem;cursor:pointer}
+.output-actions button:hover{color:var(--text);border-color:var(--text2)}
+.code-box{background:#1e1e2e;border-radius:10px;padding:16px;max-height:450px;overflow:auto;direction:ltr;text-align:left}
+.code-box pre{font-family:"Cascadia Code","Fira Code",monospace;font-size:.8rem;line-height:1.7;color:#cdd6f4;white-space:pre-wrap;word-break:break-word}
+.preview{margin-top:12px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+.preview iframe{width:100%;height:380px;border:none}
+.preview-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:#f9fafb;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--text2)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);z-index:100;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  padding:28px;width:90%;max-width:440px;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto}
-.modal h3{font-size:1.1rem;font-weight:700;margin-bottom:20px}
-.modal label{display:block;font-size:.85rem;color:var(--text2);margin-bottom:6px;margin-top:16px}
-.modal input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
-  padding:10px 14px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none}
-.modal input:focus{border-color:var(--fire)}
-.modal .save-btn{width:100%;margin-top:24px;background:linear-gradient(135deg,var(--fire),var(--ember));
-  color:#fff;border:none;padding:12px;border-radius:10px;font-family:inherit;font-size:.95rem;
-  font-weight:600;cursor:pointer}
-.modal .close-btn{width:100%;margin-top:8px;background:none;border:1px solid var(--border);
-  color:var(--text2);padding:10px;border-radius:10px;font-family:inherit;font-size:.9rem;cursor:pointer}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--surface2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;
-  font-size:.85rem;color:var(--text);z-index:200;transition:all .3s;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:90%;max-width:400px}
+.modal h3{font-size:1rem;font-weight:700;margin-bottom:16px}
+.modal label{display:block;font-size:.8rem;color:var(--text2);margin-bottom:4px;margin-top:14px}
+.modal input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:.85rem;outline:none}
+.modal input:focus{border-color:var(--accent)}
+.modal .save{width:100%;margin-top:20px;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.modal .close{width:100%;margin-top:6px;background:none;border:1px solid var(--border);color:var(--text2);padding:9px;border-radius:8px;font-family:inherit;font-size:.85rem;cursor:pointer}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:#fff;padding:8px 18px;border-radius:8px;font-size:.8rem;z-index:200;transition:all .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
-/* Bottom nav */
-.bottom-nav{display:flex;gap:8px;margin-top:40px;justify-content:center;flex-wrap:wrap}
-.bottom-nav button{background:var(--surface);border:1px solid var(--border);color:var(--text2);
-  padding:8px 18px;border-radius:10px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .2s}
-.bottom-nav button:hover{color:var(--text);border-color:var(--fire)}
-/* Panels */
-.panel{margin-top:24px;display:none;animation:fadeUp .4s ease}
-.panel.show{display:block}
-.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
-.panel-card h3{font-size:1rem;font-weight:600;margin-bottom:12px}
-.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem}
-.kv:last-child{border-bottom:none}
-.kv .k{color:var(--text2)}.kv .v{color:var(--text);font-weight:500}
-.panel-result{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;
-  margin-top:12px;max-height:300px;overflow:auto;font-size:.82rem;line-height:1.6}
-.panel-result pre{white-space:pre-wrap;word-break:break-word;font-family:'Cascadia Code',monospace;direction:ltr;text-align:left}
-@media(max-width:600px){.hero h1{font-size:2rem}.wrap{padding:24px 16px}}
+.iterate-area{margin-top:16px;display:none}
+.iterate-area.show{display:block}
+.iterate-area input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:inherit;font-size:.9rem;outline:none;margin-bottom:8px}
+.iterate-area input:focus{border-color:var(--accent)}
+@media(max-width:600px){h1{font-size:1.6rem}.wrap{padding:32px 16px}}
 </style>
 </head>
 <body>
-<div class="ambient"></div>
 <div class="wrap">
-  <div class="logo">
-    <span>🔥</span>
-    <span class="name">PromptForge</span>
-    <button class="settings" onclick="openSettings()">⚙️</button>
+  <div class="logo"><span>⚡</span><span class="name">PromptForge</span><button class="settings" onclick="openSettings()">⚙️</button></div>
+  <h1>מה ה-task שלך?</h1>
+  <p class="sub">כתוב. לחץ. קבל תוכנית + קוד עובד.</p>
+  <div class="input-area">
+    <textarea id="task" placeholder="למשל: משחק snake עם ניקוד ורמות..." rows="3"></textarea>
+    <div class="input-bar"><span class="hint">Enter לשליחה</span><button class="go-btn" id="goBtn" onclick="go()">🚀 תן לי תוכנית</button></div>
   </div>
-  <div class="hero">
-    <h1>מה אתה רוצה <span>לבנות</span>?</h1>
-    <p>כתוב. לחץ. קבל קוד עובד.</p>
+  <div class="steps" id="steps">
+    <div class="step" id="s1"><div class="dot">1</div><div><div class="title">מנתח</div><div class="desc" id="s1d"></div></div></div>
+    <div class="step" id="s2"><div class="dot">2</div><div><div class="title">מתכנן</div><div class="desc" id="s2d"></div></div></div>
+    <div class="step" id="s3"><div class="dot">3</div><div><div class="title">בונה</div><div class="desc" id="s3d"></div></div></div>
+    <div class="step" id="s4"><div class="dot">4</div><div><div class="title">בודק</div><div class="desc" id="s4d"></div></div></div>
   </div>
-  <div class="forge-input">
-    <textarea id="mission" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות חלקות..." rows="3"></textarea>
-    <div class="forge-bar">
-      <span class="hint">Enter לשליחה</span>
-      <button class="forge-btn" id="forgeBtn" onclick="forge()">
-        <span>🔥</span><span id="forgeBtnText">צור</span>
-      </button>
-    </div>
-  </div>
-  <div class="process" id="process">
-    <div class="step" id="step1"><div class="dot">1</div>
-      <div class="info"><div class="title">מנתח את המשימה</div><div class="desc" id="step1desc"></div></div></div>
-    <div class="step" id="step2"><div class="dot">2</div>
-      <div class="info"><div class="title">מתכנן ארכיטקטורה</div><div class="desc" id="step2desc"></div></div></div>
-    <div class="step" id="step3"><div class="dot">3</div>
-      <div class="info"><div class="title">בונה את הקוד</div><div class="desc" id="step3desc"></div></div></div>
-    <div class="step" id="step4"><div class="dot">4</div>
-      <div class="info"><div class="title">בודק ומלטש</div><div class="desc" id="step4desc"></div></div></div>
-  </div>
-  <div class="result" id="result">
-    <div class="result-header">
-      <h3>✨ מוכן</h3>
-      <div class="result-actions">
-        <button onclick="copyCode()">📋 העתק</button>
-        <button onclick="downloadCode()">💾 הורד</button>
-        <button onclick="togglePreview()">👁️ תצוגה</button>
-      </div>
-    </div>
-    <div class="code-block"><pre id="codeOutput"></pre></div>
-    <div class="preview-frame" id="previewFrame" style="display:none">
-      <div class="preview-label"><span>Live Preview</span>
-        <button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div>
-      <iframe id="previewIframe" sandbox="allow-scripts"></iframe>
-    </div>
-  </div>
-
-  <!-- Bottom Navigation -->
-  <div class="bottom-nav">
-    <button onclick="showPanel('loops')">🔄 לופים</button>
-    <button onclick="showPanel('github')">🐙 GitHub</button>
-    <button onclick="showPanel('dev')">🤖 AI Developer</button>
-  </div>
-
-  <!-- Loops Panel -->
-  <div class="panel" id="panel-loops">
-    <div class="panel-card">
-      <h3>🔄 לופים אוטונומיים</h3>
-      <div class="kv"><span class="k">Health Check</span><span class="v" id="loopHealth">—</span></div>
-      <div class="kv"><span class="k">Self-Healing</span><span class="v" id="loopHeal">—</span></div>
-      <div class="kv"><span class="k">Learning</span><span class="v" id="loopLearn">—</span></div>
-      <div class="kv"><span class="k">Optimization</span><span class="v" id="loopOpt">—</span></div>
-      <div class="kv"><span class="k">Last Run</span><span class="v" id="loopLast">—</span></div>
-      <div style="display:flex;gap:8px;margin-top:14px">
-        <button onclick="runLoops()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:8px;cursor:pointer">▶ הרץ עכשיו</button>
-        <button onclick="getLoopLogs()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:8px;cursor:pointer">📋 לוגים</button>
-        <button onclick="getMemories()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:8px;cursor:pointer">🧠 זכרונות</button>
-      </div>
-      <div class="panel-result" id="loopResult" style="display:none"><pre id="loopResultText"></pre></div>
-    </div>
-  </div>
-
-  <!-- GitHub Panel -->
-  <div class="panel" id="panel-github">
-    <div class="panel-card">
-      <h3>🐙 GitHub</h3>
-      <div id="ghStatus" style="font-size:.85rem;color:var(--text2);margin-bottom:12px">לא מחובר</div>
-      <button onclick="ghConnect()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;cursor:pointer;margin-bottom:8px">🔌 התחבר עם הטוקן מההגדרות</button>
-      <div id="ghRepos" style="display:none"></div>
-      <div class="panel-result" id="ghResult" style="display:none"><pre id="ghResultText"></pre></div>
-    </div>
-  </div>
-
-  <!-- AI Developer Panel -->
-  <div class="panel" id="panel-dev">
-    <div class="panel-card">
-      <h3>🤖 AI Developer</h3>
-      <textarea id="devMission" placeholder="מה לבנות? למשל: אפליקציית todo עם dark mode" rows="2" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:.9rem;resize:vertical;outline:none"></textarea>
-      <button onclick="devBuild()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,var(--fire),var(--ember));color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600">🚀 בנה</button>
-      <div class="panel-result" id="devResult" style="display:none"><pre id="devResultText"></pre></div>
-    </div>
+  <div class="output" id="output">
+    <div class="output-header"><h3>✨ מוכן</h3><div class="output-actions"><button onclick="copyCode()">📋 העתק</button><button onclick="downloadCode()">💾 הורד</button><button onclick="togglePreview()">👁️ תצוגה</button><button onclick="showIterate()">✏️ שפר</button></div></div>
+    <div class="code-box"><pre id="codeOut"></pre></div>
+    <div class="preview" id="previewBox" style="display:none"><div class="preview-bar"><span>Live Preview</span><button onclick="togglePreview()" style="background:none;border:none;cursor:pointer;color:var(--text2)">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
+    <div class="iterate-area" id="iterateArea"><input id="iterateInput" placeholder="מה לשפר? למשל: תוסיף dark mode"><button class="go-btn" onclick="iterate()" style="width:100%">🔧 שפר</button></div>
   </div>
 </div>
-
-<!-- Settings Modal -->
 <div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <h3>⚙️ הגדרות</h3>
-    <label>NVIDIA API Key</label>
-    <input type="password" id="apiKeyInput" placeholder="nvapi-...">
-    <label>GitHub Token</label>
-    <input type="password" id="ghTokenInput" placeholder="ghp_...">
-    <label>מודל AI</label>
-    <input type="text" id="modelInput" value="meta/llama-3.3-70b-instruct">
-    <button class="save-btn" onclick="saveSettings()">שמור</button>
-    <button class="close-btn" onclick="closeSettings()">סגור</button>
-  </div>
+  <div class="modal"><h3>⚙️ הגדרות</h3><label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-..."><label>מודל</label><input type="text" id="modelInput" value="meta/llama-3.3-70b-instruct"><button class="save" onclick="saveSettings()">שמור</button><button class="close" onclick="closeSettings()">סגור</button></div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script>
-const GW='https://promptforge-gateway.rabotatony.workers.dev';
-const LOOP='https://promptforge-loops.rabotatony.workers.dev';
-const GH='https://promptforge-github.rabotatony.workers.dev';
-let generatedCode='',isBuilding=false,activePanel=null;
-
-function getKey(){return localStorage.getItem('pf_key')||''}
-function getGhToken(){return localStorage.getItem('pf_gh_token')||''}
-function getModel(){return localStorage.getItem('pf_model')||'meta/llama-3.3-70b-instruct'}
-
-function openSettings(){
-  document.getElementById('apiKeyInput').value=getKey();
-  document.getElementById('ghTokenInput').value=getGhToken();
-  document.getElementById('modelInput').value=getModel();
-  document.getElementById('settingsModal').classList.add('show');
-}
-function closeSettings(){document.getElementById('settingsModal').classList.remove('show')}
-function saveSettings(){
-  const k=document.getElementById('apiKeyInput').value.trim();
-  const g=document.getElementById('ghTokenInput').value.trim();
-  const m=document.getElementById('modelInput').value.trim();
-  if(k)localStorage.setItem('pf_key',k);
-  if(g)localStorage.setItem('pf_gh_token',g);
-  if(m)localStorage.setItem('pf_model',m);
-  closeSettings();showToast('✅ נשמר');
-}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;
-  t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
-function setStep(n,state){document.getElementById('step'+n).className='step visible '+state}
+var GW="https://promptforge.rabotatony.workers.dev";
+var generatedCode="",isBuilding=false;
+function getKey(){return localStorage.getItem("pf_key")||""}
+function getModel(){return localStorage.getItem("pf_model")||"meta/llama-3.3-70b-instruct"}
+function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("modelInput").value=getModel();document.getElementById("settingsModal").classList.add("show")}
+function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
+function saveSettings(){var k=document.getElementById("apiKeyInput").value.trim();var m=document.getElementById("modelInput").value.trim();if(k)localStorage.setItem("pf_key",k);if(m)localStorage.setItem("pf_model",m);closeSettings();showToast("✅ נשמר")}
+function showToast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2500)}
+function setStep(n,state){document.getElementById("s"+n).className="step visible "+state}
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
-
-function showPanel(name){
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('show')});
-  if(activePanel===name){activePanel=null;return}
-  activePanel=name;
-  document.getElementById('panel-'+name).classList.add('show');
-  if(name==='loops')updateLoopStatus();
-}
-
-document.getElementById('mission').addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();forge()}});
-
-async function forge(){
-  const mission=document.getElementById('mission').value.trim();
-  if(!mission){showToast('כתוב מה אתה רוצה לבנות');return}
-  const key=getKey();
-  if(!key){openSettings();showToast('הכנס API key');return}
+document.getElementById("task").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go()}})
+async function go(){
+  var task=document.getElementById("task").value.trim();
+  if(!task){showToast("כתוב מה אתה רוצה לבנות");return}
+  var key=getKey();
+  if(!key){openSettings();showToast("הכנס API key");return}
   if(isBuilding)return;
-  isBuilding=true;document.body.classList.add('building');
-  document.getElementById('forgeBtn').disabled=true;
-  document.getElementById('forgeBtnText').textContent='בונה...';
-  document.getElementById('process').classList.add('show');
-  document.getElementById('result').classList.remove('show');
-  ['step1','step2','step3','step4'].forEach(function(s){
-    document.getElementById(s).className='step';
-  });
+  isBuilding=true;
+  document.getElementById("goBtn").disabled=true;
+  document.getElementById("goBtn").textContent="בונה...";
+  document.getElementById("steps").classList.add("show");
+  document.getElementById("output").classList.remove("show");
+  ["s1","s2","s3","s4"].forEach(function(s){document.getElementById(s).className="step"})
   try{
-    setStep(1,'active');
-    try{const ar=await fetch(GW+'/api/analyze-mission',{method:'POST',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify({mission:mission})});
-      const ad=await ar.json();
-      if(ad.analysis)document.getElementById('step1desc').textContent=
-        'סיבוכות: '+ad.analysis.complexity+' · זמן: '+ad.analysis.estimatedBuildTime;
-      else document.getElementById('step1desc').textContent='מנתח...';
-    }catch(e){document.getElementById('step1desc').textContent='מנתח...'}
-    setStep(1,'done');
-    setStep(2,'active');await sleep(600);
-    document.getElementById('step2desc').textContent='HTML + CSS + JS · קוד עצמאי · ללא תלויות';
-    setStep(2,'done');
-    setStep(3,'active');
-    const gr=await fetch(GW+'/api/generate',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({goal:mission,apiKey:key,model:getModel()})});
-    const gd=await gr.json();
-    if(gd.error){document.getElementById('step3desc').textContent='❌ '+gd.error;
-      showToast('❌ '+gd.error);resetBtn();return}
-    generatedCode=gd.code||'';
-    document.getElementById('step3desc').textContent=
-      generatedCode.split('\n').length+' שורות · '+(gd.total_tokens||0)+' tokens';
-    setStep(3,'done');
-    setStep(4,'active');await sleep(500);
-    var vt='✅ תקין';
-    if(gd.validation&&!gd.validation.valid)vt='⚠️ '+(gd.validation.issues||[]).join(', ');
-    if(gd.suggestions&&gd.suggestions.length)vt+=' · '+gd.suggestions.length+' הצעות';
-    document.getElementById('step4desc').textContent=vt;
-    setStep(4,'done');
+    setStep(1,"active");
+    document.getElementById("s1d").textContent="מנתח סיבוכות...";
+    var planResp=await fetch(GW+"/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,apiKey:key})});
+    var planData=await planResp.json();
+    if(planData.error){document.getElementById("s1d").textContent="❌ "+planData.error;showToast("❌ "+planData.error);resetBtn();return}
+    document.getElementById("s1d").textContent="סיבוכות: "+(planData.analysis?planData.analysis.complexity:"?");
+    setStep(1,"done");
+    setStep(2,"active");
+    document.getElementById("s2d").textContent="יוצר תוכנית פעולה...";
+    await sleep(400);
+    document.getElementById("s2d").textContent="תוכנית מוכנה";
+    setStep(2,"done");
+    setStep(3,"active");
+    document.getElementById("s3d").textContent="כותב קוד...";
+    var buildResp=await fetch(GW+"/api/build",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,plan:planData.plan||"",apiKey:key})});
+    var buildData=await buildResp.json();
+    if(buildData.error){document.getElementById("s3d").textContent="❌ "+buildData.error;showToast("❌ "+buildData.error);resetBtn();return}
+    generatedCode=buildData.code||"";
+    document.getElementById("s3d").textContent=generatedCode.split("\n").length+" שורות · "+(buildData.tokens||0)+" tokens";
+    setStep(3,"done");
+    setStep(4,"active");
+    document.getElementById("s4d").textContent="בודק...";
     await sleep(300);
-    document.getElementById('codeOutput').textContent=generatedCode;
-    document.getElementById('result').classList.add('show');
-    if(generatedCode.includes('<!DOCTYPE')||generatedCode.includes('<html')){
-      document.getElementById('previewFrame').style.display='block';
-      document.getElementById('previewIframe').srcdoc=generatedCode}
-    showToast('✨ מוכן!');
-  }catch(e){showToast('❌ '+e.message)}
+    var vText="✅ תקין";
+    if(buildData.validation&&!buildData.validation.valid)vText="⚠️ "+(buildData.validation.issues||[]).join(", ");
+    document.getElementById("s4d").textContent=vText;
+    setStep(4,"done");
+    await sleep(200);
+    document.getElementById("codeOut").textContent=generatedCode;
+    document.getElementById("output").classList.add("show");
+    if(generatedCode.indexOf("<!DOCTYPE")!==-1||generatedCode.indexOf("<html")!==-1){document.getElementById("previewBox").style.display="block";document.getElementById("previewFrame").srcdoc=generatedCode}
+    showToast("✨ מוכן!");
+  }catch(e){showToast("❌ "+e.message)}
   resetBtn();
 }
-function resetBtn(){isBuilding=false;document.body.classList.remove('building');
-  document.getElementById('forgeBtn').disabled=false;
-  document.getElementById('forgeBtnText').textContent='צור'}
-function copyCode(){navigator.clipboard.writeText(generatedCode).then(function(){showToast('📋 הועתק!')})}
-function downloadCode(){var ext=generatedCode.includes('<html')?'html':'js';
-  var b=new Blob([generatedCode],{type:'text/plain'});var a=document.createElement('a');
-  a.href=URL.createObjectURL(b);a.download='output.'+ext;a.click();showToast('💾 ירד!')}
-function togglePreview(){var f=document.getElementById('previewFrame');
-  if(f.style.display==='none'){f.style.display='block';
-    document.getElementById('previewIframe').srcdoc=generatedCode}
-  else f.style.display='none'}
-
-// Loops
-async function updateLoopStatus(){
-  try{
-    const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();
-    (d.state||[]).forEach(function(s){
-      var el={health_check:'loopHealth',self_healing:'loopHeal',learning:'loopLearn',optimization:'loopOpt'}[s.loop_name];
-      if(el){var e=document.getElementById(el);e.textContent=s.status;
-        e.style.color=s.status==='healthy'?'var(--success)':'var(--text2)'}
-      if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString();
-    });
-  }catch(e){}
-}
-async function runLoops(){
-  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
-  box.style.display='block';txt.textContent='⏳ מריץ...';
-  try{const r=await fetch(LOOP+'/api/loops/run',{method:'POST'});const d=await r.json();
-    txt.textContent=JSON.stringify(d,null,2);updateLoopStatus()}
-  catch(e){txt.textContent='❌ '+e.message}
-}
-async function getLoopLogs(){
-  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
-  box.style.display='block';txt.textContent='טוען...';
-  try{const r=await fetch(LOOP+'/api/loops/logs');const d=await r.json();
-    txt.textContent=JSON.stringify(d.logs||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
-}
-async function getMemories(){
-  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
-  box.style.display='block';txt.textContent='טוען...';
-  try{const r=await fetch(LOOP+'/api/loops/memories');const d=await r.json();
-    txt.textContent=JSON.stringify(d.memories||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
-}
-
-// GitHub
-async function ghConnect(){
-  var token=getGhToken();
-  var status=document.getElementById('ghStatus');
-  var reposBox=document.getElementById('ghRepos');
-  if(!token){openSettings();showToast('הכנס GitHub Token בהגדרות');return}
-  status.textContent='מתחבר...';
-  try{
-    const r=await fetch('https://api.github.com/user',{
-      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
-    if(!r.ok){status.textContent='❌ טוקן לא תקין: HTTP '+r.status;return}
-    const user=await r.json();
-    status.innerHTML='✅ מחובר כ-<b>'+user.login+'</b> · '+user.public_repos+' repos';
-    const rr=await fetch('https://api.github.com/user/repos?per_page=20&sort=updated',{
-      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
-    if(rr.ok){
-      const repos=await rr.json();
-      reposBox.style.display='block';
-      reposBox.innerHTML=repos.map(function(repo){
-        return '<div style="padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:.85rem" '
-          +'onclick="ghLoadRepo(\''+repo.full_name+'\')">'
-          +'<b>'+repo.name+'</b>'+(repo.private?' 🔒':'')
-          +' <span style="color:var(--text2)">'+(repo.language||'')+'</span></div>';
-      }).join('');
-    }
-  }catch(e){status.textContent='❌ '+e.message}
-}
-function ghLoadRepo(fullName){
-  var box=document.getElementById('ghResult');var txt=document.getElementById('ghResultText');
-  box.style.display='block';txt.textContent='⏳ טוען '+fullName+'...';
-  var token=getGhToken();
-  fetch('https://api.github.com/repos/'+fullName+'/contents',{
-    headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}})
-    .then(function(r){return r.json()})
-    .then(function(data){
-      if(Array.isArray(data)){
-        txt.textContent=fullName+':\n\n'+data.map(function(f){
-          return (f.type==='dir'?'📁':'📄')+' '+f.name}).join('\n');
-      }else{txt.textContent=JSON.stringify(data,null,2)}
-    }).catch(function(e){txt.textContent='❌ '+e.message});
-}
-
-// AI Developer
-async function devBuild(){
-  var mission=document.getElementById('devMission').value.trim();
-  var box=document.getElementById('devResult');var txt=document.getElementById('devResultText');
+function resetBtn(){isBuilding=false;document.getElementById("goBtn").disabled=false;document.getElementById("goBtn").textContent="🚀 תן לי תוכנית"}
+function copyCode(){navigator.clipboard.writeText(generatedCode).then(function(){showToast("📋 הועתק!")})}
+function downloadCode(){var ext=generatedCode.indexOf("<html")!==-1?"html":"js";var b=new Blob([generatedCode],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="output."+ext;a.click();showToast("💾 ירד!")}
+function togglePreview(){var f=document.getElementById("previewBox");if(f.style.display==="none"){f.style.display="block";document.getElementById("previewFrame").srcdoc=generatedCode}else f.style.display="none"}
+function showIterate(){var a=document.getElementById("iterateArea");a.classList.toggle("show")}
+async function iterate(){
+  var instruction=document.getElementById("iterateInput").value.trim();
+  if(!instruction){showToast("כתוב מה לשפר");return}
   var key=getKey();
-  if(!mission){showToast('כתוב מה לבנות');return}
-  if(!key){openSettings();showToast('הכנס API key');return}
-  box.style.display='block';txt.textContent='⏳ בונה...';
+  if(!key){openSettings();return}
+  if(!generatedCode){showToast("אין קוד לשפר");return}
+  showToast("⏳ משפר...");
   try{
-    const gr=await fetch(GW+'/api/generate',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({goal:mission,apiKey:key,model:getModel()})});
-    const gd=await gr.json();
-    if(gd.error){txt.textContent='❌ '+gd.error}
-    else{
-      var out='✅ מוכן! '+(gd.total_tokens||0)+' tokens\n\n';
-      if(gd.validation)out+='Validation: '+(gd.validation.valid?'PASS':'FAIL')+'\n';
-      out+='\n'+(gd.code||'');
-      txt.textContent=out;
-    }
-  }catch(e){txt.textContent='❌ '+e.message}
+    var resp=await fetch(GW+"/api/iterate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:generatedCode,instruction:instruction,apiKey:key})});
+    var data=await resp.json();
+    if(data.error){showToast("❌ "+data.error);return}
+    generatedCode=data.code||"";
+    document.getElementById("codeOut").textContent=generatedCode;
+    if(generatedCode.indexOf("<!DOCTYPE")!==-1||generatedCode.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=generatedCode}
+    document.getElementById("iterateInput").value="";
+    showToast("✅ שופר!");
+  }catch(e){showToast("❌ "+e.message)}
 }
-
-// Init
-if(!getKey())setTimeout(function(){showToast('⚙️ לחץ על הגלגל והכנס מפתחות')},1500);
-updateLoopStatus();
+if(!getKey())setTimeout(function(){showToast("⚙️ לחץ על הגלגל והכנס API key")},1500);
 </script>
 </body>
 </html>
