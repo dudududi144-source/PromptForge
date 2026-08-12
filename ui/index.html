@@ -78,7 +78,7 @@ body.building .ambient{background:radial-gradient(ellipse 80% 50% at 50% 30%,rgb
   z-index:100;display:none;align-items:center;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;
-  padding:28px;width:90%;max-width:440px;animation:fadeUp .3s ease}
+  padding:28px;width:90%;max-width:440px;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto}
 .modal h3{font-size:1.1rem;font-weight:700;margin-bottom:20px}
 .modal label{display:block;font-size:.85rem;color:var(--text2);margin-bottom:6px;margin-top:16px}
 .modal input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;
@@ -93,6 +93,22 @@ body.building .ambient{background:radial-gradient(ellipse 80% 50% at 50% 30%,rgb
   background:var(--surface2);border:1px solid var(--border);padding:10px 20px;border-radius:10px;
   font-size:.85rem;color:var(--text);z-index:200;transition:all .3s;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
+/* Bottom nav */
+.bottom-nav{display:flex;gap:8px;margin-top:40px;justify-content:center;flex-wrap:wrap}
+.bottom-nav button{background:var(--surface);border:1px solid var(--border);color:var(--text2);
+  padding:8px 18px;border-radius:10px;font-family:inherit;font-size:.85rem;cursor:pointer;transition:all .2s}
+.bottom-nav button:hover{color:var(--text);border-color:var(--fire)}
+/* Panels */
+.panel{margin-top:24px;display:none;animation:fadeUp .4s ease}
+.panel.show{display:block}
+.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px}
+.panel-card h3{font-size:1rem;font-weight:600;margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--text2)}.kv .v{color:var(--text);font-weight:500}
+.panel-result{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;
+  margin-top:12px;max-height:300px;overflow:auto;font-size:.82rem;line-height:1.6}
+.panel-result pre{white-space:pre-wrap;word-break:break-word;font-family:'Cascadia Code',monospace;direction:ltr;text-align:left}
 @media(max-width:600px){.hero h1{font-size:2rem}.wrap{padding:24px 16px}}
 </style>
 </head>
@@ -143,38 +159,113 @@ body.building .ambient{background:radial-gradient(ellipse 80% 50% at 50% 30%,rgb
       <iframe id="previewIframe" sandbox="allow-scripts"></iframe>
     </div>
   </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button onclick="showPanel('loops')">🔄 לופים</button>
+    <button onclick="showPanel('github')">🐙 GitHub</button>
+    <button onclick="showPanel('dev')">🤖 AI Developer</button>
+  </div>
+
+  <!-- Loops Panel -->
+  <div class="panel" id="panel-loops">
+    <div class="panel-card">
+      <h3>🔄 לופים אוטונומיים</h3>
+      <div class="kv"><span class="k">Health Check</span><span class="v" id="loopHealth">—</span></div>
+      <div class="kv"><span class="k">Self-Healing</span><span class="v" id="loopHeal">—</span></div>
+      <div class="kv"><span class="k">Learning</span><span class="v" id="loopLearn">—</span></div>
+      <div class="kv"><span class="k">Optimization</span><span class="v" id="loopOpt">—</span></div>
+      <div class="kv"><span class="k">Last Run</span><span class="v" id="loopLast">—</span></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="runLoops()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px;border-radius:8px;cursor:pointer">▶ הרץ עכשיו</button>
+        <button onclick="getLoopLogs()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:8px;cursor:pointer">📋 לוגים</button>
+        <button onclick="getMemories()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:8px;cursor:pointer">🧠 זכרונות</button>
+      </div>
+      <div class="panel-result" id="loopResult" style="display:none"><pre id="loopResultText"></pre></div>
+    </div>
+  </div>
+
+  <!-- GitHub Panel -->
+  <div class="panel" id="panel-github">
+    <div class="panel-card">
+      <h3>🐙 GitHub</h3>
+      <div id="ghStatus" style="font-size:.85rem;color:var(--text2);margin-bottom:12px">לא מחובר</div>
+      <button onclick="ghConnect()" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;cursor:pointer;margin-bottom:8px">🔌 התחבר עם הטוקן מההגדרות</button>
+      <div id="ghRepos" style="display:none"></div>
+      <div class="panel-result" id="ghResult" style="display:none"><pre id="ghResultText"></pre></div>
+    </div>
+  </div>
+
+  <!-- AI Developer Panel -->
+  <div class="panel" id="panel-dev">
+    <div class="panel-card">
+      <h3>🤖 AI Developer</h3>
+      <textarea id="devMission" placeholder="מה לבנות? למשל: אפליקציית todo עם dark mode" rows="2" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:.9rem;resize:vertical;outline:none"></textarea>
+      <button onclick="devBuild()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,var(--fire),var(--ember));color:#fff;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600">🚀 בנה</button>
+      <div class="panel-result" id="devResult" style="display:none"><pre id="devResultText"></pre></div>
+    </div>
+  </div>
 </div>
+
+<!-- Settings Modal -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
     <h3>⚙️ הגדרות</h3>
     <label>NVIDIA API Key</label>
     <input type="password" id="apiKeyInput" placeholder="nvapi-...">
-    <label>מודל</label>
+    <label>GitHub Token</label>
+    <input type="password" id="ghTokenInput" placeholder="ghp_...">
+    <label>מודל AI</label>
     <input type="text" id="modelInput" value="meta/llama-3.3-70b-instruct">
     <button class="save-btn" onclick="saveSettings()">שמור</button>
     <button class="close-btn" onclick="closeSettings()">סגור</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script>
 const GW='https://promptforge-gateway.rabotatony.workers.dev';
-let generatedCode='',isBuilding=false;
+const LOOP='https://promptforge-loops.rabotatony.workers.dev';
+const GH='https://promptforge-github.rabotatony.workers.dev';
+let generatedCode='',isBuilding=false,activePanel=null;
+
 function getKey(){return localStorage.getItem('pf_key')||''}
+function getGhToken(){return localStorage.getItem('pf_gh_token')||''}
 function getModel(){return localStorage.getItem('pf_model')||'meta/llama-3.3-70b-instruct'}
-function openSettings(){document.getElementById('apiKeyInput').value=getKey();
+
+function openSettings(){
+  document.getElementById('apiKeyInput').value=getKey();
+  document.getElementById('ghTokenInput').value=getGhToken();
   document.getElementById('modelInput').value=getModel();
-  document.getElementById('settingsModal').classList.add('show')}
+  document.getElementById('settingsModal').classList.add('show');
+}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('show')}
-function saveSettings(){const k=document.getElementById('apiKeyInput').value.trim();
+function saveSettings(){
+  const k=document.getElementById('apiKeyInput').value.trim();
+  const g=document.getElementById('ghTokenInput').value.trim();
   const m=document.getElementById('modelInput').value.trim();
-  if(k)localStorage.setItem('pf_key',k);if(m)localStorage.setItem('pf_model',m);
-  closeSettings();showToast('✅ נשמר')}
+  if(k)localStorage.setItem('pf_key',k);
+  if(g)localStorage.setItem('pf_gh_token',g);
+  if(m)localStorage.setItem('pf_model',m);
+  closeSettings();showToast('✅ נשמר');
+}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+  t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2500)}
 function setStep(n,state){document.getElementById('step'+n).className='step visible '+state}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('show')});
+  if(activePanel===name){activePanel=null;return}
+  activePanel=name;
+  document.getElementById('panel-'+name).classList.add('show');
+  if(name==='loops')updateLoopStatus();
+}
+
 document.getElementById('mission').addEventListener('keydown',function(e){
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();forge()}});
+
 async function forge(){
   const mission=document.getElementById('mission').value.trim();
   if(!mission){showToast('כתוב מה אתה רוצה לבנות');return}
@@ -240,7 +331,107 @@ function togglePreview(){var f=document.getElementById('previewFrame');
   if(f.style.display==='none'){f.style.display='block';
     document.getElementById('previewIframe').srcdoc=generatedCode}
   else f.style.display='none'}
-if(!getKey())setTimeout(function(){showToast('⚙️ לחץ על הגלגל והכנס API key')},1500);
+
+// Loops
+async function updateLoopStatus(){
+  try{
+    const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();
+    (d.state||[]).forEach(function(s){
+      var el={health_check:'loopHealth',self_healing:'loopHeal',learning:'loopLearn',optimization:'loopOpt'}[s.loop_name];
+      if(el){var e=document.getElementById(el);e.textContent=s.status;
+        e.style.color=s.status==='healthy'?'var(--success)':'var(--text2)'}
+      if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString();
+    });
+  }catch(e){}
+}
+async function runLoops(){
+  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
+  box.style.display='block';txt.textContent='⏳ מריץ...';
+  try{const r=await fetch(LOOP+'/api/loops/run',{method:'POST'});const d=await r.json();
+    txt.textContent=JSON.stringify(d,null,2);updateLoopStatus()}
+  catch(e){txt.textContent='❌ '+e.message}
+}
+async function getLoopLogs(){
+  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
+  box.style.display='block';txt.textContent='טוען...';
+  try{const r=await fetch(LOOP+'/api/loops/logs');const d=await r.json();
+    txt.textContent=JSON.stringify(d.logs||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
+}
+async function getMemories(){
+  var box=document.getElementById('loopResult');var txt=document.getElementById('loopResultText');
+  box.style.display='block';txt.textContent='טוען...';
+  try{const r=await fetch(LOOP+'/api/loops/memories');const d=await r.json();
+    txt.textContent=JSON.stringify(d.memories||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
+}
+
+// GitHub
+async function ghConnect(){
+  var token=getGhToken();
+  var status=document.getElementById('ghStatus');
+  var reposBox=document.getElementById('ghRepos');
+  if(!token){openSettings();showToast('הכנס GitHub Token בהגדרות');return}
+  status.textContent='מתחבר...';
+  try{
+    const r=await fetch('https://api.github.com/user',{
+      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if(!r.ok){status.textContent='❌ טוקן לא תקין: HTTP '+r.status;return}
+    const user=await r.json();
+    status.innerHTML='✅ מחובר כ-<b>'+user.login+'</b> · '+user.public_repos+' repos';
+    const rr=await fetch('https://api.github.com/user/repos?per_page=20&sort=updated',{
+      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if(rr.ok){
+      const repos=await rr.json();
+      reposBox.style.display='block';
+      reposBox.innerHTML=repos.map(function(repo){
+        return '<div style="padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:.85rem" '
+          +'onclick="ghLoadRepo(\''+repo.full_name+'\')">'
+          +'<b>'+repo.name+'</b>'+(repo.private?' 🔒':'')
+          +' <span style="color:var(--text2)">'+(repo.language||'')+'</span></div>';
+      }).join('');
+    }
+  }catch(e){status.textContent='❌ '+e.message}
+}
+function ghLoadRepo(fullName){
+  var box=document.getElementById('ghResult');var txt=document.getElementById('ghResultText');
+  box.style.display='block';txt.textContent='⏳ טוען '+fullName+'...';
+  var token=getGhToken();
+  fetch('https://api.github.com/repos/'+fullName+'/contents',{
+    headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}})
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if(Array.isArray(data)){
+        txt.textContent=fullName+':\n\n'+data.map(function(f){
+          return (f.type==='dir'?'📁':'📄')+' '+f.name}).join('\n');
+      }else{txt.textContent=JSON.stringify(data,null,2)}
+    }).catch(function(e){txt.textContent='❌ '+e.message});
+}
+
+// AI Developer
+async function devBuild(){
+  var mission=document.getElementById('devMission').value.trim();
+  var box=document.getElementById('devResult');var txt=document.getElementById('devResultText');
+  var key=getKey();
+  if(!mission){showToast('כתוב מה לבנות');return}
+  if(!key){openSettings();showToast('הכנס API key');return}
+  box.style.display='block';txt.textContent='⏳ בונה...';
+  try{
+    const gr=await fetch(GW+'/api/generate',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({goal:mission,apiKey:key,model:getModel()})});
+    const gd=await gr.json();
+    if(gd.error){txt.textContent='❌ '+gd.error}
+    else{
+      var out='✅ מוכן! '+(gd.total_tokens||0)+' tokens\n\n';
+      if(gd.validation)out+='Validation: '+(gd.validation.valid?'PASS':'FAIL')+'\n';
+      out+='\n'+(gd.code||'');
+      txt.textContent=out;
+    }
+  }catch(e){txt.textContent='❌ '+e.message}
+}
+
+// Init
+if(!getKey())setTimeout(function(){showToast('⚙️ לחץ על הגלגל והכנס מפתחות')},1500);
+updateLoopStatus();
 </script>
 </body>
 </html>
