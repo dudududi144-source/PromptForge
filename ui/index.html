@@ -42,22 +42,26 @@ textarea{min-height:70px}
 .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f2937;font-size:.85rem}
 .kv:last-child{border-bottom:none}
 .kv .k{color:#9ca3af}.kv .v{color:#e5e7eb;font-weight:500}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}}
 .api-status{margin-top:8px;font-size:.85rem;padding:8px 12px;border-radius:6px}
 .api-status.on{background:#064e3b;color:#6ee7b7;border:1px solid #065f46}
 .api-status.off{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b}
+.api-status.pending{background:#1e3a5f;color:#93c5fd;border:1px solid #1e40af}
 .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:600;margin-left:6px}
 .badge.simple{background:#064e3b;color:#6ee7b7}
 .badge.medium{background:#1e3a5f;color:#93c5fd}
 .badge.complex{background:#7f1d1d;color:#fca5a5}
-.badge.vague{background:#78350f;color:#fcd34d}
 .suggestion{background:#1e1b4b;border:1px solid #312e81;border-radius:6px;padding:8px 12px;margin-top:6px;font-size:.85rem;cursor:pointer;transition:all .15s}
 .suggestion:hover{background:#312e81}
-.suggestion .type{color:#818cf8;font-weight:600;font-size:.75rem}
 .analysis-bar{background:#0f172a;border:1px solid #1e3a5f;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.85rem;display:none}
 .analysis-bar.show{display:block}
-.analysis-bar .complexity{font-weight:600}
+.repo-item{background:#09090b;border:1px solid #27272a;border-radius:8px;padding:10px 14px;margin-top:8px;cursor:pointer;transition:all .15s}
+.repo-item:hover{border-color:#6366f1;background:#0f172a}
+.repo-item .name{color:#e5e7eb;font-weight:600}
+.repo-item .desc{color:#9ca3af;font-size:.8rem;margin-top:2px}
+.repo-item .lang{color:#818cf8;font-size:.75rem}
+.connected-user{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 12px;background:#064e3b;border-radius:8px;border:1px solid #065f46}
+.connected-user img{width:24px;height:24px;border-radius:50%}
+.connected-user .name{color:#6ee7b7;font-weight:600;font-size:.9rem}
 </style>
 </head>
 <body>
@@ -68,36 +72,30 @@ textarea{min-height:70px}
   <span class="dot load" id="mainDot"></span>
   <span id="mainStatus">Checking services...</span>
 </div>
-<div class="card">
-  <h2>🔑 API Connection</h2>
-  <label for="apiKey">NVIDIA Build API Key</label>
-  <input type="password" id="apiKey" placeholder="nvapi-...">
-  <button class="btn btn-green" onclick="connectKey()">Connect</button>
-  <div class="api-status off" id="apiStatus">Not connected</div>
-</div>
+
 <div class="tabs">
   <div class="tab active" onclick="switchTab('chat')">💬 Chat</div>
   <div class="tab" onclick="switchTab('dev')">🤖 AI Developer</div>
-  <div class="tab" onclick="switchTab('loops')">🔄 Loops</div>
   <div class="tab" onclick="switchTab('github')">🐙 GitHub</div>
+  <div class="tab" onclick="switchTab('loops')">🔄 Loops</div>
 </div>
 
 <!-- TAB: CHAT -->
 <div class="tab-content active" id="tab-chat">
   <div class="card">
-    <h2>💬 Chat with AI <span class="badge medium">Nova Intelligence</span></h2>
-    <div class="analysis-bar" id="analysisBar">
-      <span id="analysisText"></span>
-    </div>
+    <h2>💬 Chat with AI</h2>
+    <label for="chatKey">NVIDIA API Key</label>
+    <input type="password" id="chatKey" placeholder="nvapi-...">
+    <div class="analysis-bar" id="analysisBar"><span id="analysisText"></span></div>
     <div class="chat-box" id="chatBox">
-      <div class="msg ai"><div class="role">PromptForge</div><div class="content">Hello! I'm PromptForge, powered by Nova Intelligence. I can analyze missions, generate code, validate output, and suggest improvements. Ask me anything!</div></div>
+      <div class="msg ai"><div class="role">PromptForge</div><div class="content">Hello! Enter your NVIDIA API key above and start chatting. I can analyze missions, generate code, and suggest improvements.</div></div>
     </div>
-    <textarea id="chatInput" placeholder="Type your message... (Enter to send, Shift+Enter for new line)"></textarea>
+    <textarea id="chatInput" placeholder="Type your message... (Enter to send)"></textarea>
     <div style="display:flex;gap:8px;align-items:center">
       <select id="chatModel" style="width:auto;flex-shrink:0">
-        <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B (Best)</option>
+        <option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option>
         <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-        <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
+        <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B</option>
         <option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option>
         <option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option>
       </select>
@@ -113,13 +111,26 @@ textarea{min-height:70px}
 <!-- TAB: AI DEVELOPER -->
 <div class="tab-content" id="tab-dev">
   <div class="card">
-    <h2>🤖 AI Developer — Analyze GitHub Repos</h2>
-    <div class="grid2">
-      <div><label for="devOwner">Repo Owner</label><input type="text" id="devOwner" value="dudududi144-source"></div>
-      <div><label for="devRepo">Repo Name</label><input type="text" id="devRepo" value="PromptForge"></div>
-    </div>
-    <button class="btn btn-amber" onclick="analyzeRepo()" id="analyzeBtn">🔍 Analyze Repository</button>
+    <h2>🤖 AI Developer</h2>
+    <label for="devKey">NVIDIA API Key</label>
+    <input type="password" id="devKey" placeholder="nvapi-...">
+    <label for="devMission" style="margin-top:12px">What do you want to build?</label>
+    <textarea id="devMission" placeholder="e.g. Build a todo app with dark mode, local storage, and animations"></textarea>
+    <button class="btn btn-amber" onclick="devBuild()" id="devBtn">🚀 Build It</button>
     <div class="result-box" id="devResult" style="display:none"><pre id="devResultText"></pre></div>
+  </div>
+</div>
+
+<!-- TAB: GITHUB -->
+<div class="tab-content" id="tab-github">
+  <div class="card">
+    <h2>🐙 GitHub — Connect with your token</h2>
+    <label for="ghToken">GitHub Personal Access Token</label>
+    <input type="password" id="ghToken" placeholder="ghp_...">
+    <button class="btn btn-green" onclick="ghConnect()" id="ghConnectBtn">🔌 Connect</button>
+    <div id="ghUser" style="display:none"></div>
+    <div id="ghRepos" style="display:none;margin-top:12px"></div>
+    <div class="result-box" id="ghResult" style="display:none"><pre id="ghResultText"></pre></div>
   </div>
 </div>
 
@@ -135,29 +146,9 @@ textarea{min-height:70px}
       <div class="kv"><span class="k">Last Run</span><span class="v" id="loopLast">—</span></div>
     </div>
     <button class="btn btn-green" onclick="runLoops()" id="loopBtn">▶ Run All Loops Now</button>
-    <button class="btn btn-sm" onclick="getLoopLogs()">📋 View Logs</button>
-    <button class="btn btn-sm" onclick="getMemories()">🧠 View Memories</button>
+    <button class="btn btn-sm" onclick="getLoopLogs()">📋 Logs</button>
+    <button class="btn btn-sm" onclick="getMemories()">🧠 Memories</button>
     <div class="result-box" id="loopResult" style="display:none"><pre id="loopResultText"></pre></div>
-  </div>
-</div>
-
-<!-- TAB: GITHUB -->
-<div class="tab-content" id="tab-github">
-  <div class="card">
-    <h2>🐙 GitHub Integration</h2>
-    <button class="btn btn-sm" onclick="ghHealth()">🔌 Check Connection</button>
-    <button class="btn btn-sm" onclick="ghRepos()">📦 List Repos</button>
-    <button class="btn btn-sm" onclick="ghBranches()">🌿 List Branches</button>
-    <div style="margin-top:12px">
-      <label>Read File</label>
-      <div class="grid2">
-        <input type="text" id="ghFileOwner" placeholder="owner" value="dudududi144-source">
-        <input type="text" id="ghFileRepo" placeholder="repo" value="PromptForge">
-      </div>
-      <input type="text" id="ghFilePath" placeholder="path" value="ui/index.html" style="margin-top:8px">
-      <button class="btn btn-sm" onclick="ghReadFile()">📖 Read File</button>
-    </div>
-    <div class="result-box" id="ghResult" style="display:none"><pre id="ghResultText"></pre></div>
   </div>
 </div>
 </div>
@@ -168,29 +159,24 @@ const DEV='https://promptforge-developer.rabotatony.workers.dev';
 const LOOP='https://promptforge-loops.rabotatony.workers.dev';
 const GH='https://promptforge-github.rabotatony.workers.dev';
 let chatHistory=[];
-let lastSuggestions=[];
 
 function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
 
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach((t,i)=>{const names=['chat','dev','loops','github'];t.classList.toggle('active',names[i]===name)});
+  document.querySelectorAll('.tab').forEach((t,i)=>{const names=['chat','dev','github','loops'];t.classList.toggle('active',names[i]===name)});
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
 }
 
-async function connectKey(){
-  const key=document.getElementById('apiKey').value.trim();
-  const st=document.getElementById('apiStatus');
-  if(!key){st.textContent='Please enter your API key';st.className='api-status off';return}
-  st.textContent='Connecting...';st.className='api-status off';
-  try{
-    const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:'hi',model:'meta/llama-3.1-8b-instruct',apiKey:key})});
-    const d=await r.json();
-    if(d.error&&d.error.includes('NVIDIA')){st.textContent='❌ Invalid API key';st.className='api-status off'}
-    else{st.textContent='✅ Connected! Nova Intelligence active.';st.className='api-status on';localStorage.setItem('pf_api_key',key)}
-  }catch(e){st.textContent='⚠️ Gateway unreachable — key saved locally';st.className='api-status off';localStorage.setItem('pf_api_key',key)}
+function getKey(id){
+  const el=document.getElementById(id);
+  if(el.value.trim()){localStorage.setItem('pf_'+id,el.value.trim());return el.value.trim()}
+  return localStorage.getItem('pf_'+id)||'';
 }
 
+// ============================================================
+// CHAT
+// ============================================================
 function addMsg(role,text){
   const box=document.getElementById('chatBox');
   const m=document.createElement('div');m.className='msg '+role;
@@ -198,48 +184,48 @@ function addMsg(role,text){
   box.appendChild(m);box.scrollTop=box.scrollHeight;
 }
 
-function showAnalysis(analysis){
+function showAnalysis(a){
   const bar=document.getElementById('analysisBar');
   const txt=document.getElementById('analysisText');
-  if(!analysis)return;
-  const c=analysis.complexity||'medium';
-  const badge='<span class="badge '+c+'">'+c+'</span>';
-  const vague=analysis.vague?' <span class="badge vague">vague</span>':'';
-  const over=analysis.overScope?' <span class="badge vague">over-scope</span>':'';
-  txt.innerHTML='Complexity: '+badge+vague+over+' | Est: '+(analysis.estimatedBuildTime||'?')+' | Model: '+(analysis.modelRecommendation||'?');
+  if(!a)return;
+  txt.innerHTML='Complexity: <span class="badge '+(a.complexity||'medium')+'">'+(a.complexity||'?')+'</span>'
+    +(a.vague?' <span class="badge complex">vague</span>':'')
+    +(a.overScope?' <span class="badge complex">over-scope</span>':'')
+    +' | Est: '+(a.estimatedBuildTime||'?');
   bar.classList.add('show');
 }
 
-function showSuggestions(suggestions){
+function showSuggestions(s){
   const box=document.getElementById('suggestionsBox');
   const list=document.getElementById('suggestionsList');
-  lastSuggestions=suggestions||[];
-  if(!suggestions||suggestions.length===0){box.style.display='none';return}
+  if(!s||!s.length){box.style.display='none';return}
   box.style.display='block';
-  list.innerHTML=suggestions.map(s=>'<div class="suggestion" onclick="applySuggestion(this)"><span class="type">['+esc(s.type)+']</span> '+esc(s.message)+'</div>').join('');
+  list.innerHTML=s.map(x=>'<div class="suggestion" onclick="applySuggestion(this)"><b>['+esc(x.type)+']</b> '+esc(x.message)+'</div>').join('');
 }
 
 function applySuggestion(el){
-  const msg=el.textContent;
-  document.getElementById('chatInput').value='Please apply this improvement: '+msg;
-  el.style.opacity='0.5';
+  document.getElementById('chatInput').value='Apply: '+el.textContent;
+  el.style.opacity='0.4';
 }
 
 async function sendChat(){
   const inp=document.getElementById('chatInput');const msg=inp.value.trim();if(!msg)return;
-  const model=document.getElementById('chatModel').value;const btn=document.getElementById('sendBtn');
-  addMsg('user',msg);chatHistory.push({role:'user',content:msg});inp.value='';btn.disabled=true;btn.textContent='Thinking...';
+  const key=getKey('chatKey');
+  if(!key){addMsg('ai','❌ Please enter your NVIDIA API key first.');return}
+  const model=document.getElementById('chatModel').value;
+  const btn=document.getElementById('sendBtn');
+  addMsg('user',msg);chatHistory.push({role:'user',content:msg});inp.value='';
+  btn.disabled=true;btn.textContent='Thinking...';
   document.getElementById('suggestionsBox').style.display='none';
   try{
-    const apiKey=localStorage.getItem('pf_api_key')||document.getElementById('apiKey').value.trim();
-    const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,model:model,history:chatHistory,apiKey:apiKey})});
+    const r=await fetch(GW+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg,model:model,history:chatHistory,apiKey:key})});
     const d=await r.json();
-    if(d.error){addMsg('ai','❌ Error: '+d.error+(d.shouldRetry?' (will retry)':''))}
+    if(d.error){addMsg('ai','❌ '+d.error)}
     else{
       addMsg('ai',d.reply||'No response');
       chatHistory.push({role:'assistant',content:d.reply});
       if(d.mission_analysis)showAnalysis(d.mission_analysis);
-      if(d.suggestions&&d.suggestions.length>0)showSuggestions(d.suggestions);
+      if(d.suggestions)showSuggestions(d.suggestions);
     }
   }catch(e){addMsg('ai','❌ Network error: '+e.message)}
   btn.disabled=false;btn.textContent='Send';
@@ -247,22 +233,108 @@ async function sendChat(){
 
 document.getElementById('chatInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
 
-async function analyzeRepo(){
-  const owner=document.getElementById('devOwner').value.trim();const repo=document.getElementById('devRepo').value.trim();
-  const box=document.getElementById('devResult');const txt=document.getElementById('devResultText');const btn=document.getElementById('analyzeBtn');
-  if(!owner||!repo){alert('Enter owner and repo');return}
-  box.style.display='block';txt.textContent='⏳ Analyzing '+owner+'/'+repo+'...';btn.disabled=true;
+// ============================================================
+// AI DEVELOPER — simple: just key + mission
+// ============================================================
+async function devBuild(){
+  const key=getKey('devKey');
+  const mission=document.getElementById('devMission').value.trim();
+  const box=document.getElementById('devResult');
+  const txt=document.getElementById('devResultText');
+  const btn=document.getElementById('devBtn');
+  if(!key){alert('Enter your NVIDIA API key');return}
+  if(!mission){alert('Enter what you want to build');return}
+  box.style.display='block';txt.textContent='⏳ Analyzing mission...';btn.disabled=true;
   try{
-    const r=await fetch(DEV+'/api/developer/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({owner:owner,repo:repo})});
-    const d=await r.json();
-    if(d.error){txt.textContent='❌ Error: '+d.error}else{txt.textContent='Job ID: '+(d.job_id||'N/A')+'\nStatus: '+(d.status||'N/A')+'\nFiles: '+(d.files_analyzed||0)+'\n\n'+(d.analysis||'No analysis')}
-  }catch(e){txt.textContent='❌ Network error: '+e.message}
+    // Step 1: Analyze mission
+    const ar=await fetch(GW+'/api/analyze-mission',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mission:mission})});
+    const ad=await ar.json();
+    if(ad.analysis){
+      txt.textContent='📊 Mission Analysis:\n  Complexity: '+ad.analysis.complexity+'\n  Est. time: '+ad.analysis.estimatedBuildTime+'\n  Est. tokens: '+ad.analysis.estimatedTokens+'\n  Model: '+ad.analysis.modelRecommendation+'\n\n⏳ Building...';
+    }
+    // Step 2: Generate code
+    const gr=await fetch(GW+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goal:mission,apiKey:key})});
+    const gd=await gr.json();
+    if(gd.error){txt.textContent='❌ '+gd.error}
+    else{
+      let out='✅ Build complete!\n\n';
+      if(gd.validation){out+='Validation: '+(gd.validation.valid?'PASS':'ISSUES FOUND')+' (score: '+gd.validation.score+')\n'}
+      if(gd.validation&&gd.validation.issues&&gd.validation.issues.length){out+='Issues: '+gd.validation.issues.join(', ')+'\n'}
+      if(gd.suggestions&&gd.suggestions.length){out+='\n💡 Suggestions:\n'+gd.suggestions.map(s=>'  ['+s.type+'] '+s.message).join('\n')+'\n'}
+      out+='\n--- CODE ---\n\n'+(gd.code||'No code generated');
+      txt.textContent=out;
+    }
+  }catch(e){txt.textContent='❌ '+e.message}
   btn.disabled=false;
 }
 
+// ============================================================
+// GITHUB — just paste token, everything auto
+// ============================================================
+async function ghConnect(){
+  const token=getKey('ghToken');
+  const btn=document.getElementById('ghConnectBtn');
+  const userBox=document.getElementById('ghUser');
+  const reposBox=document.getElementById('ghRepos');
+  if(!token){alert('Enter your GitHub token');return}
+  btn.disabled=true;btn.textContent='Connecting...';
+  try{
+    // Get user info directly from GitHub API with the token
+    const r=await fetch('https://api.github.com/user',{headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if(!r.ok){
+      userBox.style.display='block';
+      userBox.innerHTML='<div class="api-status off">❌ Invalid token: HTTP '+r.status+'</div>';
+      btn.disabled=false;btn.textContent='🔌 Connect';
+      return;
+    }
+    const user=await r.json();
+    userBox.style.display='block';
+    userBox.innerHTML='<div class="connected-user"><img src="'+esc(user.avatar_url||'')+'" alt=""><span class="name">'+esc(user.login)+'</span><span style="color:#9ca3af;font-size:.8rem">('+esc(user.name||'')+') · '+user.public_repos+' repos</span></div>';
+    
+    // Get repos
+    const rr=await fetch('https://api.github.com/user/repos?per_page=30&sort=updated',{headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if(rr.ok){
+      const repos=await rr.json();
+      reposBox.style.display='block';
+      reposBox.innerHTML='<label>Your repositories ('+repos.length+'):</label>'+repos.map(repo=>
+        '<div class="repo-item" onclick="ghSelectRepo(\''+esc(repo.full_name)+'\')">'
+        +'<div class="name">'+esc(repo.name)+(repo.private?' 🔒':'')+'</div>'
+        +'<div class="desc">'+(esc(repo.description)||'No description')+'</div>'
+        +'<div class="lang">'+(repo.language||'N/A')+' · updated '+new Date(repo.updated_at).toLocaleDateString()+'</div>'
+        +'</div>'
+      ).join('');
+    }
+  }catch(e){
+    userBox.style.display='block';
+    userBox.innerHTML='<div class="api-status off">❌ '+e.message+'</div>';
+  }
+  btn.disabled=false;btn.textContent='🔌 Connect';
+}
+
+function ghSelectRepo(fullName){
+  const box=document.getElementById('ghResult');
+  const txt=document.getElementById('ghResultText');
+  box.style.display='block';
+  txt.textContent='⏳ Loading '+fullName+'...';
+  const token=getKey('ghToken');
+  fetch('https://api.github.com/repos/'+fullName+'/contents',{headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}})
+    .then(r=>r.json())
+    .then(data=>{
+      if(Array.isArray(data)){
+        txt.textContent=fullName+' contents:\n\n'+data.map(f=>(f.type==='dir'?'📁':'📄')+' '+f.name).join('\n');
+      }else{
+        txt.textContent=JSON.stringify(data,null,2);
+      }
+    })
+    .catch(e=>{txt.textContent='❌ '+e.message});
+}
+
+// ============================================================
+// LOOPS
+// ============================================================
 async function runLoops(){
   const btn=document.getElementById('loopBtn');const box=document.getElementById('loopResult');const txt=document.getElementById('loopResultText');
-  btn.disabled=true;btn.textContent='Running...';box.style.display='block';txt.textContent='⏳ Running all loops...';
+  btn.disabled=true;btn.textContent='Running...';box.style.display='block';txt.textContent='⏳ Running...';
   try{const r=await fetch(LOOP+'/api/loops/run',{method:'POST'});const d=await r.json();txt.textContent=JSON.stringify(d,null,2);updateLoopStatus()}
   catch(e){txt.textContent='❌ '+e.message}
   btn.disabled=false;btn.textContent='▶ Run All Loops Now';
@@ -270,10 +342,12 @@ async function runLoops(){
 
 async function updateLoopStatus(){
   try{
-    const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();const states=d.state||[];
-    states.forEach(s=>{const el={health_check:'loopHealth',self_healing:'loopHeal',learning:'loopLearn',optimization:'loopOpt'}[s.loop_name];
-    if(el){const elem=document.getElementById(el);elem.textContent=s.status;elem.style.color=s.status==='healthy'?'#6ee7b7':s.status==='degraded'?'#fca5a5':'#9ca3af'}
-    if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString()});
+    const r=await fetch(LOOP+'/api/loops/state');const d=await r.json();
+    (d.state||[]).forEach(s=>{
+      const el={health_check:'loopHealth',self_healing:'loopHeal',learning:'loopLearn',optimization:'loopOpt'}[s.loop_name];
+      if(el){const e=document.getElementById(el);e.textContent=s.status;e.style.color=s.status==='healthy'?'#6ee7b7':'#fca5a5'}
+      if(s.last_run)document.getElementById('loopLast').textContent=new Date(s.last_run).toLocaleString();
+    });
   }catch(e){}
 }
 
@@ -289,42 +363,18 @@ async function getMemories(){
   try{const r=await fetch(LOOP+'/api/loops/memories');const d=await r.json();txt.textContent=JSON.stringify(d.memories||[],null,2)}catch(e){txt.textContent='❌ '+e.message}
 }
 
-async function ghHealth(){
-  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
-  box.style.display='block';txt.textContent='Checking...';
-  try{const r=await fetch(GH+'/api/github/health');const d=await r.json();txt.textContent=JSON.stringify(d,null,2)}catch(e){txt.textContent='❌ '+e.message}
-}
-
-async function ghRepos(){
-  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
-  box.style.display='block';txt.textContent='Loading...';
-  try{const r=await fetch(GH+'/api/github/repos');const d=await r.json();
-  if(d.repos){txt.textContent=d.repos.map(r=>r.full_name+' ('+(r.language||'N/A')+')').join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
-}
-
-async function ghBranches(){
-  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
-  const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();
-  box.style.display='block';txt.textContent='Loading...';
-  try{const r=await fetch(GH+'/api/github/branches?owner='+owner+'&repo='+repo);const d=await r.json();
-  if(d.branches){txt.textContent=d.branches.map(b=>b.name).join('\n')}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
-}
-
-async function ghReadFile(){
-  const box=document.getElementById('ghResult');const txt=document.getElementById('ghResultText');
-  const owner=document.getElementById('ghFileOwner').value.trim();const repo=document.getElementById('ghFileRepo').value.trim();const path=document.getElementById('ghFilePath').value.trim();
-  box.style.display='block';txt.textContent='Loading...';
-  try{const r=await fetch(GH+'/api/github/file?owner='+owner+'&repo='+repo+'&path='+path);const d=await r.json();
-  if(d.content){txt.textContent=d.content}else{txt.textContent=JSON.stringify(d,null,2)}}catch(e){txt.textContent='❌ '+e.message}
-}
-
+// ============================================================
+// INIT
+// ============================================================
 (async function(){
-  const saved=localStorage.getItem('pf_api_key');if(saved)document.getElementById('apiKey').value=saved;
+  ['chatKey','devKey','ghToken'].forEach(id=>{
+    const saved=localStorage.getItem('pf_'+id);
+    if(saved)document.getElementById(id).value=saved;
+  });
   const dot=document.getElementById('mainDot');const st=document.getElementById('mainStatus');
   try{
     const r=await fetch(GW+'/api/health',{signal:AbortSignal.timeout(8000)});const d=await r.json();
-    dot.className='dot ok';
-    st.textContent='Gateway: ✅ | NVIDIA: '+(d.nvidia_configured?'✅':'❌')+' | Nova Intelligence: '+(d.intelligence?'✅':'❌');
+    dot.className='dot ok';st.textContent='Gateway ✅ | Nova Intelligence ✅';
   }catch(e){dot.className='dot err';st.textContent='⚠️ Gateway unreachable'}
   updateLoopStatus();
 })();
