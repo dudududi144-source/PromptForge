@@ -196,7 +196,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
-  <div class="footer">PromptForge — מ-task לקוד עובד</div>
+  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות</div>
 </div>
 <div class="modal-backdrop" id="diffModal">
   <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
@@ -214,6 +214,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div style="display:flex;justify-content:space-between"><span>בנה (חלופי)</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+Enter</kbd></div>
       <div style="display:flex;justify-content:space-between"><span>נקה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">🗑️ button</kbd></div>
       <div style="display:flex;justify-content:space-between"><span>עזרה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">❓ button</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>שמור מועדף</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+S</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>הורד קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+D</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>העתק קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+K</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>סגור הכל</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Escape</kbd></div>
     </div>
     <button class="modal-close" onclick="closeShortcuts()">סגור</button>
   </div>
@@ -296,6 +300,8 @@ function switchTab(name,el){
 
 function updateStats(){
   document.getElementById("statBuilds").textContent=buildCount;
+  var footerEl=document.getElementById("footerBuilds");
+  if(footerEl)footerEl.textContent=buildCount;
   document.getElementById("statIterates").textContent=iterateCount;
   document.getElementById("statTokens").textContent=totalTokens;
 }
@@ -350,6 +356,15 @@ if(lastTask&&!document.getElementById("task").value){
 document.getElementById("task").addEventListener("keydown",function(e){
   if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();forge()}
   if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();forge()}
+});
+document.addEventListener("keydown",function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveFavorite()}
+  if((e.ctrlKey||e.metaKey)&&e.key==="d"){e.preventDefault();downloadCode()}
+  if((e.ctrlKey||e.metaKey)&&e.key==="k"){e.preventDefault();copyCode()}
+  if(e.key==="Escape"){
+    closeSettings();closeHelp();closeShortcuts();closeDiff();
+    document.getElementById("iterateBox").classList.remove("show");
+  }
 })
 
 async function forge(){
