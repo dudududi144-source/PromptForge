@@ -97,7 +97,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 </head>
 <body>
 <div class="container">
-  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
+  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showShortcuts()" title="קיצורי מקלדת">⌨️</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
@@ -117,6 +117,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <button class="tpl-btn" onclick="useTemplate('form')">📝 טופס</button>
   <button class="tpl-btn" onclick="useTemplate('game')">🎮 משחק זיכרון</button>
   <button class="tpl-btn" onclick="useTemplate('landing')">🚀 דף נחיתה</button>
+  <button class="tpl-btn" onclick="useTemplate('weather')">🌤️ מזג אוויר</button>
+  <button class="tpl-btn" onclick="useTemplate('music')">🎵 נגן</button>
+  <button class="tpl-btn" onclick="useTemplate('chat')">💬 צ'אט</button>
+  <button class="tpl-btn" onclick="useTemplate('portfolio')">👤 Portfolio</button>
 </div>
 <div id="quickActions" style="margin-top:12px;display:none">
   <div style="font-size:11px;color:var(--text3);margin-bottom:6px">פעולות מהירות:</div>
@@ -140,7 +144,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="tabs">
     <div class="tab active" onclick="switchTab('history',this)">📋 היסטוריה</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
-    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div>
+    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div><div class="tab" onclick="switchTab('status',this)">🔌 סטטוס</div>
   </div>
   <div class="tab-content active" id="tab-history"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
@@ -150,10 +154,45 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div class="stat"><div class="val" id="statTokens">0</div><div class="lbl">Tokens</div></div>
     </div>
   </div>
-  <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
+  <div class="tab-content" id="tab-status">
+  <div class="stats-grid" style="grid-template-columns:1fr">
+    <div class="stat" style="text-align:right">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--text2)">Worker</span>
+        <span id="statusWorker" style="font-size:12px;color:var(--text3)">בודק...</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--text2)">Pages</span>
+        <span style="font-size:12px;color:var(--success)">✅ מקוון</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--text2)">מודל</span>
+        <span id="statusModel" style="font-size:12px;color:var(--text2)">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--text2)">גרסה</span>
+        <span style="font-size:12px;color:var(--text2)">1.0</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
+</div>
+<div class="modal-backdrop" id="shortcutsModal">
+  <div class="modal">
+    <h2>⌨️ קיצורי מקלדת</h2>
+    <div style="font-size:13px;color:var(--text2);line-height:2">
+      <div style="display:flex;justify-content:space-between"><span>בנה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Enter</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>שורה חדשה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Shift+Enter</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>בנה (חלופי)</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+Enter</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>נקה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">🗑️ button</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>עזרה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">❓ button</kbd></div>
+    </div>
+    <button class="modal-close" onclick="closeShortcuts()">סגור</button>
+  </div>
 </div>
 <div class="modal-backdrop" id="helpModal">
   <div class="modal">
@@ -369,7 +408,11 @@ var templates={
   dashboard:"בנה dashboard עם 4 כרטיסי סטטיסטיקה, גרף פשוט ב-CSS, וטבלה עם נתונים. עיצוב מודרני.",
   form:"בנה טופס הרשמה עם ולידציה, הודעות שגיאה, ואנימציות. כולל שדות: שם, אימייל, סיסמה.",
   game:"בנה משחק זיכרון עם 16 קלפים, ספירת מהלכים, וטיימר. עיצוב צבעוני ומהנה.",
-  landing:"בנה דף נחיתה עם hero section, 3 פיצ'רים, CTA button, ו-footer. עיצוב מינימליסטי."
+  landing:"בנה דף נחיתה עם hero section, 3 פיצ'רים, CTA button, ו-footer. עיצוב מינימליסטי.",
+  weather:"בנה אפליקציית מזג אוויר עם תצוגה יפה, אנימציות, ומידע על טמפרטורה, לחות ורוח.",
+  music:"בנה נגן מוזיקה פשוט עם play/pause, progress bar, ו-volume control. עיצוב מודרני.",
+  chat:"בנה ממשק צ'אט עם בועות הודעות, input field, וכפתור שליחה. עיצוב כמו WhatsApp.",
+  portfolio:"בנה דף portfolio עם hero, about, projects grid, ו-contact form. עיצוב מינימליסטי."
 };
 function useTemplate(name){
   if(templates[name]){
@@ -383,6 +426,8 @@ function toggleTheme(){
   document.getElementById("themeBtn").textContent=isLight?"☀️":"🌙";
   localStorage.setItem("pf_theme",isLight?"light":"dark");
 }
+function showShortcuts(){document.getElementById("shortcutsModal").classList.add("show")}
+function closeShortcuts(){document.getElementById("shortcutsModal").classList.remove("show")}
 function showHelp(){document.getElementById("helpModal").classList.add("show")}
 function closeHelp(){document.getElementById("helpModal").classList.remove("show")}
 function changeFontSize(size){
@@ -449,6 +494,16 @@ function quickAction(type){
     document.getElementById("iterateBox").classList.add("show");
     toast("📝 הוראה מוכנה - לחץ שפר");
   }
+}
+async function checkStatus(){
+  var el=document.getElementById("statusWorker");
+  try{
+    var r=await fetch(GW+"/api/health",{signal:AbortSignal.timeout(5000)});
+    var d=await r.json();
+    if(d.status==="healthy"){el.textContent="✅ מקוון";el.style.color="var(--success)"}
+    else{el.textContent="⚠️ בעיה";el.style.color="var(--warn)"}
+  }catch(e){el.textContent="❌ לא מקוון";el.style.color="var(--err)"}
+  document.getElementById("statusModel").textContent=getModel().split("/")[1]||"—";
 }
 function renderNotes(){
   var list=document.getElementById("notesList");
