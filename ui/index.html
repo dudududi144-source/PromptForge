@@ -129,6 +129,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <button class="tpl-btn" onclick="quickAction('optimize')">⚡ בטל את הקוד</button>
     <button class="tpl-btn" onclick="quickAction('test')">🧪 הוסף בדיקות</button>
     <button class="tpl-btn" onclick="quickAction('docs')">📚 הוסף תיעוד</button>
+    <button class="tpl-btn" onclick="quickAction('responsive')">📱 התאם למובייל</button>
+    <button class="tpl-btn" onclick="quickAction('accessibility')">♿ הוסף נגישות</button>
+    <button class="tpl-btn" onclick="quickAction('dark')">🌙 הוסף dark mode</button>
+    <button class="tpl-btn" onclick="quickAction('animate')">✨ הוסף אנימציות</button>
   </div>
 </div>
 <div class="progress" id="progress">
@@ -136,7 +140,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button><button onclick="showDiff()">📊 Diff</button></div></div>
     <div class="code-display"><pre id="codeOut"></pre></div>
     <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><div style="display:flex;gap:8px"><button onclick="openPreviewNewTab()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px">🔗 פתח בטאב</button><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
@@ -173,6 +177,19 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
         <span style="font-size:12px;color:var(--text2)">גרסה</span>
         <span style="font-size:12px;color:var(--text2)">1.0</span>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:12px;color:var(--text2)">בניות</span>
+        <span id="statusBuilds" style="font-size:12px;color:var(--text2)">0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:12px;color:var(--text2)">שיפורים</span>
+        <span id="statusIterates" style="font-size:12px;color:var(--text2)">0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:12px;color:var(--text2)">Tokens</span>
+        <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
+        <span style="font-size:12px;color:var(--text2)">1.0</span>
+      </div>
     </div>
   </div>
 </div>
@@ -180,6 +197,13 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
+</div>
+<div class="modal-backdrop" id="diffModal">
+  <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
+    <h2>📊 Diff View</h2>
+    <div id="diffContent" style="font-family:monospace;font-size:12px;line-height:1.6;direction:ltr;text-align:left"></div>
+    <button class="modal-close" onclick="closeDiff()">סגור</button>
+  </div>
 </div>
 <div class="modal-backdrop" id="shortcutsModal">
   <div class="modal">
@@ -454,6 +478,31 @@ function toggleTheme(){
   document.getElementById("themeBtn").textContent=isLight?"☀️":"🌙";
   localStorage.setItem("pf_theme",isLight?"light":"dark");
 }
+function showDiff(){
+  if(!prevCode){toast("אין קוד קודם להשוואה");return}
+  var oldLines=prevCode.split("\n");
+  var newLines=code.split("\n");
+  var html="";
+  var maxLen=Math.max(oldLines.length,newLines.length);
+  for(var i=0;i<maxLen;i++){
+    var oldLine=i<oldLines.length?oldLines[i]:"";
+    var newLine=i<newLines.length?newLines[i]:"";
+    if(oldLine===newLine){
+      html+='<div style="color:var(--text3);padding:1px 8px">'+escapeHtml(oldLine)+'</div>';
+    }else{
+      if(oldLine)html+='<div style="background:rgba(239,68,68,0.1);color:var(--err);padding:1px 8px">- '+escapeHtml(oldLine)+'</div>';
+      if(newLine)html+='<div style="background:rgba(34,197,94,0.1);color:var(--success);padding:1px 8px">+ '+escapeHtml(newLine)+'</div>';
+    }
+  }
+  document.getElementById("diffContent").innerHTML=html||'<div style="color:var(--text3)">אין שינויים</div>';
+  document.getElementById("diffModal").classList.add("show");
+}
+function closeDiff(){document.getElementById("diffModal").classList.remove("show")}
+function escapeHtml(text){
+  var div=document.createElement("div");
+  div.textContent=text;
+  return div.innerHTML;
+}
 function copyAsMarkdown(){
   var lang=code.indexOf("<html")!==-1?"html":code.indexOf("def ")!==-1?"python":"javascript";
   var md="```"+lang+"\n"+code+"\n```";
@@ -536,7 +585,11 @@ function quickAction(type){
     explain:"תסביר את הקוד הנוכחי ותוסיף הערות",
     optimize:"תבצע אופטימיזציה לקוד הנוכחי",
     test:"תוסיף בדיקות unit tests לקוד הנוכחי",
-    docs:"תוסיף תיעוד מפורט לקוד הנוכחי"
+    docs:"תוסיף תיעוד מפורט לקוד הנוכחי",
+    responsive:"תתאים את הקוד למובייל וטאבלט עם responsive design",
+    accessibility:"תוסיף תכונות נגישות: aria labels, keyboard navigation, contrast",
+    dark:"תוסיף dark mode עם toggle",
+    animate:"תוסיף אנימציות CSS חלקות"
   };
   if(actions[type]&&code){
     document.getElementById("iterateInput").value=actions[type];
@@ -553,6 +606,9 @@ async function checkStatus(){
     else{el.textContent="⚠️ בעיה";el.style.color="var(--warn)"}
   }catch(e){el.textContent="❌ לא מקוון";el.style.color="var(--err)"}
   document.getElementById("statusModel").textContent=getModel().split("/")[1]||"—";
+  document.getElementById("statusBuilds").textContent=buildCount;
+  document.getElementById("statusIterates").textContent=iterateCount;
+  document.getElementById("statusTokens").textContent=totalTokens;
 }
 function renderNotes(){
   var list=document.getElementById("notesList");
