@@ -3,1202 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="PromptForge - Task to working code in seconds">
-<meta name="theme-color" content="#0c0c0e">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <title>PromptForge</title>
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0c0c0e;--surface:#141416;--surface2:#1a1a1e;--border:#232326;--border2:#3a3a42;--text:#f0eff4;--text2:#8b8a93;--text3:#5c5b63;--accent:#6366f1;--accent2:#818cf8;--success:#22c55e;--warn:#fbbf24;--err:#ef4444;--radius:12px;--radius-sm:8px}
-body.light{--bg:#f8f9fa;--surface:#ffffff;--surface2:#f1f3f5;--border:#e9ecef;--border2:#dee2e6;--text:#212529;--text2:#6c757d;--text3:#adb5bd}
-body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-.container{max-width:680px;margin:0 auto;padding:60px 24px 40px}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0a0f;color:#e8e6f0;min-height:100vh}
+.container{max-width:700px;margin:0 auto;padding:60px 20px}
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
-.logo-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.02em}
-.logo-right{margin-right:auto;display:flex;gap:6px}
-.logo-right button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:6px;border-radius:6px;transition:all .2s}
-.logo-right button:hover{color:var(--text);background:var(--surface)}
-.hero{margin-bottom:36px}
-.hero h1{font-size:28px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:8px}
-.hero p{font-size:14px;color:var(--text2);line-height:1.6}
-.forge-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .3s ease}
-.forge-box:focus-within{border-color:var(--border2);box-shadow:0 0 0 4px rgba(99,102,241,0.08)}
-.forge-box textarea{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:15px;line-height:1.6;padding:18px;resize:none;min-height:100px}
-.forge-box textarea::placeholder{color:var(--text3)}
-.forge-actions{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border)}
-.forge-hint{font-size:11px;color:var(--text3)}
-.forge-btn{display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:9px 22px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.forge-btn:hover{background:var(--accent2);transform:translateY(-1px)}
-.forge-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-size:15px;font-weight:600}
+.settings-btn{margin-right:auto;background:none;border:none;color:#5c5b63;cursor:pointer;font-size:18px;padding:6px}
+.settings-btn:hover{color:#e8e6f0}
+h1{font-size:28px;font-weight:700;margin-bottom:8px}
+.subtitle{font-size:14px;color:#8b8a93;margin-bottom:32px}
+.input-box{background:#141416;border:1px solid #232326;border-radius:12px;overflow:hidden}
+.input-box:focus-within{border-color:#4a4a52}
+.input-box textarea{width:100%;background:transparent;border:none;outline:none;color:#e8e6f0;font-family:inherit;font-size:15px;padding:16px;resize:none;min-height:100px;line-height:1.6}
+.input-box textarea::placeholder{color:#5c5b63}
+.input-actions{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid #232326}
+.hint{font-size:11px;color:#5c5b63}
+.build-btn{background:#6366f1;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.build-btn:hover{background:#818cf8}
+.build-btn:disabled{opacity:.5;cursor:not-allowed}
 .progress{margin-top:24px;display:none}
 .progress.show{display:block}
 .progress-bars{display:flex;gap:2px;margin-bottom:10px}
-.pbar{flex:1;height:3px;background:var(--border);border-radius:2px;transition:all .5s}
-.pbar.done{background:var(--success)}
-.pbar.active{background:var(--accent)}
-.progress-label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px}
-.spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.pbar{flex:1;height:3px;background:#232326;border-radius:2px}
+.pbar.done{background:#22c55e}
+.pbar.active{background:#6366f1}
+.progress-text{font-size:12px;color:#8b8a93}
 .result{margin-top:24px;display:none}
 .result.show{display:block}
 .result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.result-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.result-title{font-size:13px;font-weight:600}
 .result-actions{display:flex;gap:4px}
-.result-actions button{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .2s}
-.result-actions button:hover{color:var(--text);border-color:var(--border2)}
-.code-display{background:#0a0a0c;border:1px solid var(--border);border-radius:var(--radius);padding:16px;max-height:420px;overflow:auto;direction:ltr;text-align:left}
-.code-display pre{font-family:"JetBrains Mono","Fira Code",monospace;font-size:12px;line-height:1.7;color:#e2e8f0;white-space:pre-wrap;word-break:break-word}
-.preview{margin-top:10px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:none}
+.result-actions button{background:#141416;border:1px solid #232326;color:#8b8a93;padding:5px 10px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer}
+.result-actions button:hover{color:#e8e6f0;border-color:#4a4a52}
+.code-box{background:#0a0a0c;border:1px solid #232326;border-radius:12px;padding:16px;max-height:400px;overflow:auto;direction:ltr;text-align:left}
+.code-box pre{font-family:"JetBrains Mono","Fira Code",monospace;font-size:12px;line-height:1.7;color:#e2e8f0;white-space:pre-wrap;word-break:break-word}
+.preview{margin-top:10px;border:1px solid #232326;border-radius:12px;overflow:hidden;display:none}
 .preview.show{display:block}
-.preview-header{display:flex;align-items:center;justify-content:space-between;padding:6px 12px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;color:var(--text2)}
 .preview iframe{width:100%;height:350px;border:none;background:#fff}
-.iterate{margin-top:12px;display:none}
-.iterate.show{display:flex;gap:6px}
-.iterate input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
-.iterate input:focus{border-color:var(--border2)}
-.iterate button{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
-.iterate button:hover{border-color:var(--border2)}
-.tabs{margin-top:40px;display:flex;gap:2px;border-bottom:1px solid var(--border)}
-.tab{padding:10px 16px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-.tab:hover{color:var(--text2)}
-.tab.active{color:var(--text);border-bottom-color:var(--accent)}
-.tab-content{display:none;padding:16px 0}
-.tab-content.active{display:block}
-.h-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;cursor:pointer;transition:all .2s}
-.h-item:hover{border-color:var(--border2)}
-.h-item .h-title{font-size:13px;font-weight:500;margin-bottom:4px}
-.h-item .h-meta{font-size:11px;color:var(--text3)}
-.empty-state{font-size:13px;color:var(--text3);text-align:center;padding:24px}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
-.stat .val{font-size:20px;font-weight:700;color:var(--accent)}
-.stat .lbl{font-size:11px;color:var(--text3);margin-top:4px}
-.plan-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
-.plan-item .p-text{font-size:12px;color:var(--text2);line-height:1.5;white-space:pre-wrap}
-.plan-item .p-meta{font-size:11px;color:var(--text3);margin-top:6px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
-.modal-backdrop.show{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:400px}
-.modal h2{font-size:16px;font-weight:700;margin-bottom:20px}
-.modal label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;margin-top:14px}
-.modal input,.modal select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
-.modal input:focus,.modal select:focus{border-color:var(--border2)}
-.modal-save{width:100%;margin-top:20px;background:var(--accent);color:#fff;border:none;padding:11px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.modal-close{width:100%;margin-top:6px;background:none;border:1px solid var(--border);color:var(--text2);padding:11px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;cursor:pointer}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);padding:10px 20px;border-radius:var(--radius-sm);font-size:12px;color:var(--text);z-index:200;transition:transform .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.iterate-box{margin-top:12px;display:none;gap:6px}
+.iterate-box.show{display:flex}
+.iterate-box input{flex:1;background:#141416;border:1px solid #232326;border-radius:8px;padding:8px 12px;color:#e8e6f0;font-family:inherit;font-size:13px;outline:none}
+.iterate-box button{background:#141416;border:1px solid #232326;color:#e8e6f0;padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
+.templates{margin-top:20px;display:flex;gap:6px;flex-wrap:wrap}
+.tpl-btn{background:#141416;border:1px solid #232326;color:#8b8a93;padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer}
+.tpl-btn:hover{color:#e8e6f0;border-color:#4a4a52}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#141416;border:1px solid #232326;border-radius:16px;padding:24px;width:90%;max-width:400px}
+.modal h2{font-size:16px;margin-bottom:16px}
+.modal label{display:block;font-size:12px;color:#8b8a93;margin-bottom:4px;margin-top:12px}
+.modal input,.modal select{width:100%;background:#0a0a0f;border:1px solid #232326;border-radius:8px;padding:8px 12px;color:#e8e6f0;font-family:inherit;font-size:13px;outline:none}
+.modal-save{width:100%;margin-top:16px;background:#6366f1;color:#fff;border:none;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.modal-close{width:100%;margin-top:6px;background:none;border:1px solid #232326;color:#8b8a93;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1e;border:1px solid #3a3a42;padding:10px 20px;border-radius:8px;font-size:12px;z-index:200;transition:transform .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
-.tpl-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .2s}
-.tpl-btn:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
-.footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
-@media(max-width:640px){.container{padding:40px 16px 24px}.hero h1{font-size:22px}.stats-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleLang()" title="שפה" id="langBtn">🇮🇱</button><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showShortcuts()" title="קיצורי מקלדת">⌨️</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
-  <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
-  <div class="forge-box">
-    <textarea id="task" oninput="updateCharCount()" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
-    <div class="forge-actions"><span class="forge-hint">Enter לשליחה · Shift+Enter שורה חדשה</span><div style="display:flex;gap:4px"><button onclick="saveFavorite()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px" title="שמור כמועדף">⭐</button></div><button onclick="clearTask()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 8px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">🗑️ נקה</button><button class="forge-btn" id="forgeBtn" onclick="forge()"><span>→</span><span id="forgeBtnText">בנה</span></button></div>
-  </div>
-  <div id="recentTasks" style="margin-top:16px;display:none">
-  <div style="font-size:11px;color:var(--text3);margin-bottom:6px">משימות אחרונות:</div>
-  <div id="recentList" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+<div class="logo"><div class="logo-icon">⚡</div><span class="logo-text">PromptForge</span><button class="settings-btn" onclick="openSettings()">⚙️</button></div>
+<h1>מה אתה רוצה לבנות?</h1>
+<p class="subtitle">תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p>
+<div class="input-box">
+<textarea id="task" placeholder="למשל: משחק snake עם ניקוד ורמות..." rows="4"></textarea>
+<div class="input-actions"><span class="hint">Enter לשליחה</span><button class="build-btn" id="buildBtn" onclick="build()">בנה</button></div>
 </div>
-<div id="taskCategories" style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
-  <button class="tpl-btn" onclick="setCategory('game')">🎮 משחקים</button>
-  <button class="tpl-btn" onclick="setCategory('app')">📱 אפליקציות</button>
-  <button class="tpl-btn" onclick="setCategory('web')">🌐 אתרים</button>
-  <button class="tpl-btn" onclick="setCategory('tool')">🔧 כלים</button>
-  <button class="tpl-btn" onclick="setCategory('design')">🎨 עיצוב</button>
-</div>
-<div style="margin-top:16px;display:flex;gap:6px;align-items:center">
-  <input id="customTemplate" placeholder="תבנית חדשה..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none">
-  <button onclick="addCustomTemplate()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">+ הוסף</button>
-</div>
-<div id="customTemplates" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"></div>
-<div id="quickStats" style="display:flex;gap:12px;margin-bottom:12px;font-size:11px;color:var(--text3)"><span id="qsBuilds">0 builds</span><span id="qsTokens">0 tokens</span></div>
-<div class="templates" id="templates" style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
-  <button class="tpl-btn" onclick="useTemplate('snake')">🐍 משחק Snake</button>
-  <button class="tpl-btn" onclick="useTemplate('todo')">✅ אפליקציית Todo</button>
-  <button class="tpl-btn" onclick="useTemplate('calculator')">🔢 מחשבון</button>
-  <button class="tpl-btn" onclick="useTemplate('timer')">⏱️ טיימר</button>
-  <button class="tpl-btn" onclick="useTemplate('quiz')">❓ חידון</button>
-  <button class="tpl-btn" onclick="useTemplate('dashboard')">📊 Dashboard</button>
-  <button class="tpl-btn" onclick="useTemplate('form')">📝 טופס</button>
-  <button class="tpl-btn" onclick="useTemplate('game')">🎮 משחק זיכרון</button>
-  <button class="tpl-btn" onclick="useTemplate('landing')">🚀 דף נחיתה</button>
-  <button class="tpl-btn" onclick="useTemplate('weather')">🌤️ מזג אוויר</button>
-  <button class="tpl-btn" onclick="useTemplate('music')">🎵 נגן</button>
-  <button class="tpl-btn" onclick="useTemplate('chat')">💬 צ'אט</button>
-  <button class="tpl-btn" onclick="useTemplate('portfolio')">👤 Portfolio</button>
-</div>
-<div id="quickActions" style="margin-top:12px;display:none">
-  <div style="font-size:11px;color:var(--text3);margin-bottom:6px">פעולות מהירות:</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap">
-    <button class="tpl-btn" onclick="quickAction('explain')">📖 הסבר את הקוד</button>
-    <button class="tpl-btn" onclick="quickAction('optimize')">⚡ בטל את הקוד</button>
-    <button class="tpl-btn" onclick="quickAction('test')">🧪 הוסף בדיקות</button>
-    <button class="tpl-btn" onclick="quickAction('docs')">📚 הוסף תיעוד</button>
-    <button class="tpl-btn" onclick="quickAction('responsive')">📱 התאם למובייל</button>
-    <button class="tpl-btn" onclick="quickAction('accessibility')">♿ הוסף נגישות</button>
-    <button class="tpl-btn" onclick="quickAction('dark')">🌙 הוסף dark mode</button>
-    <button class="tpl-btn" onclick="quickAction('animate')">✨ הוסף אנימציות</button>
-    <button class="tpl-btn" onclick="quickAction('review')">🔍 Code Review</button>
-    <button class="tpl-btn" onclick="quickAction('security')">🔒 אבטחה</button>
-    <button class="tpl-btn" onclick="quickAction('performance')">⚡ ביצועים</button>
-    <button class="tpl-btn" onclick="quickAction('refactor')">🏗️ Refactor</button>
-    <button class="tpl-btn" onclick="generateMultiFile()">📁 Multi-file</button>
-    <button class="tpl-btn" onclick="quickAction('i18n')">🌐 i18n</button>
-    <button class="tpl-btn" onclick="quickAction('pwa')">📱 PWA</button>
-    <button class="tpl-btn" onclick="quickAction('api')">🔌 API</button>
-    <button class="tpl-btn" onclick="quickAction('auth')">🔐 Auth</button>
-    <button class="tpl-btn" onclick="quickAction('database')">💾 Database</button>
-    <button class="tpl-btn" onclick="quickAction('testing')">🧪 Testing</button>
-    <button class="tpl-btn" onclick="quickAction('ci')">🔄 CI/CD</button>
-    <button class="tpl-btn" onclick="quickAction('docker')">🐳 Docker</button>
-    <button class="tpl-btn" onclick="quickAction('readme')">📖 README</button>
-    <button class="tpl-btn" onclick="quickAction('errorHandling')">🛡️ Error Handling</button>
-    <button class="tpl-btn" onclick="quickAction('validation')">✅ Validation</button>
-    <button class="tpl-btn" onclick="quickAction('caching')">💾 Caching</button>
-    <button class="tpl-btn" onclick="quickAction('logging')">📝 Logging</button>
-  </div>
+<div class="templates">
+<button class="tpl-btn" onclick="useTpl('snake')">🐍 Snake</button>
+<button class="tpl-btn" onclick="useTpl('todo')">✅ Todo</button>
+<button class="tpl-btn" onclick="useTpl('calc')">🔢 מחשבון</button>
+<button class="tpl-btn" onclick="useTpl('timer')">⏱️ טיימר</button>
+<button class="tpl-btn" onclick="useTpl('quiz')">❓ חידון</button>
 </div>
 <div class="progress" id="progress">
-    <div class="progress-bars"><div class="pbar" id="pb1"></div><div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div><div class="pbar" id="pb4"></div></div>
-    <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
-  </div>
-  <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="qualityBadge" style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--success);color:#fff;margin-right:4px"></span><span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="shareProject()">📁 פרויקט</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button><button onclick="showDiff()">📊 Diff</button></div></div>
-    <div id="codeStats" style="display:flex;gap:12px;margin-bottom:8px;font-size:11px;color:var(--text3)"></div>
-<div class="code-display"><pre id="codeOut"></pre></div>
-    <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><div style="display:flex;gap:8px"><button onclick="openPreviewNewTab()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px">🔗 פתח בטאב</button><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
-    <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
-  </div>
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('history',this)">📋 היסטוריה</div>
-    <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
-    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div><div class="tab" onclick="switchTab('status',this)">🔌 סטטוס</div><div class="tab" onclick="switchTab('snippets',this)">✂️ Snippets</div><div class="tab" onclick="switchTab('projects',this)">📁 פרויקטים</div><div class="tab" onclick="switchTab('codehistory',this)">Code History</div>
-  </div>
-  <div class="tab-content active" id="tab-history">
-<div style="margin-bottom:12px">
-  <input id="historySearch" placeholder="🔍 חפש בהיסטוריה..." oninput="searchHistory(this.value)" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
+<div class="progress-bars"><div class="pbar" id="pb1"></div><div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div><div class="pbar" id="pb4"></div></div>
+<div class="progress-text" id="progressText">מנתח...</div>
 </div>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="shareHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">🔗 שתף</button><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
-  <div class="tab-content" id="tab-stats">
-    <div class="stats-grid">
-      <div class="stat"><div class="val" id="statBuilds">0</div><div class="lbl">בניות</div></div>
-      <div class="stat"><div class="val" id="statIterates">0</div><div class="lbl">שיפורים</div></div>
-      <div class="stat"><div class="val" id="statTokens">0</div><div class="lbl">Tokens</div></div>
-    </div>
-  </div>
-  <div class="tab-content" id="tab-codehistory">
-  <div id="codeHistoryList"><div class="empty-state">No code history yet</div></div>
+<div class="result" id="result">
+<div class="result-header"><span class="result-title">✨ הקוד מוכן</span>
+<div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button></div></div>
+<div class="code-box"><pre id="codeOut"></pre></div>
+<div class="preview" id="preview"><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
+<div class="iterate-box" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
 </div>
-<div class="tab-content" id="tab-projects">
-  <div style="margin-bottom:12px;display:flex;gap:6px">
-    <input id="projectName" placeholder="שם הפרויקט..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
-    <button onclick="addProject()" style="background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;cursor:pointer">+ צור</button>
-  </div>
-  <div id="projectsList"><div class="empty-state">אין פרויקטים עדיין</div></div>
 </div>
-<div class="tab-content" id="tab-snippets">
-  <div style="margin-bottom:12px;display:flex;gap:6px">
-    <input id="snippetCode" placeholder="הדבק קוד..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none;direction:ltr;text-align:left">
-    <input id="snippetName" placeholder="שם" style="width:100px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none">
-    <button onclick="addSnippet()" style="background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">+</button>
-  </div>
-  <div id="snippetsList"><div class="empty-state">אין snippets עדיין</div></div>
-</div>
-<div class="tab-content" id="tab-status">
-  <div class="stats-grid" style="grid-template-columns:1fr">
-    <div class="stat" style="text-align:right">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:12px;color:var(--text2)">Worker</span>
-        <span id="statusWorker" style="font-size:12px;color:var(--text3)">בודק...</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:12px;color:var(--text2)">Pages</span>
-        <span style="font-size:12px;color:var(--success)">✅ מקוון</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:12px;color:var(--text2)">מודל</span>
-        <span id="statusModel" style="font-size:12px;color:var(--text2)">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:12px;color:var(--text2)">גרסה</span>
-        <span style="font-size:12px;color:var(--text2)">1.0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text2)">בניות</span>
-        <span id="statusBuilds" style="font-size:12px;color:var(--text2)">0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text2)">שיפורים</span>
-        <span id="statusIterates" style="font-size:12px;color:var(--text2)">0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text2)">Tokens</span>
-        <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        <span style="font-size:12px;color:var(--text3)">זמן ממוצע</span>
-        <span id="statusAvgTime" style="font-size:12px;color:var(--text3)">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text3)">איכות ממוצעת</span>
-        <span id="statusQualityAvg" style="font-size:12px;color:var(--text3)">—</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-size:12px;color:var(--text3)">שימוש אחרון</span>
-        <span id="statusLastUsed" style="font-size:12px;color:var(--text3)">—</span>
-        <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
-        <span style="font-size:12px;color:var(--text2)">1.0</span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
-<div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
-<div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
-  <div class="footer">PromptForge v1.0 - Full system with 80+ features — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens · 15 תבניות · 28 פעולות</div>
-</div>
-<div class="modal-backdrop" id="diffModal">
-  <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
-    <h2>📊 Diff View</h2>
-    <div id="diffContent" style="font-family:monospace;font-size:12px;line-height:1.6;direction:ltr;text-align:left"></div>
-    <button class="modal-close" onclick="closeDiff()">סגור</button>
-  </div>
-</div>
-<div class="modal-backdrop" id="shortcutsModal">
-  <div class="modal">
-    <h2>⌨️ קיצורי מקלדת</h2>
-    <div style="font-size:13px;color:var(--text2);line-height:2">
-      <div style="display:flex;justify-content:space-between"><span>בנה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Enter</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>שורה חדשה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Shift+Enter</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>בנה (חלופי)</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+Enter</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>נקה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">🗑️ button</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>עזרה</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">❓ button</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>שמור מועדף</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+S</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>הורד קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+D</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>העתק קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+K</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>סגור הכל</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Escape</kbd></div>
-      <div style="display:flex;justify-content:space-between"><span>שפר</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+I</kbd></div>
-    </div>
-    <button class="modal-close" onclick="closeShortcuts()">סגור</button>
-  </div>
-</div>
-<div class="modal-backdrop" id="helpModal">
-  <div class="modal">
-    <h2>❓ עזרה</h2>
-    <div style="font-size:13px;color:var(--text2);line-height:1.8">
-      <p><b>איך משתמשים?</b></p>
-      <p>1. הכנס API key בהגדרות (⚙️)</p>
-      <p>2. כתוב מה אתה רוצה לבנות</p>
-      <p>3. לחץ "בנה" או Enter</p>
-      <p>4. קבל תוכנית + קוד + תצוגה</p>
-      <p>5. לחץ "שפר" כדי לשפר את הקוד</p>
-      <br>
-      <p><b>קיצורי מקלדת:</b></p>
-      <p>Enter - בנה</p>
-      <p>Shift+Enter - שורה חדשה</p>
-      <p>Ctrl+Enter - בנה (חלופי)</p>
-      <br>
-      <p><b>טיפים:</b></p>
-      <p>• השתמש בתבניות להתחלה מהירה</p>
-      <p>• לחץ "תצוגה" כדי לראות את הקוד בפעולה</p>
-      <p>• לחץ "שתף" כדי לשלוח קישור עם המשימה</p>
-      <p>• בדוק את ההיסטוריה כדי לטעון משימות קודמות</p>
-      <br>
-      <p><b>גרסה:</b> 1.0</p>
-      <br>
-      <p><b>Changelog:</b></p>
-      <p style="font-size:11px;color:var(--text3)">v1.0 - ONE worker, ONE screen, 20+ features</p>
-      <p style="font-size:11px;color:var(--text3)">v0.9 - Dani's clean design</p>
-      <p style="font-size:11px;color:var(--text3)">v0.8 - Anti-Dani (sidebar, panels)</p>
-      <p style="font-size:11px;color:var(--text3)">v0.7 - Original (4 workers)</p>
-      <p><b>תכונות:</b> 13</p>
-      <p><b>תבניות:</b> 10</p>
-      <p><b>טאבים:</b> 5</p>
-    </div>
-    <button class="modal-close" onclick="closeHelp()">סגור</button>
-  </div>
-</div>
-<div class="modal-backdrop" id="settingsModal">
-  <div class="modal"><h2>הגדרות</h2><label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-..."><label>גודל פונט</label>
-<select id="fontSizeSelect" onchange="changeFontSize(this.value)">
-  <option value="13">קטן</option>
-  <option value="15" selected>רגיל</option>
-  <option value="17">גדול</option>
-</select>
-<label>Streaming</label>
-<select id="streamSelect">
-  <option value="off" selected>כבוי</option>
-  <option value="on">פעיל</option>
-</select>
-<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><div style="display:flex;gap:8px;margin-top:16px">
-  <button onclick="backupData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">💾 גבה</button>
-  <button onclick="restoreData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">📂 שחזר</button>
-</div>
-<button class="modal-save" onclick="saveSettings()">שמור</button><div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-  <div style="font-size:11px;color:var(--text3);margin-bottom:8px">קיצורי מקלדת:</div>
-  <div style="font-size:11px;color:var(--text2)">Enter - בנה</div>
-  <div style="font-size:11px;color:var(--text2)">Shift+Enter - שורה חדשה</div>
-  <div style="font-size:11px;color:var(--text2)">Ctrl+Enter - בנה (חלופי)</div>
-</div>
-<button class="modal-close" onclick="closeSettings()">סגור</button></div>
-</div>
+<div class="modal-bg" id="settingsModal">
+<div class="modal"><h2>הגדרות</h2>
+<label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-...">
+<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option></select>
+<button class="modal-save" onclick="saveSettings()">שמור</button>
+<button class="modal-close" onclick="closeSettings()">סגור</button></div></div>
 <div class="toast" id="toast"></div>
 <script>
 var GW="https://promptforge.rabotatony.workers.dev";
-var code="",building=false,totalTokens=0,buildCount=0,iterateCount=0;
-var historyData=JSON.parse(localStorage.getItem("pf_history")||"[]");
-var favoritesData=JSON.parse(localStorage.getItem("pf_favorites")||"[]");
-var notesData=JSON.parse(localStorage.getItem("pf_notes")||"[]");
-var plansData=JSON.parse(localStorage.getItem("pf_plans")||"[]");
-
+var code="";
+var building=false;
 function getKey(){return localStorage.getItem("pf_key")||""}
 function getModel(){return localStorage.getItem("pf_model")||"meta/llama-3.3-70b-instruct"}
-function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("modelSelect").value=getModel();
-  var savedStream=localStorage.getItem("pf_stream");
-  if(savedStream)document.getElementById("streamSelect").value=savedStream;document.getElementById("settingsModal").classList.add("show")}
+function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("settingsModal").classList.add("show")}
 function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
-function saveSettings(){
-  var k=document.getElementById("apiKeyInput").value.trim();
-  var m=document.getElementById("modelSelect").value;
-  var s=document.getElementById("streamSelect").value;
-  localStorage.setItem("pf_stream",s);if(k)localStorage.setItem("pf_key",k);localStorage.setItem("pf_model",m);closeSettings();toast("✅ נשמר")}
-function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2500)}
-function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
-function setProgress(step,text){for(var i=1;i<=4;i++){var bar=document.getElementById("pb"+i);bar.className="pbar"+(i<step?" done":i===step?" active":"")}document.getElementById("progressText").textContent=text}
-
-function switchTab(name,el){
-  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("active")});
-  document.querySelectorAll(".tab-content").forEach(function(c){c.classList.remove("active")});
-  el.classList.add("active");
-  document.getElementById("tab-"+name).classList.add("active");
+function saveSettings(){var k=document.getElementById("apiKeyInput").value.trim();var m=document.getElementById("modelSelect").value;if(k)localStorage.setItem("pf_key",k);localStorage.setItem("pf_model",m);closeSettings();toast("נשמר")}
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2000)}
+function useTpl(name){var tpls={snake:"בנה משחק snake עם ניקוד ורמות",todo:"בנה אפליקציית todo עם הוספה ומחיקה",calc:"בנה מחשבון עם 4 פעולות",timer:"בנה טיימר עם ספירה לאחור",quiz:"בנה חידון עם 5 שאלות"};if(tpls[name]){document.getElementById("task").value=tpls[name];toast("תבנית נטענה")}}
+function setStep(n,text){for(var i=1;i<=4;i++){var bar=document.getElementById("pb"+i);bar.className="pbar"+(i<n?" done":i===n?" active":"")}document.getElementById("progressText").textContent=text}
+document.getElementById("task").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();build()}});
+function build(){
+var task=document.getElementById("task").value.trim();
+if(!task){toast("כתוב מה לבנות");return}
+var key=getKey();
+if(!key){openSettings();toast("הכנס API key");return}
+if(building)return;
+building=true;
+document.getElementById("buildBtn").disabled=true;
+document.getElementById("progress").classList.add("show");
+document.getElementById("result").classList.remove("show");
+setStep(1,"מנתח...");
+fetch(GW+"/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,apiKey:key})})
+.then(function(r){return r.json()})
+.then(function(pd){
+if(pd.error){toast(pd.error);reset();return}
+setStep(2,"מתכנן...");
+setTimeout(function(){
+setStep(3,"בונה...");
+fetch(GW+"/api/build",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,plan:pd.plan||"",apiKey:key})})
+.then(function(r){return r.json()})
+.then(function(bd){
+if(bd.error){toast(bd.error);reset();return}
+code=bd.code||"";
+setStep(4,"בודק...");
+setTimeout(function(){
+document.getElementById("progress").classList.remove("show");
+document.getElementById("codeOut").textContent=code;
+document.getElementById("result").classList.add("show");
+if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){
+document.getElementById("preview").classList.add("show");
+document.getElementById("previewFrame").srcdoc=code;
 }
-
-function updateStats(){
-  document.getElementById("statBuilds").textContent=buildCount;
-  var footerEl=document.getElementById("footerBuilds");
-  if(footerEl)footerEl.textContent=buildCount;
-  var footerTokensEl=document.getElementById("footerTokens");
-  if(footerTokensEl)footerTokensEl.textContent=totalTokens;
-  document.getElementById("statIterates").textContent=iterateCount;
-  document.getElementById("statTokens").textContent=totalTokens;
+toast("מוכן!");
+reset();
+},300);
+}).catch(function(e){toast("שגיאה");reset()});
+},300);
+}).catch(function(e){toast("שגיאה");reset()});
 }
-
-function addToHistory(task,tokens){
-  historyData.unshift({task:task,tokens:tokens,time:new Date().toLocaleString()});
-  if(historyData.length>50)historyData=historyData.slice(0,50);
-  localStorage.setItem("pf_history",JSON.stringify(historyData));
-  renderHistory();
-}
-function renderRecent(){
-  var el=document.getElementById("recentTasks");
-  var list=document.getElementById("recentList");
-  if(historyData.length===0){el.style.display="none";return}
-  el.style.display="block";
-  list.innerHTML=historyData.slice(0,3).map(function(h,i){
-    return '<button class="tpl-btn" onclick="document.getElementById(\'task\').value=historyData['+i+'].task;toast(\'📋 נטען\')">'+h.task.substring(0,30)+'</button>';
-  }).join("");
-}
-var customTemplatesData=JSON.parse(localStorage.getItem("pf_custom_templates")||"[]");
-var buildStartTime=null;
-var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,"iterates":0,"templates":0,"shares":0,"lastUsed":""}');
-var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
-var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
-var currentCategory="";
-async function analyzeComplexity(code){
-  var complexity=0;
-  var lines=code.split("\n");
-  for(var i=0;i<lines.length;i++){
-    var line=lines[i];
-    if(line.indexOf("if(")!==-1||line.indexOf("if (")!==-1)complexity++;
-    if(line.indexOf("for(")!==-1||line.indexOf("for (")!==-1)complexity++;
-    if(line.indexOf("while(")!==-1||line.indexOf("while (")!==-1)complexity++;
-    if(line.indexOf("switch(")!==-1||line.indexOf("switch (")!==-1)complexity++;
-    if(line.indexOf("function")!==-1)complexity++;
-    if(line.indexOf("class")!==-1)complexity++;
-  }
-  return complexity;
-}
-function detectLanguage(code){
-  if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1)return"HTML";
-  if(code.indexOf("import React")!==-1||code.indexOf("from 'react'")!==-1)return"React";
-  if(code.indexOf("def ")!==-1&&code.indexOf("import ")!==-1)return"Python";
-  if(code.indexOf("function ")!==-1&&code.indexOf("var ")!==-1)return"JavaScript";
-  if(code.indexOf("const ")!==-1&&code.indexOf("=>")!==-1)return"Modern JS";
-  if(code.indexOf("SELECT ")!==-1||code.indexOf("INSERT ")!==-1)return"SQL";
-  if(code.indexOf(".container")!==-1&&code.indexOf("display:")!==-1)return"CSS";
-  return"Code";
-}
-function assessQuality(code){
-  var score=100;
-  var issues=[];
-  if(code.length<200){score-=30;issues.push("קוד קצר מדי")}
-  if(code.indexOf("<!DOCTYPE")===-1&&code.indexOf("<html")===-1&&code.indexOf("function")===-1&&code.indexOf("def ")===-1){score-=20;issues.push("מבנה לא ברור")}
-  if(code.indexOf("var ")!==-1&&code.indexOf("let ")===-1&&code.indexOf("const ")===-1){score-=10;issues.push("שימוש ב-var בלבד")}
-  if(code.indexOf("console.log")!==-1){score-=5;issues.push("console.log בקוד")}
-  if(code.indexOf("alert(")!==-1){score-=5;issues.push("alert() בקוד")}
-  var emptyFuncs=(code.match(/function\s*\(\s*\)\s*\{\s*\}/g)||[]).length;
-  if(emptyFuncs>0){score-=emptyFuncs*3;issues.push(emptyFuncs+" empty functions")}
-  if(code.indexOf("eval(")!==-1){score-=15;issues.push("eval() מסוכן")}
-  if(code.indexOf("document.write")!==-1){score-=10;issues.push("document.write לא מומלץ")}
-  if(code.indexOf("TODO")!==-1||code.indexOf("FIXME")!==-1){score-=5;issues.push("TODO/FIXME בקוד")}
-  var lines=code.split("\n");
-  var longLines=lines.filter(function(l){return l.length>120}).length;
-  if(longLines>0){score-=Math.min(longLines*2,10);issues.push(longLines+" שורות ארוכות")}
-  score=Math.max(0,score);
-  var badge=document.getElementById("qualityBadge");
-  if(badge){
-    badge.textContent=score+"%";
-    if(score>=80){badge.style.background="var(--success)"}
-    else if(score>=60){badge.style.background="var(--warn)";badge.style.color="#000"}
-    else{badge.style.background="var(--err)"}
-  }
-  return{score:score,issues:issues};
-}
-function forgeStream(){
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("כתוב מה אתה רוצה לבנות");return}
-  var key=getKey();
-  if(!key){openSettings();toast("הכנס API key");return}
-  if(building)return;
-  building=true;
-  document.getElementById("forgeBtn").disabled=true;
-  document.getElementById("forgeBtnText").textContent="בונה...";
-  document.getElementById("progress").classList.add("show");
-  document.getElementById("result").classList.remove("show");
-  setProgress(1,"מנתח...");
-  try{
-    var resp=await fetch(GW+"/api/stream",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({task:task,apiKey:key})
-    });
-    if(!resp.ok){toast("❌ שגיאה");reset();return}
-    setProgress(2,"מזרים קוד...");
-    var reader=resp.body.getReader();
-    var decoder=new TextDecoder();
-    var fullCode="";
-    document.getElementById("result").classList.add("show");
-    document.getElementById("codeOut").textContent="";
-    while(true){
-      var result=await reader.read();
-      if(result.done)break;
-      var chunk=decoder.decode(result.value);
-      var lines=chunk.split("\n");
-      for(var i=0;i<lines.length;i++){
-        if(lines[i].startsWith("data: ")){
-          try{
-            var data=JSON.parse(lines[i].substring(6));
-            if(data.choices&&data.choices[0]&&data.choices[0].delta&&data.choices[0].delta.content){
-              fullCode+=data.choices[0].delta.content;
-              document.getElementById("codeOut").textContent=fullCode;
-            }
-          }catch(e){}
-        }
-      }
-    }
-    code=fullCode;
-    setProgress(4,"הושלם");
-    document.getElementById("progress").classList.remove("show");
-    if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){
-      document.getElementById("preview").classList.add("show");
-      document.getElementById("previewFrame").srcdoc=code;
-    }
-    var lines2=code.split("\n").length;
-    var chars=code.length;
-    document.getElementById("wordCount").textContent="("+lines2+" שורות · "+chars+" תווים)";
-    var codeSizeKB=(chars/1024).toFixed(1);
-    buildCount++;
-    analyticsData.builds++;
-    localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
-    addToHistory(task,0);
-    updateStats();
-    toast("✨ מוכן (streaming)");
-  }catch(e){toast("❌ "+e.message)}
-  reset();
-}
-function generateMultiFile(){
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("כתוב משימה");return}
-  document.getElementById("task").value=task+"\n\nצור את הקוד במבנה של מספר קבצים: HTML, CSS, JS. הפרד כל קובץ עם כותרת ברורה.";
-  toast("📁 משימה עודכנה למבנה multi-file");
-}
-function setCategory(cat){
-  currentCategory=cat;
-  var prefixes={
-    game:"בנה משחק: ",
-    app:"בנה אפליקציה: ",
-    web:"בנה אתר: ",
-    tool:"בנה כלי: ",
-    design:"בנה עיצוב: "
-  };
-  var task=document.getElementById("task").value;
-  if(!task.startsWith(prefixes[cat])){
-    document.getElementById("task").value=prefixes[cat]+task;
-  }
-  toast("📂 קטגוריה: "+cat);
-}
-function addProject(){
-  var name=document.getElementById("projectName").value.trim();
-  if(!name){toast("כתוב שם לפרויקט");return}
-  projectsData.unshift({name:name,tasks:[],created:new Date().toLocaleString()});
-  if(projectsData.length>10)projectsData=projectsData.slice(0,10);
-  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
-  document.getElementById("projectName").value="";
-  renderProjects();
-  toast("📁 פרויקט נוצר");
-}
-function updateCharCount(){var task=document.getElementById("task").value;}
-function updateQuickStats(){var b=document.getElementById("qsBuilds");var t=document.getElementById("qsTokens");if(b)b.textContent=buildCount+" builds";if(t)t.textContent=totalTokens+" tokens";}
-function renderCodeHistory(){
-  var list=document.getElementById("codeHistoryList");
-  if(!list)return;
-  if(!codeHistory.length){list.innerHTML='<div class="empty-state">No code history yet</div>';return}
-  list.innerHTML=codeHistory.map(function(h,i){
-    return '<div class="h-item" onclick="loadCodeHistory('+i+')"><div class="h-title">'+h.task+'</div><div class="h-meta">'+h.time+' · '+h.code.length+' chars</div></div>';
-  }).join("");
-}
-function renderProjects(){
-  var list=document.getElementById("projectsList");
-  if(!projectsData.length){list.innerHTML='<div class="empty-state">אין פרויקטים עדיין</div>';return}
-  list.innerHTML=projectsData.map(function(p,i){
-    return '<div class="h-item"><div style="display:flex;justify-content:space-between;align-items:center"><div class="h-title">📁 '+p.name+'</div><div style="display:flex;gap:4px"><button onclick="addToProject('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px">+ משימה</button><button onclick="deleteProject('+i+',event)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px">🗑️</button></div></div><div class="h-meta">'+p.tasks.length+' משימות · '+p.created+'</div></div>';
-  }).join("");
-}
-function addToProject(i){
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("כתוב משימה קודם");return}
-  projectsData[i].tasks.push({task:task,time:new Date().toLocaleString()});
-  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
-  renderProjects();
-  toast("📁 משימה נוספה לפרויקט");
-}
-function deleteProject(i,event){
-  event.stopPropagation();
-  projectsData.splice(i,1);
-  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
-  renderProjects();
-  toast("🗑️ פרויקט נמחק");
-}
-function addSnippet(){
-  var code=document.getElementById("snippetCode").value.trim();
-  var name=document.getElementById("snippetName").value.trim()||"Snippet "+(snippetsData.length+1);
-  if(!code){toast("הדבק קוד");return}
-  snippetsData.unshift({name:name,code:code,time:new Date().toLocaleString()});
-  if(snippetsData.length>20)snippetsData=snippetsData.slice(0,20);
-  localStorage.setItem("pf_snippets",JSON.stringify(snippetsData));
-  document.getElementById("snippetCode").value="";
-  document.getElementById("snippetName").value="";
-  renderSnippets();
-  toast("✂️ Snippet נשמר");
-}
-function renderSnippets(){
-  var list=document.getElementById("snippetsList");
-  if(!snippetsData.length){list.innerHTML='<div class="empty-state">אין snippets עדיין</div>';return}
-  list.innerHTML=snippetsData.map(function(s,i){
-    return '<div class="h-item" style="cursor:pointer" onclick="useSnippet('+i+')"><div style="display:flex;justify-content:space-between;align-items:center"><div class="h-title">'+s.name+'</div><button onclick="deleteSnippet('+i+',event)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px">🗑️</button></div><div class="h-meta">'+s.code.substring(0,50)+'... · '+s.time+'</div></div>';
-  }).join("");
-}
-function useSnippet(i){
-  navigator.clipboard.writeText(snippetsData[i].code).then(function(){toast("📋 Snippet הועתק")});
-}
-function deleteSnippet(i,event){
-  event.stopPropagation();
-  snippetsData.splice(i,1);
-  localStorage.setItem("pf_snippets",JSON.stringify(snippetsData));
-  renderSnippets();
-  toast("🗑️ Snippet נמחק");
-}
-function backupData(){
-  var data={
-    history:historyData,
-    favorites:favoritesData,
-    notes:notesData,
-    plans:plansData,
-    customTemplates:customTemplatesData,
-    settings:{key:getKey(),model:getModel(),theme:localStorage.getItem("pf_theme"),lang:localStorage.getItem("pf_lang"),fontsize:localStorage.getItem("pf_fontsize")}
-  };
-  var json=JSON.stringify(data,null,2);
-  var b=new Blob([json],{type:"application/json"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(b);
-  a.download="promptforge-backup.json";
-  a.click();
-  toast("💾 גיבוי ירד");
-}
-function restoreData(){
-  var input=document.createElement("input");
-  input.type="file";
-  input.accept=".json";
-  input.onchange=function(e){
-    var file=e.target.files[0];
-    if(!file)return;
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        var data=JSON.parse(ev.target.result);
-        if(data.history){historyData=data.history;localStorage.setItem("pf_history",JSON.stringify(historyData));renderHistory()}
-        if(data.favorites){favoritesData=data.favorites;localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));renderFavorites()}
-        if(data.notes){notesData=data.notes;localStorage.setItem("pf_notes",JSON.stringify(notesData));renderNotes()}
-        if(data.plans){plansData=data.plans;localStorage.setItem("pf_plans",JSON.stringify(plansData));renderPlans()}
-        if(data.customTemplates){customTemplatesData=data.customTemplates;localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));renderCustomTemplates()}
-        if(data.settings){
-          if(data.settings.key)localStorage.setItem("pf_key",data.settings.key);
-          if(data.settings.model)localStorage.setItem("pf_model",data.settings.model);
-          if(data.settings.theme)localStorage.setItem("pf_theme",data.settings.theme);
-          if(data.settings.lang)localStorage.setItem("pf_lang",data.settings.lang);
-          if(data.settings.fontsize)localStorage.setItem("pf_fontsize",data.settings.fontsize);
-        }
-        toast("📂 שוחזר בהצלחה");
-        location.reload();
-      }catch(err){toast("❌ קובץ לא תקין")}
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-function addCustomTemplate(){
-  var input=document.getElementById("customTemplate");
-  var text=input.value.trim();
-  if(!text){toast("כתוב תבנית");return}
-  customTemplatesData.push(text);
-  if(customTemplatesData.length>10)customTemplatesData=customTemplatesData.slice(0,10);
-  localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));
-  input.value="";
-  renderCustomTemplates();
-  toast("✅ תבנית נוספה");
-}
-function renderCustomTemplates(){
-  var el=document.getElementById("customTemplates");
-  if(!customTemplatesData.length){el.innerHTML="";return}
-  el.innerHTML=customTemplatesData.map(function(t,i){
-    return '<button class="tpl-btn" onclick="useCustomTemplate('+i+')" style="position:relative">'+t.substring(0,30)+'<span onclick="deleteCustomTemplate('+i+',event)" style="position:absolute;top:-4px;left:-4px;background:var(--err);color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</span></button>';
-  }).join("");
-}
-function useCustomTemplate(i){
-  document.getElementById("task").value=customTemplatesData[i];
-  toast("📋 תבנית נטענה");
-}
-function deleteCustomTemplate(i,event){
-  event.stopPropagation();
-  customTemplatesData.splice(i,1);
-  localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));
-  renderCustomTemplates();
-  toast("🗑️ תבנית נמחקה");
-}
-function searchHistory(query){
-  var list=document.getElementById("historyList");
-  if(!query.trim()){renderHistory();return}
-  var filtered=historyData.filter(function(h){
-    return h.task.toLowerCase().includes(query.toLowerCase());
-  });
-  if(!filtered.length){list.innerHTML='<div class="empty-state">לא נמצאו תוצאות</div>';return}
-  list.innerHTML=filtered.map(function(h,i){
-    var originalIndex=historyData.indexOf(h);
-    return '<div class="h-item" onclick="loadHistory('+originalIndex+')"><div class="h-title">'+h.task.substring(0,60)+' ('+h.task.split(/\s+/).length+' words)'+'</div><div class="h-meta">'+h.time+' · '+h.tokens+' tokens</div></div>';
-  }).join("");
-}
-function renderHistory(){
-  var list=document.getElementById("historyList");
-  if(!historyData.length){list.innerHTML="<div class=\"empty-state\">אין היסטוריה עדיין</div>";return}
-  list.innerHTML=historyData.map(function(h,i){
-    return "<div class=\"h-item\" onclick=\"loadHistory("+i+")\"><div class=\"h-title\">"+h.task.substring(0,60)+' ('+h.task.split(/\s+/).length+' words)'+"</div><div class=\"h-meta\">"+h.time+" · "+h.tokens+" tokens</div></div>";
-  }).join("");
-}
-function loadHistory(i){document.getElementById("task").value=historyData[i].task;toast("📋 נטען")}
-
-function addToPlan(plan){
-  plansData.unshift({plan:plan,time:new Date().toLocaleString()});
-  if(plansData.length>20)plansData=plansData.slice(0,20);
-  localStorage.setItem("pf_plans",JSON.stringify(plansData));
-  renderPlans();
-}
-function renderPlans(){
-  var list=document.getElementById("planList");
-  if(!plansData.length){list.innerHTML="<div class=\"empty-state\">אין תוכניות עדיין</div>";return}
-  list.innerHTML=plansData.map(function(p){
-    return "<div class=\"plan-item\"><div class=\"p-text\">"+p.plan.substring(0,200)+"</div><div class=\"p-meta\">"+p.time+"</div></div>";
-  }).join("");
-}
-
-function clearAll(){historyData=[];plansData=[];localStorage.removeItem("pf_history");localStorage.removeItem("pf_plans");renderHistory();renderPlans();toast("🗑️ נוקה")}
-
-document.getElementById("task").addEventListener("input",function(){
-  localStorage.setItem("pf_lasttask",document.getElementById("task").value);
-});
-var lastTask=localStorage.getItem("pf_lasttask");
-if(lastTask&&!document.getElementById("task").value){
-  document.getElementById("task").value=lastTask;
-}
-document.getElementById("task").addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();forge()}
-  if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();forge()}
-});
-document.addEventListener("keydown",function(e){
-  if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveFavorite()}
-  if((e.ctrlKey||e.metaKey)&&e.key==="d"){e.preventDefault();downloadCode()}
-  if((e.ctrlKey||e.metaKey)&&e.key==="k"){e.preventDefault();copyCode()}
-  if((e.ctrlKey||e.metaKey)&&e.key==="i"){e.preventDefault();toggleIterate()}
-  if(e.key==="Escape"){
-    closeSettings();closeHelp();closeShortcuts();closeDiff();
-    document.getElementById("iterateBox").classList.remove("show");
-  }
-})
-
-async function forge(){
-  var streamEnabled=localStorage.getItem("pf_stream")==="on";
-  if(streamEnabled){return forgeStream()}
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("כתוב מה אתה רוצה לבנות");return}
-  var key=getKey();
-  if(!key){openSettings();toast("הכנס API key");return}
-  if(building)return;
-  building=true;
-  buildStartTime=Date.now();
-  document.getElementById("forgeBtn").disabled=true;
-  document.getElementById("forgeBtn").style.opacity="0.6";
-  document.getElementById("forgeBtnText").textContent="בונה...";
-  document.getElementById("progress").classList.add("show");
-  document.getElementById("result").classList.remove("show");
-  try{
-    setProgress(1,"מנתח את המשימה...");
-    var pr=await fetch(GW+"/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,apiKey:key})});
-    var pd=await pr.json();
-    if(pd.error){toast("❌ "+pd.error);document.getElementById("retryBtn").style.display="block";document.getElementById("spinner").style.display="none";reset();return}
-    if(pd.plan)addToPlan(pd.plan);
-    setProgress(2,"מתכנן ארכיטקטורה...");
-    var estimatedTime=words<10?"10-20 שניות":words<30?"20-40 שניות":"40-60 שניות";
-    await sleep(300);
-    setProgress(3,"כותב קוד...");
-    var br=await fetch(GW+"/api/build",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,plan:pd.plan||"",apiKey:key})});
-    var bd=await br.json();
-    if(bd.error){toast("❌ "+bd.error);document.getElementById("retryBtn").style.display="block";document.getElementById("spinner").style.display="none";reset();return}
-    code=bd.code||"";
-    setProgress(4,"בודק...");
-    await sleep(300);
-    document.getElementById("progress").classList.remove("show");
-    document.getElementById("codeOut").textContent=code;
-    var lines=code.split("\n").length;
-    var chars=code.length;
-    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    var qualityResult=if(chars>50000){toast("⚠️ קוד גדול מאוד - שקול לפצל למספר קבצים")}
-    assessQuality(code);
-  analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
-  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
-    var statsEl=document.getElementById("codeStats");
-    if(statsEl){
-      var funcs=(code.match(/function\s/g)||[]).length;
-      var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
-      var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
-      var complexity=analyzeComplexity(code);
-    var complexityLabel=complexity<5?"🟢 פשוט":complexity<15?"🟡 בינוני":"🔴 מורכב";
-    statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span><span>🔄 "+complexityLabel+" ("+complexity+")</span>";
-    }
-    document.getElementById("result").classList.add("show");
-    document.getElementById("quickActions").style.display="block";
-    if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("preview").classList.add("show");document.getElementById("previewFrame").srcdoc=code}
-    totalTokens+=(bd.tokens||0)+(pd.tokens||0);
-    buildCount++;
-  analyticsData.builds++;
-  if(buildStartTime){
-    var elapsed=(Date.now()-buildStartTime)/1000;
-    analyticsData.totalBuildTime=(analyticsData.totalBuildTime||0)+elapsed;
-  }
-  analyticsData.lastUsed=new Date().toLocaleString();
-  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
-    addToHistory(task,(bd.tokens||0)+(pd.tokens||0));
-    updateStats();
-    var buildTime=buildStartTime?((Date.now()-buildStartTime)/1000).toFixed(1):0;
-  toast("✨ מוכן ("+buildTime+" שניות)");
-  }catch(e){
-  var msg="❌ ";
-  if(e.message.includes("fetch"))msg+="שגיאת רשת - בדוק את החיבור";
-  else if(e.message.includes("401"))msg+="API key לא תקין";
-  else if(e.message.includes("429"))msg+="יותר מדי בקשות - חכה רגע";
-  else if(e.message.includes("500"))msg+="שגיאת שרת - נסה שוב";
-  else msg+=e.message;
-  toast(msg);
-}
-  reset();
-}
-
-function reset(){building=false;document.getElementById("forgeBtn").disabled=false;document.getElementById("forgeBtn").style.opacity="1";document.getElementById("forgeBtnText").textContent="בנה"}
-function copyCode(){navigator.clipboard.writeText(code).then(function(){toast("📋 הועתק")})}
-function downloadCode(){var ext=code.indexOf("<html")!==-1?"html":"js";var b=new Blob([code],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="output."+ext;a.click();toast("💾 ירד")}
+function reset(){building=false;document.getElementById("buildBtn").disabled=false}
+function copyCode(){navigator.clipboard.writeText(code).then(function(){toast("הועתק")})}
+function downloadCode(){var ext=code.indexOf("<html")!==-1?"html":"js";var b=new Blob([code],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="output."+ext;a.click();toast("ירד")}
 function togglePreview(){var p=document.getElementById("preview");p.classList.toggle("show");if(p.classList.contains("show"))document.getElementById("previewFrame").srcdoc=code}
 function toggleIterate(){document.getElementById("iterateBox").classList.toggle("show")}
-
-async function iterate(){
-  prevCode=code;
-  var instruction=document.getElementById("iterateInput").value.trim();
-  if(!instruction){toast("כתוב מה לשפר");return}
-  var key=getKey();if(!key||!code)return;
-  toast("⏳ משפר...");
-  try{
-    var r=await fetch(GW+"/api/iterate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,instruction:instruction,apiKey:key})});
-    var d=await r.json();
-    if(d.error){toast("❌ "+d.error);return}
-    code=d.code||"";
-    document.getElementById("codeOut").textContent=code;
-    var lines=code.split("\n").length;
-    var chars=code.length;
-    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    var qualityResult=if(chars>50000){toast("⚠️ קוד גדול מאוד - שקול לפצל למספר קבצים")}
-    assessQuality(code);
-  analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
-  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
-    var statsEl=document.getElementById("codeStats");
-    if(statsEl){
-      var funcs=(code.match(/function\s/g)||[]).length;
-      var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
-      var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
-      var complexity=analyzeComplexity(code);
-    var complexityLabel=complexity<5?"🟢 פשוט":complexity<15?"🟡 בינוני":"🔴 מורכב";
-    statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span><span>🔄 "+complexityLabel+" ("+complexity+")</span>";
-    }
-    if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=code}
-    document.getElementById("iterateInput").value="";
-    totalTokens+=(d.tokens||0);iterateCount++;
-  analyticsData.iterates++;
-  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
-    updateStats();
-    toast("✅ שופר");
-  }catch(e){
-  var msg="❌ ";
-  if(e.message.includes("fetch"))msg+="שגיאת רשת - בדוק את החיבור";
-  else if(e.message.includes("401"))msg+="API key לא תקין";
-  else if(e.message.includes("429"))msg+="יותר מדי בקשות - חכה רגע";
-  else if(e.message.includes("500"))msg+="שגיאת שרת - נסה שוב";
-  else msg+=e.message;
-  toast(msg);
+function iterate(){
+var instruction=document.getElementById("iterateInput").value.trim();
+if(!instruction||!code)return;
+var key=getKey();
+toast("משפר...");
+fetch(GW+"/api/iterate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,instruction:instruction,apiKey:key})})
+.then(function(r){return r.json()})
+.then(function(d){
+if(d.error){toast(d.error);return}
+code=d.code||"";
+document.getElementById("codeOut").textContent=code;
+if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1)document.getElementById("previewFrame").srcdoc=code;
+document.getElementById("iterateInput").value="";
+toast("שופר");
+}).catch(function(e){toast("שגיאה")});
 }
-}
-
-renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();renderCustomTemplates();renderSnippets();renderProjects();
-var templateDescriptions={snake:"Classic snake game",todo:"Todo app with localStorage",calculator:"Calculator with 4 operations",timer:"Countdown timer",quiz:"Quiz with scoring",dashboard:"Dashboard with stats",form:"Registration form",game:"Memory game",landing:"Landing page",weather:"Weather app",music:"Music player",chat:"Chat interface",portfolio:"Portfolio page"};
-var templates={
-  snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
-  todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
-  calculator:"בנה מחשבון עם 4 פעולות בסיסיות, אחוזים, וזיכרון. עיצוב כמו מחשבון אמיתי.",
-  timer:"בנה טיימר עם ספירה לאחור, pause/resume, והתראה בסיום. עיצוב מינימליסטי.",
-  quiz:"בנה חידון עם 5 שאלות, 4 תשובות לכל שאלה, ניקוד, ומשוב על תשובות נכונות/שגויות.",
-  dashboard:"בנה dashboard עם 4 כרטיסי סטטיסטיקה, גרף פשוט ב-CSS, וטבלה עם נתונים. עיצוב מודרני.",
-  form:"בנה טופס הרשמה עם ולידציה, הודעות שגיאה, ואנימציות. כולל שדות: שם, אימייל, סיסמה.",
-  game:"בנה משחק זיכרון עם 16 קלפים, ספירת מהלכים, וטיימר. עיצוב צבעוני ומהנה.",
-  landing:"בנה דף נחיתה עם hero section, 3 פיצ'רים, CTA button, ו-footer. עיצוב מינימליסטי.",
-  weather:"בנה אפליקציית מזג אוויר עם תצוגה יפה, אנימציות, ומידע על טמפרטורה, לחות ורוח.",
-  music:"בנה נגן מוזיקה פשוט עם play/pause, progress bar, ו-volume control. עיצוב מודרני.",
-  chat:"בנה ממשק צ'אט עם בועות הודעות, input field, וכפתור שליחה. עיצוב כמו WhatsApp.",
-  portfolio:"בנה דף portfolio עם hero, about, projects grid, ו-contact form. עיצוב מינימליסטי."
-};
-function useTemplate(name){
-  if(templates[name]){
-    document.getElementById("task").value=templates[name];
-    toast("📋 תבנית נטענה");
-  }
-}
-var currentLang="he";
-function toggleLang(){
-  currentLang=currentLang==="he"?"en":"he";
-  document.getElementById("langBtn").textContent=currentLang==="he"?"🇮🇱":"🇬🇧";
-  document.documentElement.dir=currentLang==="he"?"rtl":"ltr";
-  document.documentElement.lang=currentLang;
-  localStorage.setItem("pf_lang",currentLang);
-  toast(currentLang==="he"?"🇮🇱 עברית":"🇬🇧 English");
-}
-function toggleTheme(){
-  document.body.classList.toggle("light");
-  var isLight=document.body.classList.contains("light");
-  document.getElementById("themeBtn").textContent=isLight?"☀️":"🌙";
-  localStorage.setItem("pf_theme",isLight?"light":"dark");
-}
-function showDiff(){
-  if(!prevCode){toast("אין קוד קודם להשוואה");return}
-  var oldLines=prevCode.split("\n");
-  var newLines=code.split("\n");
-  var html="";
-  var maxLen=Math.max(oldLines.length,newLines.length);
-  for(var i=0;i<maxLen;i++){
-    var oldLine=i<oldLines.length?oldLines[i]:"";
-    var newLine=i<newLines.length?newLines[i]:"";
-    if(oldLine===newLine){
-      html+='<div style="color:var(--text3);padding:1px 8px">'+escapeHtml(oldLine)+'</div>';
-    }else{
-      if(oldLine)html+='<div style="background:rgba(239,68,68,0.1);color:var(--err);padding:1px 8px">- '+escapeHtml(oldLine)+'</div>';
-      if(newLine)html+='<div style="background:rgba(34,197,94,0.1);color:var(--success);padding:1px 8px">+ '+escapeHtml(newLine)+'</div>';
-    }
-  }
-  document.getElementById("diffContent").innerHTML=html||'<div style="color:var(--text3)">אין שינויים</div>';
-  document.getElementById("diffModal").classList.add("show");
-}
-function closeDiff(){document.getElementById("diffModal").classList.remove("show")}
-function escapeHtml(text){
-  var div=document.createElement("div");
-  div.textContent=text;
-  return div.innerHTML;
-}
-function copyAsMarkdown(){
-  var lang=code.indexOf("<html")!==-1?"html":code.indexOf("def ")!==-1?"python":"javascript";
-  var md="```"+lang+"\n"+code+"\n```";
-  navigator.clipboard.writeText(md).then(function(){toast("📋 הועתק כ-Markdown")});
-}
-function openPreviewNewTab(){
-  if(!code)return;
-  var blob=new Blob([code],{type:"text/html"});
-  var url=URL.createObjectURL(blob);
-  window.open(url,"_blank");
-}
-function showShortcuts(){document.getElementById("shortcutsModal").classList.add("show")}
-function closeShortcuts(){document.getElementById("shortcutsModal").classList.remove("show")}
-function showHelp(){document.getElementById("helpModal").classList.add("show")}
-function closeHelp(){document.getElementById("helpModal").classList.remove("show")}
-function changeFontSize(size){
-  document.querySelector(".forge-box textarea").style.fontSize=size+"px";
-  document.querySelector(".code-display pre").style.fontSize=(parseInt(size)-2)+"px";
-  localStorage.setItem("pf_fontsize",size);
-}
-function shareTask(){
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("אין משימה לשתף");return}
-  var encoded=btoa(encodeURIComponent(task));
-  var url=window.location.origin+"?task="+encoded;
-  navigator.clipboard.writeText(url).then(function(){toast("🔗 קישור הועתק")});
-}
-function copyPlan(el){
-  var text=el.closest(".plan-item").querySelector(".p-text").textContent;
-  navigator.clipboard.writeText(text).then(function(){toast("📋 תוכנית הועתקה")});
-}
-function downloadPlan(el){
-  var text=el.closest(".plan-item").querySelector(".p-text").textContent;
-  var b=new Blob([text],{type:"text/plain"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(b);
-  a.download="plan.txt";
-  a.click();
-  toast("💾 תוכנית ירדה");
-}
-function compareCode(){
-  if(!prevCode){toast("אין קוד קודם להשוואה");return}
-  var oldLines=prevCode.split("\n");
-  var newLines=code.split("\n");
-  var added=0,removed=0;
-  var maxLen=Math.max(oldLines.length,newLines.length);
-  for(var i=0;i<maxLen;i++){
-    if(i>=oldLines.length)added++;
-    else if(i>=newLines.length)removed++;
-    else if(oldLines[i]!==newLines[i]){added++;removed++}
-  }
-  var msg="🔀 השוואה:\n";
-  msg+="לפני: "+oldLines.length+" שורות\n";
-  msg+="אחרי: "+newLines.length+" שורות\n";
-  msg+="נוספו: "+added+" · הוסרו: "+removed;
-  toast(msg);
-}
-function addNote(){
-  var note=prompt("הוסף הערה:");
-  if(!note)return;
-  var task=document.getElementById("task").value.trim();
-  notesData.unshift({task:task,note:note,time:new Date().toLocaleString()});
-  if(notesData.length>50)notesData=notesData.slice(0,50);
-  localStorage.setItem("pf_notes",JSON.stringify(notesData));
-  toast("📝 הערה נשמרה");
-}
-function saveFavorite(){
-  var task=document.getElementById("task").value.trim();
-  if(!task){toast("אין משימה לשמור");return}
-  var exists=favoritesData.some(function(f){return f.task===task});
-  if(exists){toast("⚠️ כבר שמור כמועדף");return}
-  favoritesData.unshift({task:task,time:new Date().toLocaleString()});
-  if(favoritesData.length>20)favoritesData=favoritesData.slice(0,20);
-  localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));
-  renderFavorites();
-  toast("⭐ נשמר כמועדף");
-}
-function quickAction(type){
-  var actions={
-    explain:"תסביר את הקוד הנוכחי ותוסיף הערות",
-    optimize:"תבצע אופטימיזציה לקוד הנוכחי",
-    test:"תוסיף בדיקות unit tests לקוד הנוכחי",
-    docs:"תוסיף תיעוד מפורט לקוד הנוכחי",
-    responsive:"תתאים את הקוד למובייל וטאבלט עם responsive design",
-    accessibility:"תוסיף תכונות נגישות: aria labels, keyboard navigation, contrast",
-    dark:"תוסיף dark mode עם toggle",
-    animate:"תוסיף אנימציות CSS חלקות",
-    review:"תבצע code review מלא לקוד: מצא באגים, הצע שיפורים, בדוק best practices",
-    security:"תבדוק את הקוד לבעיות אבטחה: XSS, injection, exposure",
-    performance:"תבצע אופטימיזציית ביצועים לקוד:减少 memory usage, improve rendering",
-    refactor:"תבצע refactoring לקוד: שמות טובים, ארכיטקטורה נקייה, DRY"
-  };
-  if(actions[type]&&code){
-    document.getElementById("iterateInput").value=actions[type];
-    document.getElementById("iterateBox").classList.add("show");
-    toast("📝 הוראה מוכנה - לחץ שפר");
-  }
-}
-async function checkStatus(){
-  var el=document.getElementById("statusWorker");
-  try{
-    var r=await fetch(GW+"/api/health",{signal:AbortSignal.timeout(5000)});
-    var d=await r.json();
-    if(d.status==="healthy"){el.textContent="✅ מקוון";el.style.color="var(--success)"}
-    else{el.textContent="⚠️ בעיה";el.style.color="var(--warn)"}
-  }catch(e){el.textContent="❌ לא מקוון";el.style.color="var(--err)"}
-  document.getElementById("statusModel").textContent=getModel().split("/")[1]||"—";
-  document.getElementById("statusBuilds").textContent=buildCount;
-  document.getElementById("statusIterates").textContent=iterateCount;
-  document.getElementById("statusTokens").textContent=totalTokens;
-  document.getElementById("statusLastUsed").textContent=analyticsData.lastUsed||"—";
-  var avgTime=analyticsData.builds>0?Math.round((analyticsData.totalBuildTime||0)/analyticsData.builds):0;
-  var avgEl=document.getElementById("statusAvgTime");
-  if(avgEl)avgEl.textContent=avgTime+"s";
-  var qualityAvg=analyticsData.qualitySum&&analyticsData.builds>0?Math.round(analyticsData.qualitySum/analyticsData.builds):0;
-  var qualityEl=document.getElementById("statusQualityAvg").textContent=qualityAvg+"%";
-  var featuresEl=document.getElementById("statusFeatures");
-  if(featuresEl)featuresEl.textContent="80+";.textContent=qualityAvg+"%";
-  var featuresEl=document.getElementById("statusFeatures");
-  if(featuresEl)featuresEl.textContent="80+";;
-  if(qualityEl)qualityEl.textContent=qualityAvg+"%";
-  var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
-}
-function renderNotes(){
-  var list=document.getElementById("notesList");
-  if(!notesData.length){list.innerHTML='<div class="empty-state">אין הערות עדיין</div>';return}
-  list.innerHTML=notesData.map(function(n,i){
-    return '<div class="h-item"><div class="h-title">'+n.note.substring(0,60)+'</div><div class="h-meta">'+n.task.substring(0,30)+' · '+n.time+'</div></div>';
-  }).join("");
-}
-function renderFavorites(){
-  var list=document.getElementById("favoritesList");
-  if(!favoritesData.length){list.innerHTML='<div class="empty-state">אין מועדפים עדיין</div>';return}
-  list.innerHTML=favoritesData.map(function(f,i){
-    return '<div class="h-item" onclick="loadFavorite('+i+')"><div class="h-title">'+f.task.substring(0,60)+'</div><div class="h-meta">'+f.time+'</div></div>';
-  }).join("");
-}
-function deleteFavorite(i,event){
-  event.stopPropagation();
-  favoritesData.splice(i,1);
-  localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));
-  renderFavorites();
-  toast("🗑️ מועדף נמחק");
-}
-function loadFavorite(i){
-  document.getElementById("task").value=favoritesData[i].task;
-  toast("⭐ נטען ממועדפים");
-}
-function shareProject(){
-  var data={
-    task:document.getElementById("task").value,
-    code:code,
-    history:historyData.slice(0,5),
-    favorites:favoritesData.slice(0,5),
-    timestamp:new Date().toISOString()
-  };
-  var json=JSON.stringify(data);
-  var encoded=btoa(encodeURIComponent(json));
-  var url=window.location.origin+"?project="+encoded;
-  navigator.clipboard.writeText(url).then(function(){toast("🔗 קישור פרויקט הועתק")});
-}
-function loadProject(){
-  var projectParam=new URLSearchParams(window.location.search).get("project");
-  if(projectParam){
-    try{
-      var json=decodeURIComponent(atob(projectParam));
-      var data=JSON.parse(json);
-      if(data.task)document.getElementById("task").value=data.task;
-      if(data.code){code=data.code;document.getElementById("codeOut").textContent=code;document.getElementById("result").classList.add("show")}
-      toast("📁 פרויקט נטען");
-    }catch(e){toast("❌ קישור לא תקין")}
-  }
-}
-function shareHistory(){
-  if(!historyData.length){toast("אין היסטוריה לשתף");return}
-  var text=historyData.slice(0,5).map(function(h){return h.task}).join("\n");
-  navigator.clipboard.writeText(text).then(function(){toast("📋 היסטוריה הועתקה")});
-}
-function saveCodeHistory(){
-  if(!code)return;
-  codeHistory.unshift({code:code.substring(0,5000),time:new Date().toLocaleString(),task:document.getElementById("task").value.substring(0,50)});
-  if(codeHistory.length>5)codeHistory=codeHistory.slice(0,5);
-  localStorage.setItem("pf_code_history",JSON.stringify(codeHistory));
-}
-function loadCodeHistory(i){
-  if(codeHistory[i]){
-    code=codeHistory[i].code;
-    document.getElementById("codeOut").textContent=code;
-    document.getElementById("result").classList.add("show");
-    toast("Code loaded from history");
-  }
-}
-function importCode(){
-  var input=document.createElement("input");
-  input.type="file";
-  input.accept=".html,.js,.py,.css,.txt";
-  input.onchange=function(e){
-    var file=e.target.files[0];
-    if(!file)return;
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      code=ev.target.result;
-      document.getElementById("codeOut").textContent=code;
-      document.getElementById("result").classList.add("show");
-      toast("Code imported");
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-function exportAsFile(){
-  if(!code){toast("No code to export");return}
-  var ext=code.indexOf("<html")!==-1?"html":code.indexOf("def ")!==-1?"py":"js";
-  var b=new Blob([code],{type:"text/plain"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(b);
-  a.download="promptforge-output."+ext;
-  a.click();
-  toast("File exported");
-}
-function exportHistory(){
-  var data=JSON.stringify(historyData,null,2);
-  var b=new Blob([data],{type:"application/json"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(b);
-  a.download="promptforge-history.json";
-  a.click();
-  toast("💾 היסטוריה יוצאה");
-}
-function clearTask(){document.getElementById("task").value="";document.getElementById("result").classList.remove("show");document.getElementById("progress").classList.remove("show");toast("🗑️ נוקה")}
-async function checkHealth(){
-  try{
-    var r=await fetch(GW+"/api/health",{signal:AbortSignal.timeout(5000)});
-    var d=await r.json();
-    var dot=document.getElementById("healthDot");
-    if(d.status==="healthy"){dot.style.background="var(--success)";dot.title="Worker online"}
-    else{dot.style.background="var(--warn)";dot.title="Worker degraded"}
-  }catch(e){
-    var dot=document.getElementById("healthDot");
-    dot.style.background="var(--err)";dot.title="Worker offline";
-  }
-}
-checkHealth();
-setInterval(checkHealth,60000);
-var savedLang=localStorage.getItem("pf_lang");
-if(savedLang==="en"){currentLang="en";document.documentElement.dir="ltr";document.documentElement.lang="en";document.getElementById("langBtn").textContent="🇬🇧"}
-var savedTheme=localStorage.getItem("pf_theme");
-if(savedTheme==="light"){document.body.classList.add("light");document.getElementById("themeBtn").textContent="☀️"}
-var savedFontSize=localStorage.getItem("pf_fontsize");
-if(savedFontSize){changeFontSize(savedFontSize);document.getElementById("fontSizeSelect").value=savedFontSize}
-loadProject();
-var urlTask=new URLSearchParams(window.location.search).get("task");
-if(urlTask){try{document.getElementById("task").value=decodeURIComponent(atob(urlTask));toast("📋 משימה נטענה מהקישור")}catch(e){}}
-if(!getKey())setTimeout(function(){toast("⚙️ לחץ על הגלגל והכנס API key")},1000);
+if(!getKey())setTimeout(function(){toast("לחץ על הגלגל והכנס API key")},1000);
 </script>
-</div>
 </body>
 </html>
