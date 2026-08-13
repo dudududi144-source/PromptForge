@@ -5,172 +5,393 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PromptForge</title>
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0a0f;color:#e8e6f0;min-height:100vh}
-.container{max-width:700px;margin:0 auto;padding:60px 20px}
-.logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
-.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#a855f7);display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-text{font-size:15px;font-weight:600}
-.settings-btn{margin-right:auto;background:none;border:none;color:#5c5b63;cursor:pointer;font-size:18px;padding:6px}
-.settings-btn:hover{color:#e8e6f0}
-h1{font-size:28px;font-weight:700;margin-bottom:8px}
-.subtitle{font-size:14px;color:#8b8a93;margin-bottom:32px}
-.input-box{background:#141416;border:1px solid #232326;border-radius:12px;overflow:hidden}
-.input-box:focus-within{border-color:#4a4a52}
-.input-box textarea{width:100%;background:transparent;border:none;outline:none;color:#e8e6f0;font-family:inherit;font-size:15px;padding:16px;resize:none;min-height:100px;line-height:1.6}
-.input-box textarea::placeholder{color:#5c5b63}
-.input-actions{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid #232326}
-.hint{font-size:11px;color:#5c5b63}
-.build-btn{background:#6366f1;color:#fff;border:none;padding:8px 20px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.build-btn:hover{background:#818cf8}
-.build-btn:disabled{opacity:.5;cursor:not-allowed}
-.progress{margin-top:24px;display:none}
-.progress.show{display:block}
-.progress-bars{display:flex;gap:2px;margin-bottom:10px}
-.pbar{flex:1;height:3px;background:#232326;border-radius:2px}
-.pbar.done{background:#22c55e}
-.pbar.active{background:#6366f1}
-.progress-text{font-size:12px;color:#8b8a93}
-.result{margin-top:24px;display:none}
-.result.show{display:block}
-.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.result-title{font-size:13px;font-weight:600}
-.result-actions{display:flex;gap:4px}
-.result-actions button{background:#141416;border:1px solid #232326;color:#8b8a93;padding:5px 10px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer}
-.result-actions button:hover{color:#e8e6f0;border-color:#4a4a52}
-.code-box{background:#0a0a0c;border:1px solid #232326;border-radius:12px;padding:16px;max-height:400px;overflow:auto;direction:ltr;text-align:left}
-.code-box pre{font-family:"JetBrains Mono","Fira Code",monospace;font-size:12px;line-height:1.7;color:#e2e8f0;white-space:pre-wrap;word-break:break-word}
-.preview{margin-top:10px;border:1px solid #232326;border-radius:12px;overflow:hidden;display:none}
-.preview.show{display:block}
-.preview iframe{width:100%;height:350px;border:none;background:#fff}
-.iterate-box{margin-top:12px;display:none;gap:6px}
-.iterate-box.show{display:flex}
-.iterate-box input{flex:1;background:#141416;border:1px solid #232326;border-radius:8px;padding:8px 12px;color:#e8e6f0;font-family:inherit;font-size:13px;outline:none}
-.iterate-box button{background:#141416;border:1px solid #232326;color:#e8e6f0;padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
-.templates{margin-top:20px;display:flex;gap:6px;flex-wrap:wrap}
-.tpl-btn{background:#141416;border:1px solid #232326;color:#8b8a93;padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer}
-.tpl-btn:hover{color:#e8e6f0;border-color:#4a4a52}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
-.modal-bg.show{display:flex}
-.modal{background:#141416;border:1px solid #232326;border-radius:16px;padding:24px;width:90%;max-width:400px}
-.modal h2{font-size:16px;margin-bottom:16px}
-.modal label{display:block;font-size:12px;color:#8b8a93;margin-bottom:4px;margin-top:12px}
-.modal input,.modal select{width:100%;background:#0a0a0f;border:1px solid #232326;border-radius:8px;padding:8px 12px;color:#e8e6f0;font-family:inherit;font-size:13px;outline:none}
-.modal-save{width:100%;margin-top:16px;background:#6366f1;color:#fff;border:none;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
-.modal-close{width:100%;margin-top:6px;background:none;border:1px solid #232326;color:#8b8a93;padding:10px;border-radius:8px;font-family:inherit;font-size:13px;cursor:pointer}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a1e;border:1px solid #3a3a42;padding:10px 20px;border-radius:8px;font-size:12px;z-index:200;transition:transform .3s}
-.toast.show{transform:translateX(-50%) translateY(0)}
+:root{
+--bg:#fafafa;
+--surface:#ffffff;
+--surface-2:#f5f5f5;
+--border:#e8e8e8;
+--border-2:#d4d4d4;
+--text:#171717;
+--text-2:#525252;
+--text-3:#a3a3a3;
+--accent:#2563eb;
+--accent-hover:#1d4ed8;
+--accent-light:#eff6ff;
+--success:#16a34a;
+--radius:8px;
+--shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+--shadow-lg:0 10px 40px rgba(0,0,0,0.08);
+}
+body{font-family:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* Header */
+.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:800px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.brand-mark svg{width:16px;height:16px;fill:#fff}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:-0.01em}
+.header-actions{display:flex;gap:8px}
+.header-btn{background:none;border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s}
+.header-btn:hover{border-color:var(--border-2);color:var(--text)}
+
+/* Main */
+.main{max-width:800px;margin:0 auto;padding:48px 24px}
+
+/* Hero */
+.hero{margin-bottom:40px}
+.hero h1{font-size:32px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:8px}
+.hero p{font-size:15px;color:var(--text-2);line-height:1.6}
+
+/* Composer */
+.composer{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;transition:all .2s}
+.composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.composer textarea{width:100%;background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:15px;line-height:1.7;padding:20px;resize:none;min-height:120px}
+.composer textarea::placeholder{color:var(--text-3)}
+.composer-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface-2)}
+.composer-hint{font-size:12px;color:var(--text-3)}
+.composer-actions{display:flex;gap:8px;align-items:center}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:var(--surface);color:var(--text-2);border:1px solid var(--border);padding:8px 16px;border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer;transition:all .15s}
+.btn-secondary:hover{border-color:var(--border-2);color:var(--text)}
+
+/* Templates */
+.templates{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.template-chip{background:var(--surface);border:1px solid var(--border);color:var(--text-2);padding:6px 14px;border-radius:20px;font-family:inherit;font-size:12px;cursor:pointer;transition:all .15s}
+.template-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* Progress */
+.progress{margin-top:32px;display:none}
+.progress.visible{display:block}
+.progress-track{display:flex;gap:4px;margin-bottom:12px}
+.progress-segment{flex:1;height:2px;background:var(--border);border-radius:1px;transition:background .4s}
+.progress-segment.complete{background:var(--success)}
+.progress-segment.active{background:var(--accent)}
+.progress-label{font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px}
+.spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Output */
+.output{margin-top:32px;display:none}
+.output.visible{display:block}
+.output-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden}
+.output-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
+.output-title{font-size:13px;font-weight:600;color:var(--text)}
+.output-meta{font-size:12px;color:var(--text-3);margin-top:2px}
+.output-toolbar{display:flex;gap:6px}
+.tool-btn{background:none;border:1px solid var(--border);color:var(--text-2);padding:5px 10px;border-radius:5px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .15s}
+.tool-btn:hover{border-color:var(--border-2);color:var(--text)}
+.code-area{padding:20px;max-height:480px;overflow:auto;direction:ltr;text-align:left;background:#1e1e2e}
+.code-area pre{font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:13px;line-height:1.8;color:#cdd6f4;white-space:pre-wrap;word-break:break-word}
+
+/* Preview */
+.preview-panel{border-top:1px solid var(--border);display:none}
+.preview-panel.visible{display:block}
+.preview-panel iframe{width:100%;height:400px;border:none}
+
+/* Iterate */
+.iterate-panel{padding:16px 20px;border-top:1px solid var(--border);display:none;gap:8px}
+.iterate-panel.visible{display:flex}
+.iterate-panel input{flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
+.iterate-panel input:focus{border-color:var(--accent)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.visible{display:flex}
+.modal{background:var(--surface);border-radius:12px;box-shadow:var(--shadow-lg);padding:28px;width:100%;max-width:420px}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:6px}
+.form-group input,.form-group select{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.modal-actions{display:flex;gap:8px;margin-top:24px}
+.modal-actions .btn-primary{flex:1}
+.modal-actions .btn-secondary{flex:1}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:200;transition:transform .3s ease;box-shadow:var(--shadow-lg)}
+.toast.visible{transform:translateX(-50%) translateY(0)}
+
+/* Footer */
+.footer{max-width:800px;margin:0 auto;padding:24px;border-top:1px solid var(--border)}
+.footer p{font-size:12px;color:var(--text-3)}
+
+@media(max-width:640px){
+.main{padding:32px 16px}
+.hero h1{font-size:24px}
+}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="logo"><div class="logo-icon">⚡</div><span class="logo-text">PromptForge</span><button class="settings-btn" onclick="openSettings()">⚙️</button></div>
-<h1>מה אתה רוצה לבנות?</h1>
-<p class="subtitle">תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p>
-<div class="input-box">
-<textarea id="task" placeholder="למשל: משחק snake עם ניקוד ורמות..." rows="4"></textarea>
-<div class="input-actions"><span class="hint">Enter לשליחה</span><button class="build-btn" id="buildBtn" onclick="build()">בנה</button></div>
+
+<header class="header">
+<div class="header-inner">
+<div class="brand">
+<div class="brand-mark"><svg viewBox="0 0 24 24"><path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z"/></svg></div>
+<span class="brand-name">PromptForge</span>
 </div>
+<div class="header-actions">
+<button class="header-btn" onclick="openSettings()">Settings</button>
+</div>
+</div>
+</header>
+
+<main class="main">
+<div class="hero">
+<h1>What are you building?</h1>
+<p>Describe your task. Get a plan and working code in seconds.</p>
+</div>
+
+<div class="composer">
+<textarea id="task" placeholder="Describe what you want to build..." rows="4"></textarea>
+<div class="composer-footer">
+<span class="composer-hint">Enter to submit</span>
+<div class="composer-actions">
+<button class="btn-secondary" onclick="clearTask()">Clear</button>
+<button class="btn-primary" id="buildBtn" onclick="build()">Generate</button>
+</div>
+</div>
+</div>
+
 <div class="templates">
-<button class="tpl-btn" onclick="useTpl('snake')">🐍 Snake</button>
-<button class="tpl-btn" onclick="useTpl('todo')">✅ Todo</button>
-<button class="tpl-btn" onclick="useTpl('calc')">🔢 מחשבון</button>
-<button class="tpl-btn" onclick="useTpl('timer')">⏱️ טיימר</button>
-<button class="tpl-btn" onclick="useTpl('quiz')">❓ חידון</button>
+<button class="template-chip" onclick="useTemplate('snake')">Snake Game</button>
+<button class="template-chip" onclick="useTemplate('todo')">Todo App</button>
+<button class="template-chip" onclick="useTemplate('dashboard')">Dashboard</button>
+<button class="template-chip" onclick="useTemplate('landing')">Landing Page</button>
+<button class="template-chip" onclick="useTemplate('api')">REST API</button>
 </div>
+
 <div class="progress" id="progress">
-<div class="progress-bars"><div class="pbar" id="pb1"></div><div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div><div class="pbar" id="pb4"></div></div>
-<div class="progress-text" id="progressText">מנתח...</div>
+<div class="progress-track">
+<div class="progress-segment" id="seg1"></div>
+<div class="progress-segment" id="seg2"></div>
+<div class="progress-segment" id="seg3"></div>
+<div class="progress-segment" id="seg4"></div>
 </div>
-<div class="result" id="result">
-<div class="result-header"><span class="result-title">✨ הקוד מוכן</span>
-<div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button></div></div>
-<div class="code-box"><pre id="codeOut"></pre></div>
-<div class="preview" id="preview"><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
-<div class="iterate-box" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
+<div class="progress-label">
+<div class="spinner"></div>
+<span id="progressText">Analyzing...</span>
 </div>
 </div>
-<div class="modal-bg" id="settingsModal">
-<div class="modal"><h2>הגדרות</h2>
-<label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-...">
-<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option></select>
-<button class="modal-save" onclick="saveSettings()">שמור</button>
-<button class="modal-close" onclick="closeSettings()">סגור</button></div></div>
+
+<div class="output" id="output">
+<div class="output-card">
+<div class="output-header">
+<div>
+<div class="output-title">Generated Code</div>
+<div class="output-meta" id="outputMeta"></div>
+</div>
+<div class="output-toolbar">
+<button class="tool-btn" onclick="copyCode()">Copy</button>
+<button class="tool-btn" onclick="downloadCode()">Download</button>
+<button class="tool-btn" onclick="togglePreview()">Preview</button>
+<button class="tool-btn" onclick="toggleIterate()">Refine</button>
+</div>
+</div>
+<div class="code-area"><pre id="codeOutput"></pre></div>
+<div class="preview-panel" id="previewPanel">
+<iframe id="previewFrame" sandbox="allow-scripts"></iframe>
+</div>
+<div class="iterate-panel" id="iteratePanel">
+<input id="iterateInput" placeholder="What should be improved?">
+<button class="btn-primary" onclick="iterate()">Apply</button>
+</div>
+</div>
+</div>
+</main>
+
+<footer class="footer">
+<p>PromptForge — From task to working code.</p>
+</footer>
+
+<div class="modal-overlay" id="settingsModal">
+<div class="modal">
+<h2>Settings</h2>
+<div class="form-group">
+<label>NVIDIA API Key</label>
+<input type="password" id="apiKeyInput" placeholder="nvapi-...">
+</div>
+<div class="form-group">
+<label>Model</label>
+<select id="modelSelect">
+<option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option>
+<option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (Fast)</option>
+<option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option>
+</select>
+</div>
+<div class="modal-actions">
+<button class="btn-secondary" onclick="closeSettings()">Cancel</button>
+<button class="btn-primary" onclick="saveSettings()">Save</button>
+</div>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
+
 <script>
 var GW="https://promptforge.rabotatony.workers.dev";
 var code="";
 var building=false;
+
 function getKey(){return localStorage.getItem("pf_key")||""}
 function getModel(){return localStorage.getItem("pf_model")||"meta/llama-3.3-70b-instruct"}
-function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("settingsModal").classList.add("show")}
-function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
-function saveSettings(){var k=document.getElementById("apiKeyInput").value.trim();var m=document.getElementById("modelSelect").value;if(k)localStorage.setItem("pf_key",k);localStorage.setItem("pf_model",m);closeSettings();toast("נשמר")}
-function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2000)}
-function useTpl(name){var tpls={snake:"בנה משחק snake עם ניקוד ורמות",todo:"בנה אפליקציית todo עם הוספה ומחיקה",calc:"בנה מחשבון עם 4 פעולות",timer:"בנה טיימר עם ספירה לאחור",quiz:"בנה חידון עם 5 שאלות"};if(tpls[name]){document.getElementById("task").value=tpls[name];toast("תבנית נטענה")}}
-function setStep(n,text){for(var i=1;i<=4;i++){var bar=document.getElementById("pb"+i);bar.className="pbar"+(i<n?" done":i===n?" active":"")}document.getElementById("progressText").textContent=text}
-document.getElementById("task").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();build()}});
+
+function openSettings(){
+document.getElementById("apiKeyInput").value=getKey();
+document.getElementById("settingsModal").classList.add("visible");
+}
+function closeSettings(){document.getElementById("settingsModal").classList.remove("visible")}
+function saveSettings(){
+var k=document.getElementById("apiKeyInput").value.trim();
+var m=document.getElementById("modelSelect").value;
+if(k)localStorage.setItem("pf_key",k);
+localStorage.setItem("pf_model",m);
+closeSettings();
+showToast("Settings saved");
+}
+
+function showToast(msg){
+var t=document.getElementById("toast");
+t.textContent=msg;
+t.classList.add("visible");
+setTimeout(function(){t.classList.remove("visible")},2500);
+}
+
+function clearTask(){document.getElementById("task").value=""}
+
+function useTemplate(name){
+var templates={
+snake:"Build a snake game with score tracking, levels, and smooth animations using canvas",
+todo:"Build a todo application with add, delete, complete functionality and localStorage persistence",
+dashboard:"Build a dashboard with stat cards, a simple CSS chart, and a data table",
+landing:"Build a landing page with hero section, features grid, CTA button, and footer",
+api:"Build a REST API with CRUD operations, input validation, and error handling"
+};
+if(templates[name]){
+document.getElementById("task").value=templates[name];
+showToast("Template loaded");
+}
+}
+
+function setProgress(step,text){
+for(var i=1;i<=4;i++){
+var seg=document.getElementById("seg"+i);
+seg.className="progress-segment"+(i<step?" complete":i===step?" active":"");
+}
+document.getElementById("progressText").textContent=text;
+}
+
+document.getElementById("task").addEventListener("keydown",function(e){
+if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();build()}
+});
+
 function build(){
 var task=document.getElementById("task").value.trim();
-if(!task){toast("כתוב מה לבנות");return}
+if(!task){showToast("Describe what you want to build");return}
 var key=getKey();
-if(!key){openSettings();toast("הכנס API key");return}
+if(!key){openSettings();showToast("Enter your API key first");return}
 if(building)return;
 building=true;
 document.getElementById("buildBtn").disabled=true;
-document.getElementById("progress").classList.add("show");
-document.getElementById("result").classList.remove("show");
-setStep(1,"מנתח...");
-fetch(GW+"/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,apiKey:key})})
-.then(function(r){return r.json()})
-.then(function(pd){
-if(pd.error){toast(pd.error);reset();return}
-setStep(2,"מתכנן...");
+document.getElementById("progress").classList.add("visible");
+document.getElementById("output").classList.remove("visible");
+var startTime=Date.now();
+setProgress(1,"Analyzing task...");
+fetch(GW+"/api/plan",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({task:task,apiKey:key})
+}).then(function(r){return r.json()}).then(function(planData){
+if(planData.error){showToast(planData.error);resetBuild();return}
+setProgress(2,"Planning architecture...");
 setTimeout(function(){
-setStep(3,"בונה...");
-fetch(GW+"/api/build",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,plan:pd.plan||"",apiKey:key})})
-.then(function(r){return r.json()})
-.then(function(bd){
-if(bd.error){toast(bd.error);reset();return}
-code=bd.code||"";
-setStep(4,"בודק...");
+setProgress(3,"Generating code...");
+fetch(GW+"/api/build",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({task:task,plan:planData.plan||"",apiKey:key})
+}).then(function(r){return r.json()}).then(function(buildData){
+if(buildData.error){showToast(buildData.error);resetBuild();return}
+code=buildData.code||"";
+setProgress(4,"Validating...");
 setTimeout(function(){
-document.getElementById("progress").classList.remove("show");
-document.getElementById("codeOut").textContent=code;
-document.getElementById("result").classList.add("show");
+var elapsed=((Date.now()-startTime)/1000).toFixed(1);
+var lines=code.split("\n").length;
+document.getElementById("progress").classList.remove("visible");
+document.getElementById("codeOutput").textContent=code;
+document.getElementById("outputMeta").textContent=lines+" lines - "+elapsed+"s";
+document.getElementById("output").classList.add("visible");
 if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){
-document.getElementById("preview").classList.add("show");
+document.getElementById("previewPanel").classList.add("visible");
 document.getElementById("previewFrame").srcdoc=code;
 }
-toast("מוכן!");
-reset();
-},300);
-}).catch(function(e){toast("שגיאה");reset()});
-},300);
-}).catch(function(e){toast("שגיאה");reset()});
+showToast("Code generated");
+resetBuild();
+},400);
+}).catch(function(e){showToast("Generation failed");resetBuild()});
+},400);
+}).catch(function(e){showToast("Analysis failed");resetBuild()});
 }
-function reset(){building=false;document.getElementById("buildBtn").disabled=false}
-function copyCode(){navigator.clipboard.writeText(code).then(function(){toast("הועתק")})}
-function downloadCode(){var ext=code.indexOf("<html")!==-1?"html":"js";var b=new Blob([code],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="output."+ext;a.click();toast("ירד")}
-function togglePreview(){var p=document.getElementById("preview");p.classList.toggle("show");if(p.classList.contains("show"))document.getElementById("previewFrame").srcdoc=code}
-function toggleIterate(){document.getElementById("iterateBox").classList.toggle("show")}
+
+function resetBuild(){
+building=false;
+document.getElementById("buildBtn").disabled=false;
+}
+
+function copyCode(){
+navigator.clipboard.writeText(code).then(function(){showToast("Copied to clipboard")});
+}
+
+function downloadCode(){
+var ext=code.indexOf("<html")!==-1?"html":"js";
+var blob=new Blob([code],{type:"text/plain"});
+var a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="output."+ext;
+a.click();
+showToast("Downloaded");
+}
+
+function togglePreview(){
+var p=document.getElementById("previewPanel");
+p.classList.toggle("visible");
+if(p.classList.contains("visible")){
+document.getElementById("previewFrame").srcdoc=code;
+}
+}
+
+function toggleIterate(){
+document.getElementById("iteratePanel").classList.toggle("visible");
+}
+
 function iterate(){
 var instruction=document.getElementById("iterateInput").value.trim();
 if(!instruction||!code)return;
 var key=getKey();
-toast("משפר...");
-fetch(GW+"/api/iterate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:code,instruction:instruction,apiKey:key})})
-.then(function(r){return r.json()})
-.then(function(d){
-if(d.error){toast(d.error);return}
-code=d.code||"";
-document.getElementById("codeOut").textContent=code;
-if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1)document.getElementById("previewFrame").srcdoc=code;
-document.getElementById("iterateInput").value="";
-toast("שופר");
-}).catch(function(e){toast("שגיאה")});
+showToast("Refining...");
+fetch(GW+"/api/iterate",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({code:code,instruction:instruction,apiKey:key})
+}).then(function(r){return r.json()}).then(function(data){
+if(data.error){showToast(data.error);return}
+code=data.code||"";
+document.getElementById("codeOutput").textContent=code;
+if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){
+document.getElementById("previewFrame").srcdoc=code;
 }
-if(!getKey())setTimeout(function(){toast("לחץ על הגלגל והכנס API key")},1000);
+document.getElementById("iterateInput").value="";
+showToast("Code refined");
+}).catch(function(e){showToast("Refinement failed")});
+}
+
+if(!getKey()){
+setTimeout(function(){showToast("Click Settings to enter your API key")},1000);
+}
 </script>
 </body>
 </html>
