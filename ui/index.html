@@ -96,7 +96,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 </head>
 <body>
 <div class="container">
-  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><div class="logo-right"><button onclick="openSettings()">⚙️</button><button onclick="clearAll()">🗑️</button></div></div>
+  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
@@ -142,6 +142,31 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   </div>
   <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
+</div>
+<div class="modal-backdrop" id="helpModal">
+  <div class="modal">
+    <h2>❓ עזרה</h2>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      <p><b>איך משתמשים?</b></p>
+      <p>1. הכנס API key בהגדרות (⚙️)</p>
+      <p>2. כתוב מה אתה רוצה לבנות</p>
+      <p>3. לחץ "בנה" או Enter</p>
+      <p>4. קבל תוכנית + קוד + תצוגה</p>
+      <p>5. לחץ "שפר" כדי לשפר את הקוד</p>
+      <br>
+      <p><b>קיצורי מקלדת:</b></p>
+      <p>Enter - בנה</p>
+      <p>Shift+Enter - שורה חדשה</p>
+      <p>Ctrl+Enter - בנה (חלופי)</p>
+      <br>
+      <p><b>טיפים:</b></p>
+      <p>• השתמש בתבניות להתחלה מהירה</p>
+      <p>• לחץ "תצוגה" כדי לראות את הקוד בפעולה</p>
+      <p>• לחץ "שתף" כדי לשלוח קישור עם המשימה</p>
+      <p>• בדוק את ההיסטוריה כדי לטעון משימות קודמות</p>
+    </div>
+    <button class="modal-close" onclick="closeHelp()">סגור</button>
+  </div>
 </div>
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal"><h2>הגדרות</h2><label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-..."><label>גודל פונט</label>
@@ -315,6 +340,8 @@ function useTemplate(name){
     toast("📋 תבנית נטענה");
   }
 }
+function showHelp(){document.getElementById("helpModal").classList.add("show")}
+function closeHelp(){document.getElementById("helpModal").classList.remove("show")}
 function changeFontSize(size){
   document.querySelector(".forge-box textarea").style.fontSize=size+"px";
   document.querySelector(".code-display pre").style.fontSize=(parseInt(size)-2)+"px";
@@ -350,6 +377,20 @@ function exportHistory(){
   toast("💾 היסטוריה יוצאה");
 }
 function clearTask(){document.getElementById("task").value="";document.getElementById("result").classList.remove("show");document.getElementById("progress").classList.remove("show");toast("🗑️ נוקה")}
+async function checkHealth(){
+  try{
+    var r=await fetch(GW+"/api/health",{signal:AbortSignal.timeout(5000)});
+    var d=await r.json();
+    var dot=document.getElementById("healthDot");
+    if(d.status==="healthy"){dot.style.background="var(--success)";dot.title="Worker online"}
+    else{dot.style.background="var(--warn)";dot.title="Worker degraded"}
+  }catch(e){
+    var dot=document.getElementById("healthDot");
+    dot.style.background="var(--err)";dot.title="Worker offline";
+  }
+}
+checkHealth();
+setInterval(checkHealth,60000);
 var savedFontSize=localStorage.getItem("pf_fontsize");
 if(savedFontSize){changeFontSize(savedFontSize);document.getElementById("fontSizeSelect").value=savedFontSize}
 var urlTask=new URLSearchParams(window.location.search).get("task");
