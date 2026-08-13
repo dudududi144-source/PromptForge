@@ -157,8 +157,9 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button><button onclick="showDiff()">📊 Diff</button></div></div>
-    <div class="code-display"><pre id="codeOut"></pre></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="qualityBadge" style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--success);color:#fff;margin-right:4px"></span><span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button><button onclick="showDiff()">📊 Diff</button></div></div>
+    <div id="codeStats" style="display:flex;gap:12px;margin-bottom:8px;font-size:11px;color:var(--text3)"></div>
+<div class="code-display"><pre id="codeOut"></pre></div>
     <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><div style="display:flex;gap:8px"><button onclick="openPreviewNewTab()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px">🔗 פתח בטאב</button><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
   </div>
@@ -384,7 +385,28 @@ var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,
 var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
 var currentCategory="";
-async function forgeStream(){
+async function assessQuality(code){
+  var score=100;
+  var issues=[];
+  if(code.length<200){score-=30;issues.push("קוד קצר מדי")}
+  if(code.indexOf("<!DOCTYPE")===-1&&code.indexOf("<html")===-1&&code.indexOf("function")===-1&&code.indexOf("def ")===-1){score-=20;issues.push("מבנה לא ברור")}
+  if(code.indexOf("var ")!==-1&&code.indexOf("let ")===-1&&code.indexOf("const ")===-1){score-=10;issues.push("שימוש ב-var בלבד")}
+  if(code.indexOf("console.log")!==-1){score-=5;issues.push("console.log בקוד")}
+  if(code.indexOf("TODO")!==-1||code.indexOf("FIXME")!==-1){score-=5;issues.push("TODO/FIXME בקוד")}
+  var lines=code.split("\n");
+  var longLines=lines.filter(function(l){return l.length>120}).length;
+  if(longLines>0){score-=Math.min(longLines*2,10);issues.push(longLines+" שורות ארוכות")}
+  score=Math.max(0,score);
+  var badge=document.getElementById("qualityBadge");
+  if(badge){
+    badge.textContent=score+"%";
+    if(score>=80){badge.style.background="var(--success)"}
+    else if(score>=60){badge.style.background="var(--warn)";badge.style.color="#000"}
+    else{badge.style.background="var(--err)"}
+  }
+  return{score:score,issues:issues};
+}
+function forgeStream(){
   var task=document.getElementById("task").value.trim();
   if(!task){toast("כתוב מה אתה רוצה לבנות");return}
   var key=getKey();
@@ -685,6 +707,7 @@ async function forge(){
     if(pd.error){toast("❌ "+pd.error);document.getElementById("retryBtn").style.display="block";document.getElementById("spinner").style.display="none";reset();return}
     if(pd.plan)addToPlan(pd.plan);
     setProgress(2,"מתכנן ארכיטקטורה...");
+    var estimatedTime=words<10?"10-20 שניות":words<30?"20-40 שניות":"40-60 שניות";
     await sleep(300);
     setProgress(3,"כותב קוד...");
     var br=await fetch(GW+"/api/build",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({task:task,plan:pd.plan||"",apiKey:key})});
@@ -698,6 +721,14 @@ async function forge(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
+    assessQuality(code);
+    var statsEl=document.getElementById("codeStats");
+    if(statsEl){
+      var funcs=(code.match(/function\s/g)||[]).length;
+      var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
+      var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
+      statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span>";
+    }
     document.getElementById("result").classList.add("show");
     document.getElementById("quickActions").style.display="block";
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("preview").classList.add("show");document.getElementById("previewFrame").srcdoc=code}
@@ -747,6 +778,14 @@ async function iterate(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
+    assessQuality(code);
+    var statsEl=document.getElementById("codeStats");
+    if(statsEl){
+      var funcs=(code.match(/function\s/g)||[]).length;
+      var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
+      var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
+      statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span>";
+    }
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=code}
     document.getElementById("iterateInput").value="";
     totalTokens+=(d.tokens||0);iterateCount++;
