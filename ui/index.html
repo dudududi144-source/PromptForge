@@ -107,6 +107,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div style="font-size:11px;color:var(--text3);margin-bottom:6px">משימות אחרונות:</div>
   <div id="recentList" style="display:flex;gap:6px;flex-wrap:wrap"></div>
 </div>
+<div style="margin-top:16px;display:flex;gap:6px;align-items:center">
+  <input id="customTemplate" placeholder="תבנית חדשה..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none">
+  <button onclick="addCustomTemplate()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">+ הוסף</button>
+</div>
+<div id="customTemplates" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"></div>
 <div class="templates" id="templates" style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
   <button class="tpl-btn" onclick="useTemplate('snake')">🐍 משחק Snake</button>
   <button class="tpl-btn" onclick="useTemplate('todo')">✅ אפליקציית Todo</button>
@@ -150,7 +155,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
     <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div><div class="tab" onclick="switchTab('status',this)">🔌 סטטוס</div>
   </div>
-  <div class="tab-content active" id="tab-history"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
+  <div class="tab-content active" id="tab-history">
+<div style="margin-bottom:12px">
+  <input id="historySearch" placeholder="🔍 חפש בהיסטוריה..." oninput="searchHistory(this.value)" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
     <div class="stats-grid">
       <div class="stat"><div class="val" id="statBuilds">0</div><div class="lbl">בניות</div></div>
@@ -265,7 +274,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <option value="15" selected>רגיל</option>
   <option value="17">גדול</option>
 </select>
-<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><button class="modal-save" onclick="saveSettings()">שמור</button><div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><div style="display:flex;gap:8px;margin-top:16px">
+  <button onclick="backupData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">💾 גבה</button>
+  <button onclick="restoreData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">📂 שחזר</button>
+</div>
+<button class="modal-save" onclick="saveSettings()">שמור</button><div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
   <div style="font-size:11px;color:var(--text3);margin-bottom:8px">קיצורי מקלדת:</div>
   <div style="font-size:11px;color:var(--text2)">Enter - בנה</div>
   <div style="font-size:11px;color:var(--text2)">Shift+Enter - שורה חדשה</div>
@@ -319,6 +332,96 @@ function renderRecent(){
   el.style.display="block";
   list.innerHTML=historyData.slice(0,3).map(function(h,i){
     return '<button class="tpl-btn" onclick="document.getElementById(\'task\').value=historyData['+i+'].task;toast(\'📋 נטען\')">'+h.task.substring(0,30)+'</button>';
+  }).join("");
+}
+var customTemplatesData=JSON.parse(localStorage.getItem("pf_custom_templates")||"[]");
+function backupData(){
+  var data={
+    history:historyData,
+    favorites:favoritesData,
+    notes:notesData,
+    plans:plansData,
+    customTemplates:customTemplatesData,
+    settings:{key:getKey(),model:getModel(),theme:localStorage.getItem("pf_theme"),lang:localStorage.getItem("pf_lang"),fontsize:localStorage.getItem("pf_fontsize")}
+  };
+  var json=JSON.stringify(data,null,2);
+  var b=new Blob([json],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="promptforge-backup.json";
+  a.click();
+  toast("💾 גיבוי ירד");
+}
+function restoreData(){
+  var input=document.createElement("input");
+  input.type="file";
+  input.accept=".json";
+  input.onchange=function(e){
+    var file=e.target.files[0];
+    if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var data=JSON.parse(ev.target.result);
+        if(data.history){historyData=data.history;localStorage.setItem("pf_history",JSON.stringify(historyData));renderHistory()}
+        if(data.favorites){favoritesData=data.favorites;localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));renderFavorites()}
+        if(data.notes){notesData=data.notes;localStorage.setItem("pf_notes",JSON.stringify(notesData));renderNotes()}
+        if(data.plans){plansData=data.plans;localStorage.setItem("pf_plans",JSON.stringify(plansData));renderPlans()}
+        if(data.customTemplates){customTemplatesData=data.customTemplates;localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));renderCustomTemplates()}
+        if(data.settings){
+          if(data.settings.key)localStorage.setItem("pf_key",data.settings.key);
+          if(data.settings.model)localStorage.setItem("pf_model",data.settings.model);
+          if(data.settings.theme)localStorage.setItem("pf_theme",data.settings.theme);
+          if(data.settings.lang)localStorage.setItem("pf_lang",data.settings.lang);
+          if(data.settings.fontsize)localStorage.setItem("pf_fontsize",data.settings.fontsize);
+        }
+        toast("📂 שוחזר בהצלחה");
+        location.reload();
+      }catch(err){toast("❌ קובץ לא תקין")}
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+function addCustomTemplate(){
+  var input=document.getElementById("customTemplate");
+  var text=input.value.trim();
+  if(!text){toast("כתוב תבנית");return}
+  customTemplatesData.push(text);
+  if(customTemplatesData.length>10)customTemplatesData=customTemplatesData.slice(0,10);
+  localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));
+  input.value="";
+  renderCustomTemplates();
+  toast("✅ תבנית נוספה");
+}
+function renderCustomTemplates(){
+  var el=document.getElementById("customTemplates");
+  if(!customTemplatesData.length){el.innerHTML="";return}
+  el.innerHTML=customTemplatesData.map(function(t,i){
+    return '<button class="tpl-btn" onclick="useCustomTemplate('+i+')" style="position:relative">'+t.substring(0,30)+'<span onclick="deleteCustomTemplate('+i+',event)" style="position:absolute;top:-4px;left:-4px;background:var(--err);color:#fff;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</span></button>';
+  }).join("");
+}
+function useCustomTemplate(i){
+  document.getElementById("task").value=customTemplatesData[i];
+  toast("📋 תבנית נטענה");
+}
+function deleteCustomTemplate(i,event){
+  event.stopPropagation();
+  customTemplatesData.splice(i,1);
+  localStorage.setItem("pf_custom_templates",JSON.stringify(customTemplatesData));
+  renderCustomTemplates();
+  toast("🗑️ תבנית נמחקה");
+}
+function searchHistory(query){
+  var list=document.getElementById("historyList");
+  if(!query.trim()){renderHistory();return}
+  var filtered=historyData.filter(function(h){
+    return h.task.toLowerCase().includes(query.toLowerCase());
+  });
+  if(!filtered.length){list.innerHTML='<div class="empty-state">לא נמצאו תוצאות</div>';return}
+  list.innerHTML=filtered.map(function(h,i){
+    var originalIndex=historyData.indexOf(h);
+    return '<div class="h-item" onclick="loadHistory('+originalIndex+')"><div class="h-title">'+h.task.substring(0,60)+'</div><div class="h-meta">'+h.time+' · '+h.tokens+' tokens</div></div>';
   }).join("");
 }
 function renderHistory(){
@@ -456,7 +559,7 @@ async function iterate(){
 }
 }
 
-renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();
+renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();renderCustomTemplates();
 var templates={
   snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
   todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
