@@ -136,9 +136,9 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
     <div class="code-display"><pre id="codeOut"></pre></div>
-    <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
+    <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><div style="display:flex;gap:8px"><button onclick="openPreviewNewTab()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px">🔗 פתח בטאב</button><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
   </div>
   <div class="tabs">
@@ -217,6 +217,12 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <p>• בדוק את ההיסטוריה כדי לטעון משימות קודמות</p>
       <br>
       <p><b>גרסה:</b> 1.0</p>
+      <br>
+      <p><b>Changelog:</b></p>
+      <p style="font-size:11px;color:var(--text3)">v1.0 - ONE worker, ONE screen, 20+ features</p>
+      <p style="font-size:11px;color:var(--text3)">v0.9 - Dani's clean design</p>
+      <p style="font-size:11px;color:var(--text3)">v0.8 - Anti-Dani (sidebar, panels)</p>
+      <p style="font-size:11px;color:var(--text3)">v0.7 - Original (4 workers)</p>
       <p><b>תכונות:</b> 13</p>
       <p><b>תבניות:</b> 10</p>
       <p><b>טאבים:</b> 5</p>
@@ -426,6 +432,17 @@ function toggleTheme(){
   document.getElementById("themeBtn").textContent=isLight?"☀️":"🌙";
   localStorage.setItem("pf_theme",isLight?"light":"dark");
 }
+function copyAsMarkdown(){
+  var lang=code.indexOf("<html")!==-1?"html":code.indexOf("def ")!==-1?"python":"javascript";
+  var md="```"+lang+"\n"+code+"\n```";
+  navigator.clipboard.writeText(md).then(function(){toast("📋 הועתק כ-Markdown")});
+}
+function openPreviewNewTab(){
+  if(!code)return;
+  var blob=new Blob([code],{type:"text/html"});
+  var url=URL.createObjectURL(blob);
+  window.open(url,"_blank");
+}
 function showShortcuts(){document.getElementById("shortcutsModal").classList.add("show")}
 function closeShortcuts(){document.getElementById("shortcutsModal").classList.remove("show")}
 function showHelp(){document.getElementById("helpModal").classList.add("show")}
@@ -457,10 +474,20 @@ function downloadPlan(el){
 }
 function compareCode(){
   if(!prevCode){toast("אין קוד קודם להשוואה");return}
-  var oldLines=prevCode.split("\n").length;
-  var newLines=code.split("\n").length;
-  var diff=newLines-oldLines;
-  toast("🔀 לפני: "+oldLines+" שורות · אחרי: "+newLines+" שורות ("+(diff>=0?"+":"")+diff+")");
+  var oldLines=prevCode.split("\n");
+  var newLines=code.split("\n");
+  var added=0,removed=0;
+  var maxLen=Math.max(oldLines.length,newLines.length);
+  for(var i=0;i<maxLen;i++){
+    if(i>=oldLines.length)added++;
+    else if(i>=newLines.length)removed++;
+    else if(oldLines[i]!==newLines[i]){added++;removed++}
+  }
+  var msg="🔀 השוואה:\n";
+  msg+="לפני: "+oldLines.length+" שורות\n";
+  msg+="אחרי: "+newLines.length+" שורות\n";
+  msg+="נוספו: "+added+" · הוסרו: "+removed;
+  toast(msg);
 }
 function addNote(){
   var note=prompt("הוסף הערה:");
