@@ -1,55 +1,47 @@
 # PromptForge
 
-Task to working code in seconds.
+AI-powered code generation tool. Describe what you want to build, get working code in seconds.
 
-## Live
+## Features
+
+- AI Code Generation (DeepSeek Coder, Llama 3.1)
+- Dark/Light Mode
+- Build History (last 10)
+- 8 Templates
+- Live HTML Preview
+- Code Refine/Iterate
+- Export (auto-detect language)
+- Favorites
+- Code Validation Hints
+- Copy as Markdown
+- Line Numbers Toggle
+- Auto-save Draft
+- Share Links
+- Code Stats
+- Keyboard Shortcuts
+
+## URLs
 
 - UI: https://promptforge-ui.pages.dev
 - Worker: https://promptforge.rabotatony.workers.dev
 
-## Features
+## API Endpoints
 
-- ONE field, ONE button
-- 4-bar progress indicator
-- Code display + Live preview
-- Inline iterate
-- 10 templates
-- History, Stats, Plans, Favorites tabs
-- Share, Notes, Compare
-- Health indicator
-- Help modal
-- Font size adjustment
-- Export history as JSON
-- Retry on error
-- Recent tasks
-
-## API
-
-- POST /api/plan - Analyze task
+- GET /api/health - Health check
+- POST /api/plan - Generate action plan
 - POST /api/build - Generate code
-- POST /api/iterate - Fix code
-- GET /api/health - Status
+- POST /api/iterate - Refine existing code
 
-## Stack
+## Setup
+
+1. Get NVIDIA Build API key from https://build.nvidia.com
+2. Open https://promptforge-ui.pages.dev
+3. Settings -> Enter API key -> Save
+4. Start building!
+
+## Tech Stack
 
 - Frontend: Vanilla HTML/CSS/JS
-- Backend: Cloudflare Worker
+- Backend: Cloudflare Workers
 - AI: NVIDIA Build API
 - Hosting: Cloudflare Pages + Workers
-
-## Changelog
-
-### v1.0 Final
-- ONE worker with 4 endpoints
-- ONE screen UI with clean design
-- 10 templates
-- History, Stats, Plans, Favorites
-- Share, Notes, Compare
-- Health indicator + Help modal
-- Font size + URL task loading
-- Export + Retry + Recent tasks
-- Meta tags + Favicon + CI/CD
-
-## License
-
-MIT
