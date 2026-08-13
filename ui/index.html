@@ -259,7 +259,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
-  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens</div>
+  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens · 15 תבניות · 28 פעולות</div>
 </div>
 <div class="modal-backdrop" id="diffModal">
   <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
@@ -421,6 +421,16 @@ async function analyzeComplexity(code){
     if(line.indexOf("class")!==-1)complexity++;
   }
   return complexity;
+}
+function detectLanguage(code){
+  if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1)return"HTML";
+  if(code.indexOf("import React")!==-1||code.indexOf("from 'react'")!==-1)return"React";
+  if(code.indexOf("def ")!==-1&&code.indexOf("import ")!==-1)return"Python";
+  if(code.indexOf("function ")!==-1&&code.indexOf("var ")!==-1)return"JavaScript";
+  if(code.indexOf("const ")!==-1&&code.indexOf("=>")!==-1)return"Modern JS";
+  if(code.indexOf("SELECT ")!==-1||code.indexOf("INSERT ")!==-1)return"SQL";
+  if(code.indexOf(".container")!==-1&&code.indexOf("display:")!==-1)return"CSS";
+  return"Code";
 }
 function assessQuality(code){
   var score=100;
@@ -761,7 +771,8 @@ async function forge(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    var qualityResult=assessQuality(code);
+    var qualityResult=if(chars>50000){toast("⚠️ קוד גדול מאוד - שקול לפצל למספר קבצים")}
+    assessQuality(code);
   analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
   localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     var statsEl=document.getElementById("codeStats");
@@ -822,7 +833,8 @@ async function iterate(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    var qualityResult=assessQuality(code);
+    var qualityResult=if(chars>50000){toast("⚠️ קוד גדול מאוד - שקול לפצל למספר קבצים")}
+    assessQuality(code);
   analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
   localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     var statsEl=document.getElementById("codeStats");
