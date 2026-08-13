@@ -236,6 +236,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
         <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--text3)">זמן ממוצע</span>
+        <span id="statusAvgTime" style="font-size:12px;color:var(--text3)">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
         <span style="font-size:12px;color:var(--text3)">שימוש אחרון</span>
         <span id="statusLastUsed" style="font-size:12px;color:var(--text3)">—</span>
         <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
@@ -745,7 +749,7 @@ async function forge(){
     document.getElementById("codeOut").textContent=code;
     var lines=code.split("\n").length;
     var chars=code.length;
-    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
+    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
     assessQuality(code);
     var statsEl=document.getElementById("codeStats");
     if(statsEl){
@@ -804,7 +808,7 @@ async function iterate(){
     document.getElementById("codeOut").textContent=code;
     var lines=code.split("\n").length;
     var chars=code.length;
-    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
+    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
     assessQuality(code);
     var statsEl=document.getElementById("codeStats");
     if(statsEl){
@@ -1006,6 +1010,9 @@ async function checkStatus(){
   document.getElementById("statusIterates").textContent=iterateCount;
   document.getElementById("statusTokens").textContent=totalTokens;
   document.getElementById("statusLastUsed").textContent=analyticsData.lastUsed||"—";
+  var avgTime=analyticsData.builds>0?Math.round((analyticsData.totalBuildTime||0)/analyticsData.builds):0;
+  var avgEl=document.getElementById("statusAvgTime");
+  if(avgEl)avgEl.textContent=avgTime+"s";
   var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
 }
 function renderNotes(){
