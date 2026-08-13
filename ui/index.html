@@ -145,6 +145,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <button class="tpl-btn" onclick="quickAction('accessibility')">♿ הוסף נגישות</button>
     <button class="tpl-btn" onclick="quickAction('dark')">🌙 הוסף dark mode</button>
     <button class="tpl-btn" onclick="quickAction('animate')">✨ הוסף אנימציות</button>
+    <button class="tpl-btn" onclick="quickAction('review')">🔍 Code Review</button>
+    <button class="tpl-btn" onclick="quickAction('security')">🔒 אבטחה</button>
+    <button class="tpl-btn" onclick="quickAction('performance')">⚡ ביצועים</button>
+    <button class="tpl-btn" onclick="quickAction('refactor')">🏗️ Refactor</button>
   </div>
 </div>
 <div class="progress" id="progress">
@@ -160,7 +164,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="tabs">
     <div class="tab active" onclick="switchTab('history',this)">📋 היסטוריה</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
-    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div><div class="tab" onclick="switchTab('status',this)">🔌 סטטוס</div><div class="tab" onclick="switchTab('snippets',this)">✂️ Snippets</div>
+    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div><div class="tab" onclick="switchTab('status',this)">🔌 סטטוס</div><div class="tab" onclick="switchTab('snippets',this)">✂️ Snippets</div><div class="tab" onclick="switchTab('projects',this)">📁 פרויקטים</div>
   </div>
   <div class="tab-content active" id="tab-history">
 <div style="margin-bottom:12px">
@@ -174,7 +178,14 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div class="stat"><div class="val" id="statTokens">0</div><div class="lbl">Tokens</div></div>
     </div>
   </div>
-  <div class="tab-content" id="tab-snippets">
+  <div class="tab-content" id="tab-projects">
+  <div style="margin-bottom:12px;display:flex;gap:6px">
+    <input id="projectName" placeholder="שם הפרויקט..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
+    <button onclick="addProject()" style="background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;cursor:pointer">+ צור</button>
+  </div>
+  <div id="projectsList"><div class="empty-state">אין פרויקטים עדיין</div></div>
+</div>
+<div class="tab-content" id="tab-snippets">
   <div style="margin-bottom:12px;display:flex;gap:6px">
     <input id="snippetCode" placeholder="הדבק קוד..." style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none;direction:ltr;text-align:left">
     <input id="snippetName" placeholder="שם" style="width:100px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:12px;outline:none">
@@ -350,6 +361,7 @@ function renderRecent(){
   }).join("");
 }
 var customTemplatesData=JSON.parse(localStorage.getItem("pf_custom_templates")||"[]");
+var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
 var currentCategory="";
 function setCategory(cat){
@@ -366,6 +378,38 @@ function setCategory(cat){
     document.getElementById("task").value=prefixes[cat]+task;
   }
   toast("📂 קטגוריה: "+cat);
+}
+function addProject(){
+  var name=document.getElementById("projectName").value.trim();
+  if(!name){toast("כתוב שם לפרויקט");return}
+  projectsData.unshift({name:name,tasks:[],created:new Date().toLocaleString()});
+  if(projectsData.length>10)projectsData=projectsData.slice(0,10);
+  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
+  document.getElementById("projectName").value="";
+  renderProjects();
+  toast("📁 פרויקט נוצר");
+}
+function renderProjects(){
+  var list=document.getElementById("projectsList");
+  if(!projectsData.length){list.innerHTML='<div class="empty-state">אין פרויקטים עדיין</div>';return}
+  list.innerHTML=projectsData.map(function(p,i){
+    return '<div class="h-item"><div style="display:flex;justify-content:space-between;align-items:center"><div class="h-title">📁 '+p.name+'</div><div style="display:flex;gap:4px"><button onclick="addToProject('+i+')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px">+ משימה</button><button onclick="deleteProject('+i+',event)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px">🗑️</button></div></div><div class="h-meta">'+p.tasks.length+' משימות · '+p.created+'</div></div>';
+  }).join("");
+}
+function addToProject(i){
+  var task=document.getElementById("task").value.trim();
+  if(!task){toast("כתוב משימה קודם");return}
+  projectsData[i].tasks.push({task:task,time:new Date().toLocaleString()});
+  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
+  renderProjects();
+  toast("📁 משימה נוספה לפרויקט");
+}
+function deleteProject(i,event){
+  event.stopPropagation();
+  projectsData.splice(i,1);
+  localStorage.setItem("pf_projects",JSON.stringify(projectsData));
+  renderProjects();
+  toast("🗑️ פרויקט נמחק");
 }
 function addSnippet(){
   var code=document.getElementById("snippetCode").value.trim();
@@ -620,7 +664,7 @@ async function iterate(){
 }
 }
 
-renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();renderCustomTemplates();renderSnippets();
+renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();renderCustomTemplates();renderSnippets();renderProjects();
 var templates={
   snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
   todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
@@ -768,7 +812,11 @@ function quickAction(type){
     responsive:"תתאים את הקוד למובייל וטאבלט עם responsive design",
     accessibility:"תוסיף תכונות נגישות: aria labels, keyboard navigation, contrast",
     dark:"תוסיף dark mode עם toggle",
-    animate:"תוסיף אנימציות CSS חלקות"
+    animate:"תוסיף אנימציות CSS חלקות",
+    review:"תבצע code review מלא לקוד: מצא באגים, הצע שיפורים, בדוק best practices",
+    security:"תבדוק את הקוד לבעיות אבטחה: XSS, injection, exposure",
+    performance:"תבצע אופטימיזציית ביצועים לקוד:减少 memory usage, improve rendering",
+    refactor:"תבצע refactoring לקוד: שמות טובים, ארכיטקטורה נקייה, DRY"
   };
   if(actions[type]&&code){
     document.getElementById("iterateInput").value=actions[type];
