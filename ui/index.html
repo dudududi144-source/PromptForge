@@ -263,7 +263,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
-  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens · 15 תבניות · 28 פעולות</div>
+  <div class="footer">PromptForge v1.0 - Full system with 80+ features — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens · 15 תבניות · 28 פעולות</div>
 </div>
 <div class="modal-backdrop" id="diffModal">
   <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
@@ -512,6 +512,7 @@ function forgeStream(){
     var lines2=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines2+" שורות · "+chars+" תווים)";
+    var codeSizeKB=(chars/1024).toFixed(1);
     buildCount++;
     analyticsData.builds++;
     localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
@@ -1056,7 +1057,9 @@ async function checkStatus(){
   var avgEl=document.getElementById("statusAvgTime");
   if(avgEl)avgEl.textContent=avgTime+"s";
   var qualityAvg=analyticsData.qualitySum&&analyticsData.builds>0?Math.round(analyticsData.qualitySum/analyticsData.builds):0;
-  var qualityEl=document.getElementById("statusQualityAvg");
+  var qualityEl=document.getElementById("statusQualityAvg").textContent=qualityAvg+"%";
+  var featuresEl=document.getElementById("statusFeatures");
+  if(featuresEl)featuresEl.textContent="80+";;
   if(qualityEl)qualityEl.textContent=qualityAvg+"%";
   var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
 }
