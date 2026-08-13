@@ -159,6 +159,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <button class="tpl-btn" onclick="quickAction('ci')">🔄 CI/CD</button>
     <button class="tpl-btn" onclick="quickAction('docker')">🐳 Docker</button>
     <button class="tpl-btn" onclick="quickAction('readme')">📖 README</button>
+    <button class="tpl-btn" onclick="quickAction('errorHandling')">🛡️ Error Handling</button>
+    <button class="tpl-btn" onclick="quickAction('validation')">✅ Validation</button>
+    <button class="tpl-btn" onclick="quickAction('caching')">💾 Caching</button>
+    <button class="tpl-btn" onclick="quickAction('logging')">📝 Logging</button>
   </div>
 </div>
 <div class="progress" id="progress">
@@ -238,6 +242,10 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
         <span style="font-size:12px;color:var(--text3)">זמן ממוצע</span>
         <span id="statusAvgTime" style="font-size:12px;color:var(--text3)">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="font-size:12px;color:var(--text3)">איכות ממוצעת</span>
+        <span id="statusQualityAvg" style="font-size:12px;color:var(--text3)">—</span>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
         <span style="font-size:12px;color:var(--text3)">שימוש אחרון</span>
@@ -421,6 +429,9 @@ function assessQuality(code){
   if(code.indexOf("<!DOCTYPE")===-1&&code.indexOf("<html")===-1&&code.indexOf("function")===-1&&code.indexOf("def ")===-1){score-=20;issues.push("מבנה לא ברור")}
   if(code.indexOf("var ")!==-1&&code.indexOf("let ")===-1&&code.indexOf("const ")===-1){score-=10;issues.push("שימוש ב-var בלבד")}
   if(code.indexOf("console.log")!==-1){score-=5;issues.push("console.log בקוד")}
+  if(code.indexOf("alert(")!==-1){score-=5;issues.push("alert() בקוד")}
+  if(code.indexOf("eval(")!==-1){score-=15;issues.push("eval() מסוכן")}
+  if(code.indexOf("document.write")!==-1){score-=10;issues.push("document.write לא מומלץ")}
   if(code.indexOf("TODO")!==-1||code.indexOf("FIXME")!==-1){score-=5;issues.push("TODO/FIXME בקוד")}
   var lines=code.split("\n");
   var longLines=lines.filter(function(l){return l.length>120}).length;
@@ -750,7 +761,9 @@ async function forge(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    assessQuality(code);
+    var qualityResult=assessQuality(code);
+  analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
+  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     var statsEl=document.getElementById("codeStats");
     if(statsEl){
       var funcs=(code.match(/function\s/g)||[]).length;
@@ -809,7 +822,9 @@ async function iterate(){
     var lines=code.split("\n").length;
     var chars=code.length;
     document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים · "+(chars/1024).toFixed(1)+"KB)";
-    assessQuality(code);
+    var qualityResult=assessQuality(code);
+  analyticsData.qualitySum=(analyticsData.qualitySum||0)+qualityResult.score;
+  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     var statsEl=document.getElementById("codeStats");
     if(statsEl){
       var funcs=(code.match(/function\s/g)||[]).length;
@@ -1013,6 +1028,9 @@ async function checkStatus(){
   var avgTime=analyticsData.builds>0?Math.round((analyticsData.totalBuildTime||0)/analyticsData.builds):0;
   var avgEl=document.getElementById("statusAvgTime");
   if(avgEl)avgEl.textContent=avgTime+"s";
+  var qualityAvg=analyticsData.qualitySum&&analyticsData.builds>0?Math.round(analyticsData.qualitySum/analyticsData.builds):0;
+  var qualityEl=document.getElementById("statusQualityAvg");
+  if(qualityEl)qualityEl.textContent=qualityAvg+"%";
   var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
 }
 function renderNotes(){
