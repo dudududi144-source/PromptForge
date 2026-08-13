@@ -122,7 +122,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button></div></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button></div></div>
     <div class="code-display"><pre id="codeOut"></pre></div>
     <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
@@ -144,7 +144,13 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
 </div>
 <div class="modal-backdrop" id="settingsModal">
-  <div class="modal"><h2>הגדרות</h2><label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-..."><label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><button class="modal-save" onclick="saveSettings()">שמור</button><div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+  <div class="modal"><h2>הגדרות</h2><label>NVIDIA API Key</label><input type="password" id="apiKeyInput" placeholder="nvapi-..."><label>גודל פונט</label>
+<select id="fontSizeSelect" onchange="changeFontSize(this.value)">
+  <option value="13">קטן</option>
+  <option value="15" selected>רגיל</option>
+  <option value="17">גדול</option>
+</select>
+<label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><button class="modal-save" onclick="saveSettings()">שמור</button><div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
   <div style="font-size:11px;color:var(--text3);margin-bottom:8px">קיצורי מקלדת:</div>
   <div style="font-size:11px;color:var(--text2)">Enter - בנה</div>
   <div style="font-size:11px;color:var(--text2)">Shift+Enter - שורה חדשה</div>
@@ -234,6 +240,7 @@ async function forge(){
   if(building)return;
   building=true;
   document.getElementById("forgeBtn").disabled=true;
+  document.getElementById("forgeBtn").style.opacity="0.6";
   document.getElementById("forgeBtnText").textContent="בונה...";
   document.getElementById("progress").classList.add("show");
   document.getElementById("result").classList.remove("show");
@@ -265,7 +272,7 @@ async function forge(){
   reset();
 }
 
-function reset(){building=false;document.getElementById("forgeBtn").disabled=false;document.getElementById("forgeBtnText").textContent="בנה"}
+function reset(){building=false;document.getElementById("forgeBtn").disabled=false;document.getElementById("forgeBtn").style.opacity="1";document.getElementById("forgeBtnText").textContent="בנה"}
 function copyCode(){navigator.clipboard.writeText(code).then(function(){toast("📋 הועתק")})}
 function downloadCode(){var ext=code.indexOf("<html")!==-1?"html":"js";var b=new Blob([code],{type:"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="output."+ext;a.click();toast("💾 ירד")}
 function togglePreview(){var p=document.getElementById("preview");p.classList.toggle("show");if(p.classList.contains("show"))document.getElementById("previewFrame").srcdoc=code}
@@ -308,6 +315,18 @@ function useTemplate(name){
     toast("📋 תבנית נטענה");
   }
 }
+function changeFontSize(size){
+  document.querySelector(".forge-box textarea").style.fontSize=size+"px";
+  document.querySelector(".code-display pre").style.fontSize=(parseInt(size)-2)+"px";
+  localStorage.setItem("pf_fontsize",size);
+}
+function shareTask(){
+  var task=document.getElementById("task").value.trim();
+  if(!task){toast("אין משימה לשתף");return}
+  var encoded=btoa(encodeURIComponent(task));
+  var url=window.location.origin+"?task="+encoded;
+  navigator.clipboard.writeText(url).then(function(){toast("🔗 קישור הועתק")});
+}
 function copyPlan(el){
   var text=el.closest(".plan-item").querySelector(".p-text").textContent;
   navigator.clipboard.writeText(text).then(function(){toast("📋 תוכנית הועתקה")});
@@ -331,6 +350,10 @@ function exportHistory(){
   toast("💾 היסטוריה יוצאה");
 }
 function clearTask(){document.getElementById("task").value="";document.getElementById("result").classList.remove("show");document.getElementById("progress").classList.remove("show");toast("🗑️ נוקה")}
+var savedFontSize=localStorage.getItem("pf_fontsize");
+if(savedFontSize){changeFontSize(savedFontSize);document.getElementById("fontSizeSelect").value=savedFontSize}
+var urlTask=new URLSearchParams(window.location.search).get("task");
+if(urlTask){try{document.getElementById("task").value=decodeURIComponent(atob(urlTask));toast("📋 משימה נטענה מהקישור")}catch(e){}}
 if(!getKey())setTimeout(function(){toast("⚙️ לחץ על הגלגל והכנס API key")},1000);
 </script>
 </body>
