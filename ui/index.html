@@ -659,6 +659,18 @@ showToast("Code refined");
 if(!getKey()){
 setTimeout(function(){showToast("Click Settings to enter your API key")},1000);
 }
+
+function compareCode() {
+  if (!previousCode) { showToast("No previous version to compare"); return; }
+  var output = document.getElementById("codeOutput");
+  if (output.textContent === code) {
+    output.textContent = "=== PREVIOUS VERSION ===\n" + previousCode + "\n\n=== CURRENT VERSION ===\n" + code;
+    showToast("Showing comparison");
+  } else {
+    output.textContent = code;
+    showToast("Showing current code");
+  }
+}
 </script>
 </div>
 </body>
