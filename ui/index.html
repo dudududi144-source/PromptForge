@@ -206,6 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <button class="tool-btn" onclick="togglePreview()">Preview</button>
 <button class="tool-btn" onclick="openPreviewTab()">Open</button>
 <button class="tool-btn" onclick="toggleIterate()">Refine</button>
+<button class="tool-btn" id="compareBtn" onclick="toggleCompare()" style="display:none">Compare</button>
 <button class="tool-btn" onclick="exportCode()">Export</button>
 <button class="tool-btn" id="lineNumBtn" onclick="toggleLineNumbers()">Lines</button>
 <button class="tool-btn" onclick="saveFavorite()">Save</button>
@@ -633,7 +634,9 @@ function iterate(){
 var instruction=document.getElementById("iterateInput").value.trim();
 if(!instruction||!code)return;
 var key=getKey();
-showToast("Refining...");
+previousCode = code;
+  document.getElementById("compareBtn").style.display = "inline-block";
+  showToast("Refining...");
 fetch(GW+"/api/iterate",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
