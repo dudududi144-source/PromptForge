@@ -444,6 +444,8 @@ function assessQuality(code){
   if(code.indexOf("var ")!==-1&&code.indexOf("let ")===-1&&code.indexOf("const ")===-1){score-=10;issues.push("שימוש ב-var בלבד")}
   if(code.indexOf("console.log")!==-1){score-=5;issues.push("console.log בקוד")}
   if(code.indexOf("alert(")!==-1){score-=5;issues.push("alert() בקוד")}
+  var emptyFuncs=(code.match(/function\s*\(\s*\)\s*\{\s*\}/g)||[]).length;
+  if(emptyFuncs>0){score-=emptyFuncs*3;issues.push(emptyFuncs+" empty functions")}
   if(code.indexOf("eval(")!==-1){score-=15;issues.push("eval() מסוכן")}
   if(code.indexOf("document.write")!==-1){score-=10;issues.push("document.write לא מומלץ")}
   if(code.indexOf("TODO")!==-1||code.indexOf("FIXME")!==-1){score-=5;issues.push("TODO/FIXME בקוד")}
@@ -700,14 +702,14 @@ function searchHistory(query){
   if(!filtered.length){list.innerHTML='<div class="empty-state">לא נמצאו תוצאות</div>';return}
   list.innerHTML=filtered.map(function(h,i){
     var originalIndex=historyData.indexOf(h);
-    return '<div class="h-item" onclick="loadHistory('+originalIndex+')"><div class="h-title">'+h.task.substring(0,60)+'</div><div class="h-meta">'+h.time+' · '+h.tokens+' tokens</div></div>';
+    return '<div class="h-item" onclick="loadHistory('+originalIndex+')"><div class="h-title">'+h.task.substring(0,60)+' ('+h.task.split(/\s+/).length+' words)'+'</div><div class="h-meta">'+h.time+' · '+h.tokens+' tokens</div></div>';
   }).join("");
 }
 function renderHistory(){
   var list=document.getElementById("historyList");
   if(!historyData.length){list.innerHTML="<div class=\"empty-state\">אין היסטוריה עדיין</div>";return}
   list.innerHTML=historyData.map(function(h,i){
-    return "<div class=\"h-item\" onclick=\"loadHistory("+i+")\"><div class=\"h-title\">"+h.task.substring(0,60)+"</div><div class=\"h-meta\">"+h.time+" · "+h.tokens+" tokens</div></div>";
+    return "<div class=\"h-item\" onclick=\"loadHistory("+i+")\"><div class=\"h-title\">"+h.task.substring(0,60)+' ('+h.task.split(/\s+/).length+' words)'+"</div><div class=\"h-meta\">"+h.time+" · "+h.tokens+" tokens</div></div>";
   }).join("");
 }
 function loadHistory(i){document.getElementById("task").value=historyData[i].task;toast("📋 נטען")}
