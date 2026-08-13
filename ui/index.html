@@ -100,7 +100,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
-    <div class="forge-actions"><span class="forge-hint">Enter לשליחה · Shift+Enter שורה חדשה</span><button onclick="clearTask()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 8px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">🗑️ נקה</button><button class="forge-btn" id="forgeBtn" onclick="forge()"><span>→</span><span id="forgeBtnText">בנה</span></button></div>
+    <div class="forge-actions"><span class="forge-hint">Enter לשליחה · Shift+Enter שורה חדשה</span><div style="display:flex;gap:4px"><button onclick="saveFavorite()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px" title="שמור כמועדף">⭐</button></div><button onclick="clearTask()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 8px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">🗑️ נקה</button><button class="forge-btn" id="forgeBtn" onclick="forge()"><span>→</span><span id="forgeBtnText">בנה</span></button></div>
   </div>
   <div id="recentTasks" style="margin-top:16px;display:none">
   <div style="font-size:11px;color:var(--text3);margin-bottom:6px">משימות אחרונות:</div>
@@ -130,7 +130,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="tabs">
     <div class="tab active" onclick="switchTab('history',this)">📋 היסטוריה</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
-    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div>
+    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div>
   </div>
   <div class="tab-content active" id="tab-history"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
@@ -140,7 +140,8 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div class="stat"><div class="val" id="statTokens">0</div><div class="lbl">Tokens</div></div>
     </div>
   </div>
-  <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
+  <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
+<div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
 </div>
 <div class="modal-backdrop" id="helpModal">
@@ -188,6 +189,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 var GW="https://promptforge.rabotatony.workers.dev";
 var code="",building=false,totalTokens=0,buildCount=0,iterateCount=0;
 var historyData=JSON.parse(localStorage.getItem("pf_history")||"[]");
+var favoritesData=JSON.parse(localStorage.getItem("pf_favorites")||"[]");
 var plansData=JSON.parse(localStorage.getItem("pf_plans")||"[]");
 
 function getKey(){return localStorage.getItem("pf_key")||""}
@@ -322,7 +324,7 @@ async function iterate(){
   }catch(e){toast("❌ "+e.message)}
 }
 
-renderHistory();renderPlans();updateStats();renderRecent();
+renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();
 var templates={
   snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
   todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
@@ -366,6 +368,28 @@ function downloadPlan(el){
   a.download="plan.txt";
   a.click();
   toast("💾 תוכנית ירדה");
+}
+function saveFavorite(){
+  var task=document.getElementById("task").value.trim();
+  if(!task){toast("אין משימה לשמור");return}
+  var exists=favoritesData.some(function(f){return f.task===task});
+  if(exists){toast("⚠️ כבר שמור כמועדף");return}
+  favoritesData.unshift({task:task,time:new Date().toLocaleString()});
+  if(favoritesData.length>20)favoritesData=favoritesData.slice(0,20);
+  localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));
+  renderFavorites();
+  toast("⭐ נשמר כמועדף");
+}
+function renderFavorites(){
+  var list=document.getElementById("favoritesList");
+  if(!favoritesData.length){list.innerHTML='<div class="empty-state">אין מועדפים עדיין</div>';return}
+  list.innerHTML=favoritesData.map(function(f,i){
+    return '<div class="h-item" onclick="loadFavorite('+i+')"><div class="h-title">'+f.task.substring(0,60)+'</div><div class="h-meta">'+f.time+'</div></div>';
+  }).join("");
+}
+function loadFavorite(i){
+  document.getElementById("task").value=favoritesData[i].task;
+  toast("⭐ נטען ממועדפים");
 }
 function exportHistory(){
   var data=JSON.stringify(historyData,null,2);
