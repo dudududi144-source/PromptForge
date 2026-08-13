@@ -196,11 +196,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 </div>
 <div class="output-toolbar">
 <button class="tool-btn" onclick="copyCode()">Copy</button>
+<button class="tool-btn" onclick="copyMarkdown()">MD</button>
 <button class="tool-btn" onclick="downloadCode()">Download</button>
 <button class="tool-btn" onclick="togglePreview()">Preview</button>
 <button class="tool-btn" onclick="toggleIterate()">Refine</button>
 <button class="tool-btn" onclick="exportCode()">Export</button>
 <button class="tool-btn" id="lineNumBtn" onclick="toggleLineNumbers()">Lines</button>
+<button class="tool-btn" onclick="saveFavorite()">Save</button>
 </div>
 </div>
 <div class="code-area"><pre id="codeOutput"></pre></div>
@@ -446,6 +448,13 @@ building=false;
 document.getElementById("buildBtn").disabled=false;
 }
 
+function copyMarkdown() {
+  var lang = "javascript";
+  if (code.indexOf("<html") !== -1) lang = "html";
+  else if (code.indexOf("def ") !== -1) lang = "python";
+  var md = "```" + lang + "\n" + code + "\n```";
+  navigator.clipboard.writeText(md).then(function() { showToast("Copied as Markdown"); });
+}
 function copyCode(){
 navigator.clipboard.writeText(code).then(function(){showToast("Copied to clipboard")});
 }
@@ -497,6 +506,35 @@ function exportCode() {
   a.click();
   URL.revokeObjectURL(a.href);
   showToast("Exported as ." + lang);
+}
+function validateCode(code) {
+  var issues = [];
+  if (code.indexOf("<html") !== -1 || code.indexOf("<!DOCTYPE") !== -1) {
+    if (code.indexOf("viewport") === -1) issues.push("Missing viewport meta tag");
+    if (code.indexOf("<title") === -1) issues.push("Missing title tag");
+  }
+  if (code.indexOf("console.log") !== -1) issues.push("Contains console.log statements");
+  if (code.indexOf("var ") !== -1 && code.indexOf("let ") === -1 && code.indexOf("const ") === -1) {
+    issues.push("Uses var instead of let/const");
+  }
+  if (issues.length > 0) {
+    var metaEl = document.getElementById("outputMeta");
+    if (metaEl) {
+      metaEl.textContent += " | " + issues.length + " hint(s)";
+      metaEl.title = issues.join("\n");
+    }
+  }
+}
+function saveFavorite() {
+  var task = document.getElementById("task").value.trim();
+  if (!task) { showToast("No task to save"); return; }
+  var favorites = JSON.parse(localStorage.getItem("pf_favorites") || "[]");
+  var exists = favorites.some(function(f) { return f.task === task; });
+  if (exists) { showToast("Already saved"); return; }
+  favorites.unshift({ task: task, time: new Date().toLocaleString() });
+  if (favorites.length > 20) favorites = favorites.slice(0, 20);
+  localStorage.setItem("pf_favorites", JSON.stringify(favorites));
+  showToast("Saved to favorites");
 }
 function toggleIterate(){
 document.getElementById("iteratePanel").classList.toggle("visible");
