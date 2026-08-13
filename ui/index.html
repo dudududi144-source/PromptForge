@@ -100,7 +100,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleLang()" title="שפה" id="langBtn">🇮🇱</button><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showShortcuts()" title="קיצורי מקלדת">⌨️</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
-    <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
+    <textarea id="task" oninput="updateCharCount()" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
     <div class="forge-actions"><span class="forge-hint">Enter לשליחה · Shift+Enter שורה חדשה</span><div style="display:flex;gap:4px"><button onclick="saveFavorite()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px" title="שמור כמועדף">⭐</button></div><button onclick="clearTask()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 8px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">🗑️ נקה</button><button class="forge-btn" id="forgeBtn" onclick="forge()"><span>→</span><span id="forgeBtnText">בנה</span></button></div>
   </div>
   <div id="recentTasks" style="margin-top:16px;display:none">
@@ -119,6 +119,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <button onclick="addCustomTemplate()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">+ הוסף</button>
 </div>
 <div id="customTemplates" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"></div>
+<div id="quickStats" style="display:flex;gap:12px;margin-bottom:12px;font-size:11px;color:var(--text3)"><span id="qsBuilds">0 builds</span><span id="qsTokens">0 tokens</span></div>
 <div class="templates" id="templates" style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
   <button class="tpl-btn" onclick="useTemplate('snake')">🐍 משחק Snake</button>
   <button class="tpl-btn" onclick="useTemplate('todo')">✅ אפליקציית Todo</button>
@@ -551,6 +552,8 @@ function addProject(){
   renderProjects();
   toast("📁 פרויקט נוצר");
 }
+function updateCharCount(){var task=document.getElementById("task").value;}
+function updateQuickStats(){var b=document.getElementById("qsBuilds");var t=document.getElementById("qsTokens");if(b)b.textContent=buildCount+" builds";if(t)t.textContent=totalTokens+" tokens";}
 function renderCodeHistory(){
   var list=document.getElementById("codeHistoryList");
   if(!list)return;
@@ -876,6 +879,7 @@ async function iterate(){
 }
 
 renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();renderCustomTemplates();renderSnippets();renderProjects();
+var templateDescriptions={snake:"Classic snake game",todo:"Todo app with localStorage",calculator:"Calculator with 4 operations",timer:"Countdown timer",quiz:"Quiz with scoring",dashboard:"Dashboard with stats",form:"Registration form",game:"Memory game",landing:"Landing page",weather:"Weather app",music:"Music player",chat:"Chat interface",portfolio:"Portfolio page"};
 var templates={
   snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
   todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
