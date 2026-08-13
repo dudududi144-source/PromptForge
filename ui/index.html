@@ -88,6 +88,8 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 .modal-close{width:100%;margin-top:6px;background:none;border:1px solid var(--border);color:var(--text2);padding:11px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;cursor:pointer}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);padding:10px 20px;border-radius:var(--radius-sm);font-size:12px;color:var(--text);z-index:200;transition:transform .3s ease;box-shadow:0 8px 32px rgba(0,0,0,.4)}
 .toast.show{transform:translateX(-50%) translateY(0)}
+.tpl-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .2s}
+.tpl-btn:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
 .footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
 @media(max-width:640px){.container{padding:40px 16px 24px}.hero h1{font-size:22px}.stats-grid{grid-template-columns:1fr}}
 </style>
@@ -100,7 +102,14 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
     <div class="forge-actions"><span class="forge-hint">Enter לשליחה · Shift+Enter שורה חדשה</span><button onclick="clearTask()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit;padding:4px 8px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">🗑️ נקה</button><button class="forge-btn" id="forgeBtn" onclick="forge()"><span>→</span><span id="forgeBtnText">בנה</span></button></div>
   </div>
-  <div class="progress" id="progress">
+  <div class="templates" id="templates" style="margin-top:16px;display:flex;gap:6px;flex-wrap:wrap">
+  <button class="tpl-btn" onclick="useTemplate('snake')">🐍 משחק Snake</button>
+  <button class="tpl-btn" onclick="useTemplate('todo')">✅ אפליקציית Todo</button>
+  <button class="tpl-btn" onclick="useTemplate('calculator')">🔢 מחשבון</button>
+  <button class="tpl-btn" onclick="useTemplate('timer')">⏱️ טיימר</button>
+  <button class="tpl-btn" onclick="useTemplate('quiz')">❓ חידון</button>
+</div>
+<div class="progress" id="progress">
     <div class="progress-bars"><div class="pbar" id="pb1"></div><div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div><div class="pbar" id="pb4"></div></div>
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span></div>
   </div>
@@ -115,7 +124,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
     <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div>
   </div>
-  <div class="tab-content active" id="tab-history"><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
+  <div class="tab-content active" id="tab-history"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
     <div class="stats-grid">
       <div class="stat"><div class="val" id="statBuilds">0</div><div class="lbl">בניות</div></div>
@@ -259,6 +268,28 @@ async function iterate(){
 }
 
 renderHistory();renderPlans();updateStats();
+var templates={
+  snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
+  todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
+  calculator:"בנה מחשבון עם 4 פעולות בסיסיות, אחוזים, וזיכרון. עיצוב כמו מחשבון אמיתי.",
+  timer:"בנה טיימר עם ספירה לאחור, pause/resume, והתראה בסיום. עיצוב מינימליסטי.",
+  quiz:"בנה חידון עם 5 שאלות, 4 תשובות לכל שאלה, ניקוד, ומשוב על תשובות נכונות/שגויות."
+};
+function useTemplate(name){
+  if(templates[name]){
+    document.getElementById("task").value=templates[name];
+    toast("📋 תבנית נטענה");
+  }
+}
+function exportHistory(){
+  var data=JSON.stringify(historyData,null,2);
+  var b=new Blob([data],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="promptforge-history.json";
+  a.click();
+  toast("💾 היסטוריה יוצאה");
+}
 function clearTask(){document.getElementById("task").value="";document.getElementById("result").classList.remove("show");document.getElementById("progress").classList.remove("show");toast("🗑️ נוקה")}
 if(!getKey())setTimeout(function(){toast("⚙️ לחץ על הגלגל והכנס API key")},1000);
 </script>
