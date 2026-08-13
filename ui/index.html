@@ -287,6 +287,17 @@ var building=false;
 function getKey(){return localStorage.getItem("pf_key")||""}
 function getModel(){return localStorage.getItem("pf_model")||"meta/llama-3.3-70b-instruct"}
 
+function clearAllData() {
+  if (confirm("This will delete all history, favorites, drafts, and settings. Continue?")) {
+    localStorage.removeItem("pf_history");
+    localStorage.removeItem("pf_favorites");
+    localStorage.removeItem("pf_draft");
+    localStorage.removeItem("pf_total_builds");
+    localStorage.removeItem("pf_theme");
+    showToast("All data cleared");
+    setTimeout(function() { location.reload(); }, 1000);
+  }
+}
 function toggleShortcuts() {
   var panel = document.getElementById("shortcutsPanel");
   if (panel) {
@@ -533,6 +544,31 @@ building=false;
 document.getElementById("buildBtn").disabled=false;
 }
 
+function renderFavoritesList() {
+  var favorites = JSON.parse(localStorage.getItem("pf_favorites") || "[]");
+  if (favorites.length === 0) return;
+  var section = document.getElementById("historySection");
+  if (!section) return;
+  var existingFav = document.getElementById("favoritesSection");
+  if (existingFav) existingFav.remove();
+  var favDiv = document.createElement("div");
+  favDiv.id = "favoritesSection";
+  favDiv.style.cssText = "margin-top:24px";
+  favDiv.innerHTML = '<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text)">Favorites (' + favorites.length + ')</div>' +
+    favorites.slice(0, 5).map(function(f, i) {
+      return '<div class="history-item" onclick="loadFavorite(' + i + ')"><span class="task">' + f.task.substring(0, 80) + '</span><span class="time">' + f.time + '</span></div>';
+    }).join("");
+  section.parentNode.insertBefore(favDiv, section);
+}
+function loadFavorite(i) {
+  var favorites = JSON.parse(localStorage.getItem("pf_favorites") || "[]");
+  if (favorites[i]) {
+    document.getElementById("task").value = favorites[i].task;
+    updateCharCount();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    showToast("Favorite loaded");
+  }
+}
 function shareTask() {
   var task = document.getElementById("task").value.trim();
   if (!task) { showToast("No task to share"); return; }
@@ -656,6 +692,7 @@ function saveFavorite() {
   if (favorites.length > 20) favorites = favorites.slice(0, 20);
   localStorage.setItem("pf_favorites", JSON.stringify(favorites));
   showToast("Saved to favorites");
+  renderFavoritesList();
 }
 function toggleIterate(){
 document.getElementById("iteratePanel").classList.toggle("visible");
