@@ -1,41 +1,22 @@
 # PromptForge
 
-> Autonomous AI Software Development Orchestrator
+Task to working code in seconds.
 
-PromptForge is a production-grade system that combines AI code generation,
-quality assurance, and automated deployment into a unified CLI.
+## Live
 
-## Quick Start
+- UI: https://promptforge-ui.pages.dev
+- Worker: https://promptforge.rabotatony.workers.dev
 
-    pip install -e ".[dev]"
-    cp .env.example .env
-    # Edit .env with your NVIDIA API key
-    promptforge run "Build a REST API"
+## API
 
-## Architecture
+- POST /api/plan - Analyze task
+- POST /api/build - Generate code
+- POST /api/iterate - Fix code
+- GET /api/health - Status
 
-    User -> Gateway -> [Nova | PromptForge | Forge] -> Deploy
+## Stack
 
-## Components
-
-| Component | Purpose | Status |
-|-----------|---------|--------|
-| Gateway | Entry point, auth, rate limiting | Active |
-| Nova Engine | Code generation | Active |
-| PromptForge | Code enhancement | Active |
-| Forge Engine | Deployment | Active |
-| Turso DB | Persistent storage | Active |
-| Chat UI | Frontend | Active |
-
-## Deployment
-
-### Cloudflare Workers
-- Gateway: https://rabotatony.workers.dev/promptforge-gateway
-- API: https://rabotatony.workers.dev/promptforge-api
-
-### Cloudflare Pages
-- Chat UI: https://promptforge-ui.pages.dev
-
-## License
-
-MIT
+- Frontend: Vanilla HTML/CSS/JS
+- Backend: Cloudflare Worker
+- AI: NVIDIA Build API
+- Hosting: Cloudflare Pages + Workers
