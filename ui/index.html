@@ -122,7 +122,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button></div></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
     <div class="code-display"><pre id="codeOut"></pre></div>
     <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
@@ -190,6 +190,7 @@ var GW="https://promptforge.rabotatony.workers.dev";
 var code="",building=false,totalTokens=0,buildCount=0,iterateCount=0;
 var historyData=JSON.parse(localStorage.getItem("pf_history")||"[]");
 var favoritesData=JSON.parse(localStorage.getItem("pf_favorites")||"[]");
+var notesData=JSON.parse(localStorage.getItem("pf_notes")||"[]");
 var plansData=JSON.parse(localStorage.getItem("pf_plans")||"[]");
 
 function getKey(){return localStorage.getItem("pf_key")||""}
@@ -306,6 +307,7 @@ function togglePreview(){var p=document.getElementById("preview");p.classList.to
 function toggleIterate(){document.getElementById("iterateBox").classList.toggle("show")}
 
 async function iterate(){
+  prevCode=code;
   var instruction=document.getElementById("iterateInput").value.trim();
   if(!instruction){toast("כתוב מה לשפר");return}
   var key=getKey();if(!key||!code)return;
@@ -368,6 +370,22 @@ function downloadPlan(el){
   a.download="plan.txt";
   a.click();
   toast("💾 תוכנית ירדה");
+}
+function compareCode(){
+  if(!prevCode){toast("אין קוד קודם להשוואה");return}
+  var oldLines=prevCode.split("\n").length;
+  var newLines=code.split("\n").length;
+  var diff=newLines-oldLines;
+  toast("🔀 לפני: "+oldLines+" שורות · אחרי: "+newLines+" שורות ("+(diff>=0?"+":"")+diff+")");
+}
+function addNote(){
+  var note=prompt("הוסף הערה:");
+  if(!note)return;
+  var task=document.getElementById("task").value.trim();
+  notesData.unshift({task:task,note:note,time:new Date().toLocaleString()});
+  if(notesData.length>50)notesData=notesData.slice(0,50);
+  localStorage.setItem("pf_notes",JSON.stringify(notesData));
+  toast("📝 הערה נשמרה");
 }
 function saveFavorite(){
   var task=document.getElementById("task").value.trim();
