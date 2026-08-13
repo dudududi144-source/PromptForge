@@ -1059,6 +1059,8 @@ async function checkStatus(){
   var qualityAvg=analyticsData.qualitySum&&analyticsData.builds>0?Math.round(analyticsData.qualitySum/analyticsData.builds):0;
   var qualityEl=document.getElementById("statusQualityAvg").textContent=qualityAvg+"%";
   var featuresEl=document.getElementById("statusFeatures");
+  if(featuresEl)featuresEl.textContent="80+";.textContent=qualityAvg+"%";
+  var featuresEl=document.getElementById("statusFeatures");
   if(featuresEl)featuresEl.textContent="80+";;
   if(qualityEl)qualityEl.textContent=qualityAvg+"%";
   var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
