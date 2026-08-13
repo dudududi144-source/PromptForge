@@ -307,6 +307,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <option value="15" selected>רגיל</option>
   <option value="17">גדול</option>
 </select>
+<label>Streaming</label>
+<select id="streamSelect">
+  <option value="off" selected>כבוי</option>
+  <option value="on">פעיל</option>
+</select>
 <label>מודל</label><select id="modelSelect"><option value="meta/llama-3.3-70b-instruct">Llama 3.3 70B</option><option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B (מהיר)</option><option value="deepseek-ai/deepseek-coder-6.7b-instruct">DeepSeek Coder</option><option value="mistralai/codestral-22b-instruct-v0.1">Codestral 22B</option></select><div style="display:flex;gap:8px;margin-top:16px">
   <button onclick="backupData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">💾 גבה</button>
   <button onclick="restoreData()" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:8px;border-radius:var(--radius-sm);font-family:inherit;font-size:12px;cursor:pointer">📂 שחזר</button>
@@ -330,9 +335,15 @@ var plansData=JSON.parse(localStorage.getItem("pf_plans")||"[]");
 
 function getKey(){return localStorage.getItem("pf_key")||""}
 function getModel(){return localStorage.getItem("pf_model")||"meta/llama-3.3-70b-instruct"}
-function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("modelSelect").value=getModel();document.getElementById("settingsModal").classList.add("show")}
+function openSettings(){document.getElementById("apiKeyInput").value=getKey();document.getElementById("modelSelect").value=getModel();
+  var savedStream=localStorage.getItem("pf_stream");
+  if(savedStream)document.getElementById("streamSelect").value=savedStream;document.getElementById("settingsModal").classList.add("show")}
 function closeSettings(){document.getElementById("settingsModal").classList.remove("show")}
-function saveSettings(){var k=document.getElementById("apiKeyInput").value.trim();var m=document.getElementById("modelSelect").value;if(k)localStorage.setItem("pf_key",k);localStorage.setItem("pf_model",m);closeSettings();toast("✅ נשמר")}
+function saveSettings(){
+  var k=document.getElementById("apiKeyInput").value.trim();
+  var m=document.getElementById("modelSelect").value;
+  var s=document.getElementById("streamSelect").value;
+  localStorage.setItem("pf_stream",s);if(k)localStorage.setItem("pf_key",k);localStorage.setItem("pf_model",m);closeSettings();toast("✅ נשמר")}
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2500)}
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
 function setProgress(step,text){for(var i=1;i<=4;i++){var bar=document.getElementById("pb"+i);bar.className="pbar"+(i<step?" done":i===step?" active":"")}document.getElementById("progressText").textContent=text}
@@ -373,6 +384,67 @@ var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,
 var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
 var currentCategory="";
+async function forgeStream(){
+  var task=document.getElementById("task").value.trim();
+  if(!task){toast("כתוב מה אתה רוצה לבנות");return}
+  var key=getKey();
+  if(!key){openSettings();toast("הכנס API key");return}
+  if(building)return;
+  building=true;
+  document.getElementById("forgeBtn").disabled=true;
+  document.getElementById("forgeBtnText").textContent="בונה...";
+  document.getElementById("progress").classList.add("show");
+  document.getElementById("result").classList.remove("show");
+  setProgress(1,"מנתח...");
+  try{
+    var resp=await fetch(GW+"/api/stream",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({task:task,apiKey:key})
+    });
+    if(!resp.ok){toast("❌ שגיאה");reset();return}
+    setProgress(2,"מזרים קוד...");
+    var reader=resp.body.getReader();
+    var decoder=new TextDecoder();
+    var fullCode="";
+    document.getElementById("result").classList.add("show");
+    document.getElementById("codeOut").textContent="";
+    while(true){
+      var result=await reader.read();
+      if(result.done)break;
+      var chunk=decoder.decode(result.value);
+      var lines=chunk.split("\n");
+      for(var i=0;i<lines.length;i++){
+        if(lines[i].startsWith("data: ")){
+          try{
+            var data=JSON.parse(lines[i].substring(6));
+            if(data.choices&&data.choices[0]&&data.choices[0].delta&&data.choices[0].delta.content){
+              fullCode+=data.choices[0].delta.content;
+              document.getElementById("codeOut").textContent=fullCode;
+            }
+          }catch(e){}
+        }
+      }
+    }
+    code=fullCode;
+    setProgress(4,"הושלם");
+    document.getElementById("progress").classList.remove("show");
+    if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){
+      document.getElementById("preview").classList.add("show");
+      document.getElementById("previewFrame").srcdoc=code;
+    }
+    var lines2=code.split("\n").length;
+    var chars=code.length;
+    document.getElementById("wordCount").textContent="("+lines2+" שורות · "+chars+" תווים)";
+    buildCount++;
+    analyticsData.builds++;
+    localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
+    addToHistory(task,0);
+    updateStats();
+    toast("✨ מוכן (streaming)");
+  }catch(e){toast("❌ "+e.message)}
+  reset();
+}
 function generateMultiFile(){
   var task=document.getElementById("task").value.trim();
   if(!task){toast("כתוב משימה");return}
@@ -592,6 +664,8 @@ document.addEventListener("keydown",function(e){
 })
 
 async function forge(){
+  var streamEnabled=localStorage.getItem("pf_stream")==="on";
+  if(streamEnabled){return forgeStream()}
   var task=document.getElementById("task").value.trim();
   if(!task){toast("כתוב מה אתה רוצה לבנות");return}
   var key=getKey();
