@@ -131,7 +131,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <div class="tabs">
     <div class="tab active" onclick="switchTab('history',this)">📋 היסטוריה</div>
     <div class="tab" onclick="switchTab('stats',this)">📊 סטטיסטיקות</div>
-    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div>
+    <div class="tab" onclick="switchTab('plans',this)">🗺️ תוכניות</div><div class="tab" onclick="switchTab('favorites',this)">⭐ מועדפים</div><div class="tab" onclick="switchTab('notes',this)">📝 הערות</div>
   </div>
   <div class="tab-content active" id="tab-history"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
@@ -141,7 +141,8 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div class="stat"><div class="val" id="statTokens">0</div><div class="lbl">Tokens</div></div>
     </div>
   </div>
-  <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
+  <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
+<div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
   <div class="footer">PromptForge — מ-task לקוד עובד</div>
 </div>
@@ -166,6 +167,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <p>• לחץ "תצוגה" כדי לראות את הקוד בפעולה</p>
       <p>• לחץ "שתף" כדי לשלוח קישור עם המשימה</p>
       <p>• בדוק את ההיסטוריה כדי לטעון משימות קודמות</p>
+      <br>
+      <p><b>גרסה:</b> 1.0</p>
+      <p><b>תכונות:</b> 13</p>
+      <p><b>תבניות:</b> 10</p>
+      <p><b>טאבים:</b> 5</p>
     </div>
     <button class="modal-close" onclick="closeHelp()">סגור</button>
   </div>
@@ -327,7 +333,7 @@ async function iterate(){
   }catch(e){toast("❌ "+e.message)}
 }
 
-renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();
+renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();
 var templates={
   snake:"בנה משחק snake עם ניקוד, רמות, ואנימציות חלקות. השתמש ב-canvas וב-requestAnimationFrame.",
   todo:"בנה אפליקציית todo עם הוספה, מחיקה, סימון כהושלם, ושמירה ב-localStorage. עיצוב נקי ומודרני.",
@@ -405,12 +411,26 @@ function saveFavorite(){
   renderFavorites();
   toast("⭐ נשמר כמועדף");
 }
+function renderNotes(){
+  var list=document.getElementById("notesList");
+  if(!notesData.length){list.innerHTML='<div class="empty-state">אין הערות עדיין</div>';return}
+  list.innerHTML=notesData.map(function(n,i){
+    return '<div class="h-item"><div class="h-title">'+n.note.substring(0,60)+'</div><div class="h-meta">'+n.task.substring(0,30)+' · '+n.time+'</div></div>';
+  }).join("");
+}
 function renderFavorites(){
   var list=document.getElementById("favoritesList");
   if(!favoritesData.length){list.innerHTML='<div class="empty-state">אין מועדפים עדיין</div>';return}
   list.innerHTML=favoritesData.map(function(f,i){
     return '<div class="h-item" onclick="loadFavorite('+i+')"><div class="h-title">'+f.task.substring(0,60)+'</div><div class="h-meta">'+f.time+'</div></div>';
   }).join("");
+}
+function deleteFavorite(i,event){
+  event.stopPropagation();
+  favoritesData.splice(i,1);
+  localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));
+  renderFavorites();
+  toast("🗑️ מועדף נמחק");
 }
 function loadFavorite(i){
   document.getElementById("task").value=favoritesData[i].task;
