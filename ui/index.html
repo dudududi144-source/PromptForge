@@ -149,6 +149,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <button class="tpl-btn" onclick="quickAction('security')">🔒 אבטחה</button>
     <button class="tpl-btn" onclick="quickAction('performance')">⚡ ביצועים</button>
     <button class="tpl-btn" onclick="quickAction('refactor')">🏗️ Refactor</button>
+    <button class="tpl-btn" onclick="generateMultiFile()">📁 Multi-file</button>
   </div>
 </div>
 <div class="progress" id="progress">
@@ -170,7 +171,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div style="margin-bottom:12px">
   <input id="historySearch" placeholder="🔍 חפש בהיסטוריה..." oninput="searchHistory(this.value)" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none">
 </div>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><span style="font-size:12px;color:var(--text3)">היסטוריה</span><button onclick="shareHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">🔗 שתף</button><button onclick="exportHistory()" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer">💾 יצא JSON</button></div><div id="historyList"><div class="empty-state">אין היסטוריה עדיין</div></div></div>
   <div class="tab-content" id="tab-stats">
     <div class="stats-grid">
       <div class="stat"><div class="val" id="statBuilds">0</div><div class="lbl">בניות</div></div>
@@ -222,6 +223,11 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
         <span style="font-size:12px;color:var(--text2)">Tokens</span>
+        <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--text3)">שימוש אחרון</span>
+        <span id="statusLastUsed" style="font-size:12px;color:var(--text3)">—</span>
         <span id="statusTokens" style="font-size:12px;color:var(--text2)">0</span>
         <span style="font-size:12px;color:var(--text2)">1.0</span>
       </div>
@@ -361,9 +367,16 @@ function renderRecent(){
   }).join("");
 }
 var customTemplatesData=JSON.parse(localStorage.getItem("pf_custom_templates")||"[]");
+var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,"iterates":0,"templates":0,"shares":0,"lastUsed":""}');
 var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
 var currentCategory="";
+function generateMultiFile(){
+  var task=document.getElementById("task").value.trim();
+  if(!task){toast("כתוב משימה");return}
+  document.getElementById("task").value=task+"\n\nצור את הקוד במבנה של מספר קבצים: HTML, CSS, JS. הפרד כל קובץ עם כותרת ברורה.";
+  toast("📁 משימה עודכנה למבנה multi-file");
+}
 function setCategory(cat){
   currentCategory=cat;
   var prefixes={
@@ -612,6 +625,9 @@ async function forge(){
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("preview").classList.add("show");document.getElementById("previewFrame").srcdoc=code}
     totalTokens+=(bd.tokens||0)+(pd.tokens||0);
     buildCount++;
+  analyticsData.builds++;
+  analyticsData.lastUsed=new Date().toLocaleString();
+  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     addToHistory(task,(bd.tokens||0)+(pd.tokens||0));
     updateStats();
     toast("✨ מוכן");
@@ -651,6 +667,8 @@ async function iterate(){
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=code}
     document.getElementById("iterateInput").value="";
     totalTokens+=(d.tokens||0);iterateCount++;
+  analyticsData.iterates++;
+  localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     updateStats();
     toast("✅ שופר");
   }catch(e){
@@ -836,6 +854,7 @@ async function checkStatus(){
   document.getElementById("statusBuilds").textContent=buildCount;
   document.getElementById("statusIterates").textContent=iterateCount;
   document.getElementById("statusTokens").textContent=totalTokens;
+  document.getElementById("statusLastUsed").textContent=analyticsData.lastUsed||"—";
 }
 function renderNotes(){
   var list=document.getElementById("notesList");
@@ -861,6 +880,11 @@ function deleteFavorite(i,event){
 function loadFavorite(i){
   document.getElementById("task").value=favoritesData[i].task;
   toast("⭐ נטען ממועדפים");
+}
+function shareHistory(){
+  if(!historyData.length){toast("אין היסטוריה לשתף");return}
+  var text=historyData.slice(0,5).map(function(h){return h.task}).join("\n");
+  navigator.clipboard.writeText(text).then(function(){toast("📋 היסטוריה הועתקה")});
 }
 function exportHistory(){
   var data=JSON.stringify(historyData,null,2);
