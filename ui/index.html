@@ -259,6 +259,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
       <div style="display:flex;justify-content:space-between"><span>הורד קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+D</kbd></div>
       <div style="display:flex;justify-content:space-between"><span>העתק קוד</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+K</kbd></div>
       <div style="display:flex;justify-content:space-between"><span>סגור הכל</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Escape</kbd></div>
+      <div style="display:flex;justify-content:space-between"><span>שפר</span><kbd style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px">Ctrl+I</kbd></div>
     </div>
     <button class="modal-close" onclick="closeShortcuts()">סגור</button>
   </div>
@@ -367,6 +368,7 @@ function renderRecent(){
   }).join("");
 }
 var customTemplatesData=JSON.parse(localStorage.getItem("pf_custom_templates")||"[]");
+var buildStartTime=null;
 var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,"iterates":0,"templates":0,"shares":0,"lastUsed":""}');
 var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
@@ -582,6 +584,7 @@ document.addEventListener("keydown",function(e){
   if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveFavorite()}
   if((e.ctrlKey||e.metaKey)&&e.key==="d"){e.preventDefault();downloadCode()}
   if((e.ctrlKey||e.metaKey)&&e.key==="k"){e.preventDefault();copyCode()}
+  if((e.ctrlKey||e.metaKey)&&e.key==="i"){e.preventDefault();toggleIterate()}
   if(e.key==="Escape"){
     closeSettings();closeHelp();closeShortcuts();closeDiff();
     document.getElementById("iterateBox").classList.remove("show");
@@ -595,6 +598,7 @@ async function forge(){
   if(!key){openSettings();toast("הכנס API key");return}
   if(building)return;
   building=true;
+  buildStartTime=Date.now();
   document.getElementById("forgeBtn").disabled=true;
   document.getElementById("forgeBtn").style.opacity="0.6";
   document.getElementById("forgeBtnText").textContent="בונה...";
@@ -626,11 +630,16 @@ async function forge(){
     totalTokens+=(bd.tokens||0)+(pd.tokens||0);
     buildCount++;
   analyticsData.builds++;
+  if(buildStartTime){
+    var elapsed=(Date.now()-buildStartTime)/1000;
+    analyticsData.totalBuildTime=(analyticsData.totalBuildTime||0)+elapsed;
+  }
   analyticsData.lastUsed=new Date().toLocaleString();
   localStorage.setItem("pf_analytics",JSON.stringify(analyticsData));
     addToHistory(task,(bd.tokens||0)+(pd.tokens||0));
     updateStats();
-    toast("✨ מוכן");
+    var buildTime=buildStartTime?((Date.now()-buildStartTime)/1000).toFixed(1):0;
+  toast("✨ מוכן ("+buildTime+" שניות)");
   }catch(e){
   var msg="❌ ";
   if(e.message.includes("fetch"))msg+="שגיאת רשת - בדוק את החיבור";
@@ -855,6 +864,7 @@ async function checkStatus(){
   document.getElementById("statusIterates").textContent=iterateCount;
   document.getElementById("statusTokens").textContent=totalTokens;
   document.getElementById("statusLastUsed").textContent=analyticsData.lastUsed||"—";
+  var avgBuildTime=analyticsData.builds>0?Math.round(analyticsData.totalBuildTime/analyticsData.builds):0;
 }
 function renderNotes(){
   var list=document.getElementById("notesList");
