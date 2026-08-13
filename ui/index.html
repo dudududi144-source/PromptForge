@@ -350,6 +350,19 @@ var history = JSON.parse(localStorage.getItem("pf_history") || "[]");
 history.unshift({ task: task, time: new Date().toLocaleString() });
 if (history.length > 10) history = history.slice(0, 10);
 localStorage.setItem("pf_history", JSON.stringify(history));
+function loadFromHistory(i) {
+  var history = JSON.parse(localStorage.getItem("pf_history") || "[]");
+  if (history[i]) {
+    document.getElementById("task").value = history[i].task;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    showToast("Task loaded");
+  }
+}
+function clearHistory() {
+  localStorage.removeItem("pf_history");
+  renderHistory();
+  showToast("History cleared");
+}
 renderHistory();
 }
 function renderHistory() {
