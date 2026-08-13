@@ -206,6 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <div>
 <div class="output-title">Generated Code</div>
 <div class="output-meta" id="outputMeta"></div>
+<div style="font-size:11px;color:var(--text-3);margin-top:2px" id="modelIndicator"></div>
 <div id="codeStats" style="display:flex;gap:16px;margin-top:4px;font-size:11px;color:var(--text-3)"></div>
 </div>
 <div class="output-toolbar">
@@ -238,6 +239,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 </div>
 <div style="margin-top:24px;text-align:center;display:none" id="newTaskSection">
 <button class="btn-secondary" onclick="duplicateTask()" style="padding:10px 24px">Duplicate</button>
+<button class="btn-secondary" onclick="regenerate()" style="padding:10px 24px">Regenerate</button>
 <button class="btn-secondary" onclick="newTask()" style="padding:10px 24px">Start New Task</button>
 </div>
 </div>
@@ -674,6 +676,9 @@ function calculateStats(code) {
   }
 }
 function validateCode(code) {
+  var issues = [];
+  if (code.length > 50000) issues.push("Code is very large - consider splitting into files");
+  if (code.split("\n").length > 1000) issues.push("Over 1000 lines - consider modularizing");
   var issues = [];
   if (code.indexOf("<html") !== -1 || code.indexOf("<!DOCTYPE") !== -1) {
     if (code.indexOf("viewport") === -1) issues.push("Missing viewport meta tag");
