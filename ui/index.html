@@ -199,6 +199,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <button class="tool-btn" onclick="downloadCode()">Download</button>
 <button class="tool-btn" onclick="togglePreview()">Preview</button>
 <button class="tool-btn" onclick="toggleIterate()">Refine</button>
+<button class="tool-btn" onclick="exportCode()">Export</button>
 </div>
 </div>
 <div class="code-area"><pre id="codeOutput"></pre></div>
@@ -209,6 +210,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <input id="iterateInput" placeholder="What should be improved?">
 <button class="btn-primary" onclick="iterate()">Apply</button>
 </div>
+<div style="margin-top:24px;text-align:center;display:none" id="newTaskSection">
+<button class="btn-secondary" onclick="newTask()" style="padding:10px 24px">Start New Task</button>
 </div>
 </div>
 </main>
@@ -218,7 +221,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <div id="historyList"></div>
 </div>
 <footer class="footer">
-<p>PromptForge — From task to working code.</p>
+<p>PromptForge — From task to working code. <span id="totalBuilds"></span></p>
 </footer>
 
 <div class="modal-overlay" id="settingsModal">
@@ -392,9 +395,19 @@ function loadFromHistory(i) {
 function clearHistory() {
   localStorage.removeItem("pf_history");
   renderHistory();
+(function() {
+  var builds = localStorage.getItem("pf_total_builds") || "0";
+  var el = document.getElementById("totalBuilds");
+  if (el && parseInt(builds) > 0) el.textContent = "Builds: " + builds;
+})();
   showToast("History cleared");
 }
 renderHistory();
+(function() {
+  var builds = localStorage.getItem("pf_total_builds") || "0";
+  var el = document.getElementById("totalBuilds");
+  if (el && parseInt(builds) > 0) el.textContent = "Builds: " + builds;
+})();
 }
 function renderHistory() {
 var history = JSON.parse(localStorage.getItem("pf_history") || "[]");
@@ -435,6 +448,20 @@ document.getElementById("previewFrame").srcdoc=code;
 }
 }
 
+function exportCode() {
+  if (!code) { showToast("No code to export"); return; }
+  var lang = "txt";
+  if (code.indexOf("<html") !== -1 || code.indexOf("<!DOCTYPE") !== -1) lang = "html";
+  else if (code.indexOf("def ") !== -1 || code.indexOf("import ") !== -1) lang = "py";
+  else if (code.indexOf("function") !== -1 || code.indexOf("const ") !== -1) lang = "js";
+  var blob = new Blob([code], { type: "text/plain" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "promptforge-output." + lang;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast("Exported as ." + lang);
+}
 function toggleIterate(){
 document.getElementById("iteratePanel").classList.toggle("visible");
 }
