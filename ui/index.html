@@ -247,7 +247,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 <div class="tab-content" id="tab-notes"><div id="notesList"><div class="empty-state">אין הערות עדיין</div></div></div>
 <div class="tab-content" id="tab-favorites"><div id="favoritesList"><div class="empty-state">אין מועדפים עדיין</div></div></div>
 <div class="tab-content" id="tab-plans"><div id="planList"><div class="empty-state">אין תוכניות עדיין</div></div></div>
-  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות</div>
+  <div class="footer">PromptForge v1.0 — מ-task לקוד עובד · <span id="footerBuilds">0</span> בניות · <span id="footerTokens">0</span> tokens</div>
 </div>
 <div class="modal-backdrop" id="diffModal">
   <div class="modal" style="max-width:600px;max-height:80vh;overflow-y:auto">
@@ -369,6 +369,8 @@ function updateStats(){
   document.getElementById("statBuilds").textContent=buildCount;
   var footerEl=document.getElementById("footerBuilds");
   if(footerEl)footerEl.textContent=buildCount;
+  var footerTokensEl=document.getElementById("footerTokens");
+  if(footerTokensEl)footerTokensEl.textContent=totalTokens;
   document.getElementById("statIterates").textContent=iterateCount;
   document.getElementById("statTokens").textContent=totalTokens;
 }
@@ -394,7 +396,21 @@ var analyticsData=JSON.parse(localStorage.getItem("pf_analytics")||'{"builds":0,
 var projectsData=JSON.parse(localStorage.getItem("pf_projects")||"[]");
 var snippetsData=JSON.parse(localStorage.getItem("pf_snippets")||"[]");
 var currentCategory="";
-async function assessQuality(code){
+async function analyzeComplexity(code){
+  var complexity=0;
+  var lines=code.split("\n");
+  for(var i=0;i<lines.length;i++){
+    var line=lines[i];
+    if(line.indexOf("if(")!==-1||line.indexOf("if (")!==-1)complexity++;
+    if(line.indexOf("for(")!==-1||line.indexOf("for (")!==-1)complexity++;
+    if(line.indexOf("while(")!==-1||line.indexOf("while (")!==-1)complexity++;
+    if(line.indexOf("switch(")!==-1||line.indexOf("switch (")!==-1)complexity++;
+    if(line.indexOf("function")!==-1)complexity++;
+    if(line.indexOf("class")!==-1)complexity++;
+  }
+  return complexity;
+}
+function assessQuality(code){
   var score=100;
   var issues=[];
   if(code.length<200){score-=30;issues.push("קוד קצר מדי")}
@@ -736,7 +752,9 @@ async function forge(){
       var funcs=(code.match(/function\s/g)||[]).length;
       var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
       var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
-      statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span>";
+      var complexity=analyzeComplexity(code);
+    var complexityLabel=complexity<5?"🟢 פשוט":complexity<15?"🟡 בינוני":"🔴 מורכב";
+    statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span><span>🔄 "+complexityLabel+" ("+complexity+")</span>";
     }
     document.getElementById("result").classList.add("show");
     document.getElementById("quickActions").style.display="block";
@@ -793,7 +811,9 @@ async function iterate(){
       var funcs=(code.match(/function\s/g)||[]).length;
       var vars=(code.match(/var\s|let\s|const\s/g)||[]).length;
       var comments=(code.match(/\/\/|\/\*|#/g)||[]).length;
-      statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span>";
+      var complexity=analyzeComplexity(code);
+    var complexityLabel=complexity<5?"🟢 פשוט":complexity<15?"🟡 בינוני":"🔴 מורכב";
+    statsEl.innerHTML="<span>📊 "+funcs+" פונקציות</span><span>📝 "+vars+" משתנים</span><span>💬 "+comments+" הערות</span><span>🔄 "+complexityLabel+" ("+complexity+")</span>";
     }
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=code}
     document.getElementById("iterateInput").value="";
