@@ -11,6 +11,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0c0c0e;--surface:#141416;--surface2:#1a1a1e;--border:#232326;--border2:#3a3a42;--text:#f0eff4;--text2:#8b8a93;--text3:#5c5b63;--accent:#6366f1;--accent2:#818cf8;--success:#22c55e;--warn:#fbbf24;--err:#ef4444;--radius:12px;--radius-sm:8px}
+body.light{--bg:#f8f9fa;--surface:#ffffff;--surface2:#f1f3f5;--border:#e9ecef;--border2:#dee2e6;--text:#212529;--text2:#6c757d;--text3:#adb5bd}
 body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
 .container{max-width:680px;margin:0 auto;padding:60px 24px 40px}
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:48px}
@@ -96,7 +97,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 </head>
 <body>
 <div class="container">
-  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
+  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
@@ -344,6 +345,12 @@ function useTemplate(name){
     toast("📋 תבנית נטענה");
   }
 }
+function toggleTheme(){
+  document.body.classList.toggle("light");
+  var isLight=document.body.classList.contains("light");
+  document.getElementById("themeBtn").textContent=isLight?"☀️":"🌙";
+  localStorage.setItem("pf_theme",isLight?"light":"dark");
+}
 function showHelp(){document.getElementById("helpModal").classList.add("show")}
 function closeHelp(){document.getElementById("helpModal").classList.remove("show")}
 function changeFontSize(size){
@@ -433,6 +440,8 @@ async function checkHealth(){
 }
 checkHealth();
 setInterval(checkHealth,60000);
+var savedTheme=localStorage.getItem("pf_theme");
+if(savedTheme==="light"){document.body.classList.add("light");document.getElementById("themeBtn").textContent="☀️"}
 var savedFontSize=localStorage.getItem("pf_fontsize");
 if(savedFontSize){changeFontSize(savedFontSize);document.getElementById("fontSizeSelect").value=savedFontSize}
 var urlTask=new URLSearchParams(window.location.search).get("task");
