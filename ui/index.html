@@ -118,6 +118,15 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
   <button class="tpl-btn" onclick="useTemplate('game')">🎮 משחק זיכרון</button>
   <button class="tpl-btn" onclick="useTemplate('landing')">🚀 דף נחיתה</button>
 </div>
+<div id="quickActions" style="margin-top:12px;display:none">
+  <div style="font-size:11px;color:var(--text3);margin-bottom:6px">פעולות מהירות:</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button class="tpl-btn" onclick="quickAction('explain')">📖 הסבר את הקוד</button>
+    <button class="tpl-btn" onclick="quickAction('optimize')">⚡ בטל את הקוד</button>
+    <button class="tpl-btn" onclick="quickAction('test')">🧪 הוסף בדיקות</button>
+    <button class="tpl-btn" onclick="quickAction('docs')">📚 הוסף תיעוד</button>
+  </div>
+</div>
 <div class="progress" id="progress">
     <div class="progress-bars"><div class="pbar" id="pb1"></div><div class="pbar" id="pb2"></div><div class="pbar" id="pb3"></div><div class="pbar" id="pb4"></div></div>
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
@@ -297,13 +306,22 @@ async function forge(){
     document.getElementById("progress").classList.remove("show");
     document.getElementById("codeOut").textContent=code;
     document.getElementById("result").classList.add("show");
+    document.getElementById("quickActions").style.display="block";
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("preview").classList.add("show");document.getElementById("previewFrame").srcdoc=code}
     totalTokens+=(bd.tokens||0)+(pd.tokens||0);
     buildCount++;
     addToHistory(task,(bd.tokens||0)+(pd.tokens||0));
     updateStats();
     toast("✨ מוכן");
-  }catch(e){toast("❌ "+e.message)}
+  }catch(e){
+  var msg="❌ ";
+  if(e.message.includes("fetch"))msg+="שגיאת רשת - בדוק את החיבור";
+  else if(e.message.includes("401"))msg+="API key לא תקין";
+  else if(e.message.includes("429"))msg+="יותר מדי בקשות - חכה רגע";
+  else if(e.message.includes("500"))msg+="שגיאת שרת - נסה שוב";
+  else msg+=e.message;
+  toast(msg);
+}
   reset();
 }
 
@@ -330,7 +348,15 @@ async function iterate(){
     totalTokens+=(d.tokens||0);iterateCount++;
     updateStats();
     toast("✅ שופר");
-  }catch(e){toast("❌ "+e.message)}
+  }catch(e){
+  var msg="❌ ";
+  if(e.message.includes("fetch"))msg+="שגיאת רשת - בדוק את החיבור";
+  else if(e.message.includes("401"))msg+="API key לא תקין";
+  else if(e.message.includes("429"))msg+="יותר מדי בקשות - חכה רגע";
+  else if(e.message.includes("500"))msg+="שגיאת שרת - נסה שוב";
+  else msg+=e.message;
+  toast(msg);
+}
 }
 
 renderHistory();renderPlans();updateStats();renderRecent();renderFavorites();renderNotes();
@@ -410,6 +436,19 @@ function saveFavorite(){
   localStorage.setItem("pf_favorites",JSON.stringify(favoritesData));
   renderFavorites();
   toast("⭐ נשמר כמועדף");
+}
+function quickAction(type){
+  var actions={
+    explain:"תסביר את הקוד הנוכחי ותוסיף הערות",
+    optimize:"תבצע אופטימיזציה לקוד הנוכחי",
+    test:"תוסיף בדיקות unit tests לקוד הנוכחי",
+    docs:"תוסיף תיעוד מפורט לקוד הנוכחי"
+  };
+  if(actions[type]&&code){
+    document.getElementById("iterateInput").value=actions[type];
+    document.getElementById("iterateBox").classList.add("show");
+    toast("📝 הוראה מוכנה - לחץ שפר");
+  }
 }
 function renderNotes(){
   var list=document.getElementById("notesList");
