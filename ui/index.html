@@ -97,7 +97,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
 </head>
 <body>
 <div class="container">
-  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showShortcuts()" title="קיצורי מקלדת">⌨️</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
+  <div class="logo"><div class="logo-mark">⚡</div><span class="logo-text">PromptForge</span><span id="healthDot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);margin-right:4px" title="Worker status"></span><div class="logo-right"><button onclick="toggleLang()" title="שפה" id="langBtn">🇮🇱</button><button onclick="toggleTheme()" title="שנה ערכת נושא" id="themeBtn">🌙</button><button onclick="showShortcuts()" title="קיצורי מקלדת">⌨️</button><button onclick="showHelp()" title="עזרה">❓</button><button onclick="openSettings()" title="הגדרות">⚙️</button><button onclick="clearAll()" title="נקה הכל">🗑️</button></div></div>
   <div class="hero"><h1>מה אתה רוצה לבנות?</h1><p>תאר את המשימה. תקבל תוכנית וקוד עובד תוך שניות.</p></div>
   <div class="forge-box">
     <textarea id="task" placeholder="למשל: משחק snake עם ניקוד, רמות, ואנימציות..." rows="4"></textarea>
@@ -136,7 +136,7 @@ body{font-family:"Inter",-apple-system,sans-serif;background:var(--bg);color:var
     <div class="progress-label"><div class="spinner" id="spinner"></div><span id="progressText">מנתח...</span><button id="retryBtn" onclick="forge()" style="display:none;background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-family:inherit;font-size:11px;cursor:pointer;margin-right:auto">🔄 נסה שוב</button></div>
   </div>
   <div class="result" id="result">
-    <div class="result-header"><div class="result-title">✨ הקוד מוכן</div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
+    <div class="result-header"><div class="result-title">✨ הקוד מוכן <span id="wordCount" style="font-size:11px;color:var(--text3);font-weight:400"></span></div><div class="result-actions"><button onclick="copyCode()">העתק</button><button onclick="copyAsMarkdown()">MD</button><button onclick="downloadCode()">הורד</button><button onclick="togglePreview()">תצוגה</button><button onclick="toggleIterate()">שפר</button><button onclick="shareTask()">🔗 שתף</button><button onclick="addNote()">📝 הערה</button><button onclick="compareCode()">🔀 השווה</button></div></div>
     <div class="code-display"><pre id="codeOut"></pre></div>
     <div class="preview" id="preview"><div class="preview-header"><span>Live Preview</span><div style="display:flex;gap:8px"><button onclick="openPreviewNewTab()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:11px">🔗 פתח בטאב</button><button onclick="togglePreview()" style="background:none;border:none;color:var(--text2);cursor:pointer">✕</button></div><iframe id="previewFrame" sandbox="allow-scripts"></iframe></div>
     <div class="iterate" id="iterateBox"><input id="iterateInput" placeholder="מה לשפר?"><button onclick="iterate()">שפר</button></div>
@@ -316,6 +316,13 @@ function renderPlans(){
 
 function clearAll(){historyData=[];plansData=[];localStorage.removeItem("pf_history");localStorage.removeItem("pf_plans");renderHistory();renderPlans();toast("🗑️ נוקה")}
 
+document.getElementById("task").addEventListener("input",function(){
+  localStorage.setItem("pf_lasttask",document.getElementById("task").value);
+});
+var lastTask=localStorage.getItem("pf_lasttask");
+if(lastTask&&!document.getElementById("task").value){
+  document.getElementById("task").value=lastTask;
+}
 document.getElementById("task").addEventListener("keydown",function(e){
   if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();forge()}
   if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();forge()}
@@ -350,6 +357,9 @@ async function forge(){
     await sleep(300);
     document.getElementById("progress").classList.remove("show");
     document.getElementById("codeOut").textContent=code;
+    var lines=code.split("\n").length;
+    var chars=code.length;
+    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
     document.getElementById("result").classList.add("show");
     document.getElementById("quickActions").style.display="block";
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("preview").classList.add("show");document.getElementById("previewFrame").srcdoc=code}
@@ -388,6 +398,9 @@ async function iterate(){
     if(d.error){toast("❌ "+d.error);return}
     code=d.code||"";
     document.getElementById("codeOut").textContent=code;
+    var lines=code.split("\n").length;
+    var chars=code.length;
+    document.getElementById("wordCount").textContent="("+lines+" שורות · "+chars+" תווים)";
     if(code.indexOf("<!DOCTYPE")!==-1||code.indexOf("<html")!==-1){document.getElementById("previewFrame").srcdoc=code}
     document.getElementById("iterateInput").value="";
     totalTokens+=(d.tokens||0);iterateCount++;
@@ -425,6 +438,15 @@ function useTemplate(name){
     document.getElementById("task").value=templates[name];
     toast("📋 תבנית נטענה");
   }
+}
+var currentLang="he";
+function toggleLang(){
+  currentLang=currentLang==="he"?"en":"he";
+  document.getElementById("langBtn").textContent=currentLang==="he"?"🇮🇱":"🇬🇧";
+  document.documentElement.dir=currentLang==="he"?"rtl":"ltr";
+  document.documentElement.lang=currentLang;
+  localStorage.setItem("pf_lang",currentLang);
+  toast(currentLang==="he"?"🇮🇱 עברית":"🇬🇧 English");
 }
 function toggleTheme(){
   document.body.classList.toggle("light");
@@ -581,6 +603,8 @@ async function checkHealth(){
 }
 checkHealth();
 setInterval(checkHealth,60000);
+var savedLang=localStorage.getItem("pf_lang");
+if(savedLang==="en"){currentLang="en";document.documentElement.dir="ltr";document.documentElement.lang="en";document.getElementById("langBtn").textContent="🇬🇧"}
 var savedTheme=localStorage.getItem("pf_theme");
 if(savedTheme==="light"){document.body.classList.add("light");document.getElementById("themeBtn").textContent="☀️"}
 var savedFontSize=localStorage.getItem("pf_fontsize");
